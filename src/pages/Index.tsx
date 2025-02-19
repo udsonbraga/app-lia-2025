@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { MessageCircle, Send } from "lucide-react";
+import { MessageCircle, Shield, BellAlert } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
@@ -13,24 +13,24 @@ const Index = () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     
     toast({
-      title: "Mensagem enviada com sucesso",
-      description: "Um contato de emergência foi notificado e responderá em breve.",
+      title: "Pedido de ajuda enviado",
+      description: "As autoridades e seus contatos de confiança foram notificados.",
     });
     
     setIsLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
       <div className="container mx-auto px-4 py-12 flex flex-col items-center justify-center min-h-screen">
         {/* Hero Section */}
         <div className="w-full max-w-2xl text-center space-y-8 animate-fade-in">
           <div className="space-y-4">
             <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-              Assistência Imediata
+              Maria da Penha
             </h1>
             <p className="text-lg text-gray-600 max-w-xl mx-auto">
-              Com apenas um toque, conecte-se instantaneamente com um contato de emergência seguro.
+              Proteção imediata ao alcance de um toque. Você não está sozinha.
             </p>
           </div>
 
@@ -48,40 +48,52 @@ const Index = () => {
           >
             <div className="absolute inset-0 bg-red-500 rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
             <div className="flex flex-col items-center gap-2">
-              <MessageCircle size={48} className="text-red-500" />
+              <BellAlert size={48} className="text-red-500" />
               <span className="text-lg font-semibold text-gray-800">
-                {isLoading ? "Enviando..." : "Pedir Ajuda"}
+                {isLoading ? "Enviando..." : "Botão do Pânico"}
               </span>
             </div>
           </button>
 
-          {/* Supporting Image */}
-          <div className="mt-12 relative rounded-xl overflow-hidden shadow-lg">
-            <img
-              src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"
-              alt="Tecnologia de suporte"
-              className="w-full h-64 object-cover"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-          </div>
-
           {/* Features */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
             <div className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <Send className="h-8 w-8 text-red-500 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Resposta Instantânea</h3>
+              <Shield className="h-8 w-8 text-red-500 mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Proteção Imediata</h3>
               <p className="text-gray-600">
-                Envio imediato de mensagem para seu contato de emergência.
+                Acione autoridades e contatos de confiança com um toque.
+              </p>
+            </div>
+            <div className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <BellAlert className="h-8 w-8 text-red-500 mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Resposta Rápida</h3>
+              <p className="text-gray-600">
+                Sistema integrado com órgãos de proteção à mulher.
               </p>
             </div>
             <div className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
               <MessageCircle className="h-8 w-8 text-red-500 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Contato Seguro</h3>
+              <h3 className="text-lg font-semibold mb-2">Rede de Apoio</h3>
               <p className="text-gray-600">
-                Comunicação protegida e confidencial com contatos verificados.
+                Conexão direta com sua rede de contatos de confiança.
               </p>
             </div>
+          </div>
+
+          {/* Informational Section */}
+          <div className="mt-12 p-6 bg-white rounded-xl shadow-lg text-left">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Lembre-se:</h2>
+            <ul className="space-y-2 text-gray-600">
+              <li className="flex items-center gap-2">
+                • Em caso de emergência, ligue também para 190 (Polícia)
+              </li>
+              <li className="flex items-center gap-2">
+                • Disque 180 para denúncias e orientações
+              </li>
+              <li className="flex items-center gap-2">
+                • Procure a Delegacia da Mulher mais próxima
+              </li>
+            </ul>
           </div>
         </div>
       </div>
