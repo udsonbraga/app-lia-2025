@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { MessageCircle, Shield, BellAlert } from "lucide-react";
+import { MessageCircle, Shield, Bell } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
@@ -48,7 +48,7 @@ const Index = () => {
           >
             <div className="absolute inset-0 bg-red-500 rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
             <div className="flex flex-col items-center gap-2">
-              <BellAlert size={48} className="text-red-500" />
+              <Bell size={48} className="text-red-500" />
               <span className="text-lg font-semibold text-gray-800">
                 {isLoading ? "Enviando..." : "Botão do Pânico"}
               </span>
@@ -65,7 +65,7 @@ const Index = () => {
               </p>
             </div>
             <div className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <BellAlert className="h-8 w-8 text-red-500 mb-4" />
+              <Bell className="h-8 w-8 text-red-500 mb-4" />
               <h3 className="text-lg font-semibold mb-2">Resposta Rápida</h3>
               <p className="text-gray-600">
                 Sistema integrado com órgãos de proteção à mulher.
