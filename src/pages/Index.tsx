@@ -1,11 +1,12 @@
-
 import { useState } from "react";
 import { MessageCircle, Shield, Bell } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleEmergencyContact = async () => {
     setIsLoading(true);
@@ -32,6 +33,12 @@ const Index = () => {
             <p className="text-lg text-gray-600 max-w-xl mx-auto">
               Proteção imediata ao alcance de um toque. Você não está sozinha.
             </p>
+            <button
+              onClick={() => navigate("/register")}
+              className="inline-flex items-center justify-center px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-red-500 hover:bg-red-600 transition-colors"
+            >
+              Criar Conta
+            </button>
           </div>
 
           {/* Main Action Button */}
