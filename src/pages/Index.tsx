@@ -86,22 +86,6 @@ const Index = () => {
               <p className="text-sm text-gray-600">Acesse contatos de emergência rapidamente</p>
             </button>
           </div>
-
-          {/* Help Information */}
-          <div className="mt-8 p-6 bg-white rounded-xl shadow-lg text-left max-w-2xl mx-auto">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Lembre-se:</h2>
-            <ul className="space-y-2 text-gray-600">
-              <li className="flex items-center gap-2">
-                • Em caso de emergência, ligue para 190 (Polícia)
-              </li>
-              <li className="flex items-center gap-2">
-                • Disque 180 para denúncias e orientações
-              </li>
-              <li className="flex items-center gap-2">
-                • Procure a Delegacia da Mulher mais próxima
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>
