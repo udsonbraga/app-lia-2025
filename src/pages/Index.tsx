@@ -24,14 +24,14 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
-      <div className="container mx-auto px-4 py-12 flex flex-col items-center justify-center min-h-screen">
-        <div className="w-full max-w-2xl text-center space-y-12 animate-fade-in">
+      <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-screen">
+        <div className="w-full max-w-md text-center space-y-8 animate-fade-in">
           {/* App Title */}
-          <div className="space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+          <div className="space-y-3">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
               Safe Lady
             </h1>
-            <p className="text-lg text-gray-600 max-w-xl mx-auto">
+            <p className="text-base text-gray-600 max-w-xl mx-auto">
               Proteção imediata ao alcance de um toque. Você não está sozinha.
             </p>
           </div>
@@ -42,7 +42,7 @@ const Index = () => {
             disabled={isLoading}
             className={`
               relative group flex items-center justify-center gap-3
-              w-48 h-48 sm:w-64 sm:h-64 rounded-full mx-auto
+              w-40 h-40 sm:w-48 sm:h-48 rounded-full mx-auto
               bg-white shadow-lg hover:shadow-xl
               transition-all duration-300 ease-in-out
               ${isLoading ? "animate-button-press" : ""}
@@ -50,36 +50,36 @@ const Index = () => {
           >
             <div className="absolute inset-0 bg-red-500 rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
             <div className="flex flex-col items-center gap-2">
-              <Shield size={48} className="text-red-500" />
-              <span className="text-lg font-semibold text-gray-800">
+              <Shield size={40} className="text-red-500" />
+              <span className="text-base font-semibold text-gray-800">
                 {isLoading ? "Enviando..." : "Botão de Emergência"}
               </span>
             </div>
           </button>
 
           {/* Feature Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto px-4">
+          <div className="flex flex-col gap-3 max-w-xs mx-auto px-4">
             <button
               onClick={() => navigate("/support-network")}
-              className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3"
+              className="p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
             >
-              <Users className="h-8 w-8 text-red-500" />
+              <Users className="h-5 w-5 text-red-500" />
               <span className="font-medium text-gray-800">Rede de Apoio</span>
             </button>
 
             <button
               onClick={() => navigate("/diary")}
-              className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3"
+              className="p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
             >
-              <BookOpen className="h-8 w-8 text-red-500" />
+              <BookOpen className="h-5 w-5 text-red-500" />
               <span className="font-medium text-gray-800">Diário Seguro</span>
             </button>
 
             <button
               onClick={() => navigate("/safe-contact")}
-              className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3"
+              className="p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
             >
-              <Phone className="h-8 w-8 text-red-500" />
+              <Phone className="h-5 w-5 text-red-500" />
               <span className="font-medium text-gray-800">Contato Seguro</span>
             </button>
           </div>
