@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Users, BookOpen, Phone, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { BottomNavigation } from "@/components/BottomNavigation";
+import { DrawerMenu } from "@/components/DrawerMenu";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +26,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
-      <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-screen">
+      {/* Status Bar Space */}
+      <div className="h-6 bg-transparent" />
+      
+      {/* Drawer Menu */}
+      <DrawerMenu />
+      
+      <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-screen pb-20">
         <div className="w-full max-w-md text-center space-y-8 animate-fade-in">
           {/* App Title */}
           <div className="space-y-3">
@@ -85,6 +93,9 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation />
     </div>
   );
 };
