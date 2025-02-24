@@ -61,29 +61,26 @@ const Index = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto px-4">
             <button
               onClick={() => navigate("/support-network")}
-              className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 text-center"
+              className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3"
             >
               <Users className="h-8 w-8 text-red-500" />
               <span className="font-medium text-gray-800">Rede de Apoio</span>
-              <p className="text-sm text-gray-600">Conecte-se com sua rede de contatos seguros</p>
             </button>
 
             <button
               onClick={() => navigate("/diary")}
-              className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 text-center"
+              className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3"
             >
               <BookOpen className="h-8 w-8 text-red-500" />
               <span className="font-medium text-gray-800">Diário Seguro</span>
-              <p className="text-sm text-gray-600">Registre suas experiências com segurança</p>
             </button>
 
             <button
               onClick={() => navigate("/safe-contact")}
-              className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3 text-center"
+              className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-3"
             >
               <Phone className="h-8 w-8 text-red-500" />
               <span className="font-medium text-gray-800">Contato Seguro</span>
-              <p className="text-sm text-gray-600">Acesse contatos de emergência rapidamente</p>
             </button>
           </div>
         </div>
