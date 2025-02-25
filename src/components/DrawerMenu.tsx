@@ -6,13 +6,14 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Settings, Palette, LogOut, UserCircle } from "lucide-react";
+import { Settings, Palette, LogOut, UserCircle, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 export const DrawerMenu = () => {
   const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isDisguised, setIsDisguised] = useState(false);
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -23,22 +24,26 @@ export const DrawerMenu = () => {
   };
 
   const handleLogout = () => {
-    // Adicione aqui a lógica de logout
     navigate('/');
   };
 
+  const toggleDisguise = () => {
+    setIsDisguised(!isDisguised);
+    document.body.classList.toggle('disguise-mode');
+  };
+
   const menuItems = [
+    {
+      title: isDisguised ? "Modo Normal" : "Modo Disfarce",
+      action: toggleDisguise,
+      icon: isDisguised ? <EyeOff className="h-5 w-5 text-gray-600" /> : <Eye className="h-5 w-5 text-gray-600" />,
+      description: "Alterne entre os modos de visualização"
+    },
     {
       title: "Dados Cadastrais",
       path: "/profile",
       icon: <Settings className="h-5 w-5 text-gray-600" />,
       description: "Atualize suas informações pessoais"
-    },
-    {
-      title: "Personalizar",
-      path: "/customize",
-      icon: <Palette className="h-5 w-5 text-gray-600" />,
-      description: "Mude cores e aparência do app"
     },
     {
       title: "Ajuda",
@@ -51,12 +56,12 @@ export const DrawerMenu = () => {
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <button className="fixed top-3 left-3 p-2 z-50">
+        <button className="w-8 h-8 flex items-center justify-center">
           {avatarUrl ? (
             <img
               src={avatarUrl}
               alt="Avatar"
-              className="h-8 w-8 rounded-full object-cover"
+              className="h-8 w-8 rounded-full object-cover ring-2 ring-gray-200"
             />
           ) : (
             <UserCircle className="h-8 w-8 text-gray-700" />
@@ -81,7 +86,7 @@ export const DrawerMenu = () => {
                 <img
                   src={avatarUrl}
                   alt="Avatar"
-                  className="h-20 w-20 rounded-full object-cover"
+                  className="h-20 w-20 rounded-full object-cover ring-4 ring-gray-100"
                 />
               ) : (
                 <UserCircle className="h-20 w-20 text-gray-700" />
@@ -94,9 +99,13 @@ export const DrawerMenu = () => {
           <nav className="space-y-3">
             {menuItems.map((item) => (
               <button
-                key={item.path}
+                key={item.title}
                 onClick={() => {
-                  navigate(item.path);
+                  if (item.action) {
+                    item.action();
+                  } else if (item.path) {
+                    navigate(item.path);
+                  }
                 }}
                 className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
               >

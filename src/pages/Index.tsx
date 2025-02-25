@@ -13,7 +13,6 @@ const Index = () => {
 
   const handleEmergencyContact = async () => {
     setIsLoading(true);
-    // Simulate sending message
     await new Promise((resolve) => setTimeout(resolve, 1000));
     
     toast({
@@ -66,22 +65,16 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen ${isDisguised ? 'bg-white' : 'bg-gradient-to-b from-rose-50 to-white'}`}>
-      {/* Status Bar Space */}
-      <div className="h-6 bg-transparent" />
+      <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm flex items-center px-4 z-50">
+        <DrawerMenu />
+        <h1 className="text-xl font-semibold text-center flex-1">
+          {isDisguised ? 'Notas Pessoais' : 'Safe Lady'}
+        </h1>
+        <div className="w-8" />
+      </div>
       
-      {/* Drawer Menu */}
-      <DrawerMenu />
-      
-      <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-screen pb-20">
-        <div className="w-full max-w-md text-center space-y-8 animate-fade-in">
-          {/* App Title */}
-          <div className="space-y-3">
-            <h1 className={`text-3xl font-bold tracking-tight ${isDisguised ? 'text-gray-800' : 'text-gray-900'} sm:text-4xl`}>
-              {isDisguised ? 'Notas Pessoais' : 'Safe Lady'}
-            </h1>
-          </div>
-
-          {/* Main Emergency Button and Feature Buttons */}
+      <div className="container mx-auto px-4 pt-20 pb-16 flex flex-col min-h-screen">
+        <div className="flex-1 flex flex-col items-center justify-center">
           {!isDisguised && (
             <>
               <button
@@ -89,9 +82,9 @@ const Index = () => {
                 disabled={isLoading}
                 className={`
                   relative group flex items-center justify-center gap-3
-                  w-40 h-40 sm:w-48 sm:h-48 rounded-full mx-auto
+                  w-40 h-40 sm:w-48 sm:h-48 rounded-full
                   bg-white shadow-lg hover:shadow-xl
-                  transition-all duration-300 ease-in-out
+                  transition-all duration-300 ease-in-out mb-8
                   ${isLoading ? "animate-button-press" : ""}
                 `}
               >
@@ -104,38 +97,36 @@ const Index = () => {
                 </div>
               </button>
 
-              {/* Feature Buttons */}
-              <div className="flex flex-col gap-3 max-w-xs mx-auto px-4">
+              <div className="grid grid-cols-3 gap-4 w-full max-w-xl mx-auto">
                 <button
                   onClick={() => navigate("/support-network")}
-                  className="p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
+                  className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2"
                 >
-                  <Users className="h-5 w-5 text-red-500" />
-                  <span className="font-medium text-gray-800">Rede de Apoio</span>
+                  <Users className="h-6 w-6 text-red-500" />
+                  <span className="text-sm font-medium text-gray-800 text-center">Rede de Apoio</span>
                 </button>
 
                 <button
                   onClick={() => navigate("/diary")}
-                  className="p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
+                  className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2"
                 >
-                  <BookOpen className="h-5 w-5 text-red-500" />
-                  <span className="font-medium text-gray-800">Diário Seguro</span>
+                  <BookOpen className="h-6 w-6 text-red-500" />
+                  <span className="text-sm font-medium text-gray-800 text-center">Diário Seguro</span>
                 </button>
 
                 <button
                   onClick={() => navigate("/safe-contact")}
-                  className="p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
+                  className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2"
                 >
-                  <Phone className="h-5 w-5 text-red-500" />
-                  <span className="font-medium text-gray-800">Contato Seguro</span>
+                  <Phone className="h-6 w-6 text-red-500" />
+                  <span className="text-sm font-medium text-gray-800 text-center">Contato Seguro</span>
                 </button>
               </div>
             </>
           )}
 
-          {/* Disguise Mode Content */}
           {isDisguised && (
-            <div className="space-y-4">
+            <div className="w-full max-w-2xl mx-auto p-4">
               <textarea
                 className="w-full h-64 p-4 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-200"
                 placeholder="Digite suas anotações aqui..."
@@ -145,7 +136,6 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
       <BottomNavigation />
     </div>
   );
