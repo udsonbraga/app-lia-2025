@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Shield } from "lucide-react";
+import { Shield, Users, BookOpen, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -87,25 +87,54 @@ const Index = () => {
 
           {/* Main Emergency Button - Hidden in disguise mode */}
           {!isDisguised && (
-            <button
-              onClick={handleEmergencyContact}
-              disabled={isLoading}
-              className={`
-                relative group flex items-center justify-center gap-3
-                w-40 h-40 sm:w-48 sm:h-48 rounded-full mx-auto
-                bg-white shadow-lg hover:shadow-xl
-                transition-all duration-300 ease-in-out
-                ${isLoading ? "animate-button-press" : ""}
-              `}
-            >
-              <div className="absolute inset-0 bg-red-500 rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
-              <div className="flex flex-col items-center gap-2">
-                <Shield size={40} className="text-red-500" />
-                <span className="text-base font-semibold text-gray-800">
-                  {isLoading ? "Enviando..." : "Botão de Emergência"}
-                </span>
+            <>
+              <button
+                onClick={handleEmergencyContact}
+                disabled={isLoading}
+                className={`
+                  relative group flex items-center justify-center gap-3
+                  w-40 h-40 sm:w-48 sm:h-48 rounded-full mx-auto
+                  bg-white shadow-lg hover:shadow-xl
+                  transition-all duration-300 ease-in-out
+                  ${isLoading ? "animate-button-press" : ""}
+                `}
+              >
+                <div className="absolute inset-0 bg-red-500 rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                <div className="flex flex-col items-center gap-2">
+                  <Shield size={40} className="text-red-500" />
+                  <span className="text-base font-semibold text-gray-800">
+                    {isLoading ? "Enviando..." : "Botão de Emergência"}
+                  </span>
+                </div>
+              </button>
+
+              {/* Feature Buttons */}
+              <div className="flex flex-col gap-3 max-w-xs mx-auto px-4">
+                <button
+                  onClick={() => navigate("/support-network")}
+                  className="p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
+                >
+                  <Users className="h-5 w-5 text-red-500" />
+                  <span className="font-medium text-gray-800">Rede de Apoio</span>
+                </button>
+
+                <button
+                  onClick={() => navigate("/diary")}
+                  className="p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
+                >
+                  <BookOpen className="h-5 w-5 text-red-500" />
+                  <span className="font-medium text-gray-800">Diário Seguro</span>
+                </button>
+
+                <button
+                  onClick={() => navigate("/safe-contact")}
+                  className="p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
+                >
+                  <Phone className="h-5 w-5 text-red-500" />
+                  <span className="font-medium text-gray-800">Contato Seguro</span>
+                </button>
               </div>
-            </button>
+            </>
           )}
 
           {/* Disguise Mode Content */}

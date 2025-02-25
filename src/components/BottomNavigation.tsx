@@ -9,7 +9,6 @@ export const BottomNavigation = () => {
 
   const toggleDisguise = () => {
     setIsDisguised(!isDisguised);
-    // Aqui você pode adicionar a lógica para mudar a aparência do app
     document.body.classList.toggle('disguise-mode');
   };
 
