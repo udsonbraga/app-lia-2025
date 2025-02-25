@@ -6,19 +6,31 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Menu } from "lucide-react";
+import { Menu, Settings, Palette } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const DrawerMenu = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { title: "Início", path: "/" },
-    { title: "Rede de Apoio", path: "/support-network" },
-    { title: "Diário Seguro", path: "/diary" },
-    { title: "Contato Seguro", path: "/safe-contact" },
-    { title: "Configurações", path: "/settings" },
-    { title: "Ajuda", path: "/help" },
+    {
+      title: "Dados Cadastrais",
+      path: "/profile",
+      icon: <Settings className="h-5 w-5 text-gray-600" />,
+      description: "Atualize suas informações pessoais"
+    },
+    {
+      title: "Personalizar",
+      path: "/customize",
+      icon: <Palette className="h-5 w-5 text-gray-600" />,
+      description: "Mude cores e aparência do app"
+    },
+    {
+      title: "Ajuda",
+      path: "/help",
+      icon: null,
+      description: "Suporte e informações"
+    },
   ];
 
   return (
@@ -33,7 +45,7 @@ export const DrawerMenu = () => {
           <DrawerTitle>Menu</DrawerTitle>
         </DrawerHeader>
         <div className="px-4 pb-6">
-          <nav className="space-y-2">
+          <nav className="space-y-3">
             {menuItems.map((item) => (
               <button
                 key={item.path}
@@ -42,7 +54,15 @@ export const DrawerMenu = () => {
                 }}
                 className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                {item.title}
+                <div className="flex items-center gap-3">
+                  {item.icon}
+                  <div>
+                    <div className="font-medium text-gray-900">{item.title}</div>
+                    {item.description && (
+                      <div className="text-sm text-gray-500">{item.description}</div>
+                    )}
+                  </div>
+                </div>
               </button>
             ))}
           </nav>
