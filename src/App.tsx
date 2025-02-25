@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import Index from "@/pages/Index";
 import Register from "@/pages/Register";
 import NotFound from "@/pages/NotFound";
+import Customize from "@/pages/Customize";
 import "./App.css";
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/customize" element={<Customize />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />

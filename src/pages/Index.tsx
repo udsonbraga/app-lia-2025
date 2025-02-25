@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Shield, Users, BookOpen, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -80,12 +79,9 @@ const Index = () => {
             <h1 className={`text-3xl font-bold tracking-tight ${isDisguised ? 'text-gray-800' : 'text-gray-900'} sm:text-4xl`}>
               {isDisguised ? 'Notas Pessoais' : 'Safe Lady'}
             </h1>
-            <p className={`text-base ${isDisguised ? 'text-gray-500' : 'text-gray-600'} max-w-xl mx-auto`}>
-              {isDisguised ? 'Suas anotações diárias' : 'Proteção imediata ao alcance de um toque. Você não está sozinha.'}
-            </p>
           </div>
 
-          {/* Main Emergency Button - Hidden in disguise mode */}
+          {/* Main Emergency Button and Feature Buttons */}
           {!isDisguised && (
             <>
               <button
