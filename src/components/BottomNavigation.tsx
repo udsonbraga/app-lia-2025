@@ -13,7 +13,7 @@ export const BottomNavigation = ({ isDisguised, onDisguiseToggle, onSave, showSa
   const navigate = useNavigate();
 
   return (
-    <div className="fixed left-0 top-0 bottom-0 w-16 bg-white border-r border-gray-200 flex flex-col items-center py-4 space-y-6">
+    <div className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 flex justify-center items-center space-x-6">
       <button
         onClick={() => navigate("/")}
         className="p-3 rounded-lg hover:bg-gray-100 transition-colors"

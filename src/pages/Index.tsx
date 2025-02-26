@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Shield, Users, BookOpen, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -109,7 +110,7 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen ${isDisguised ? 'bg-white' : 'bg-gradient-to-b from-rose-50 to-white'}`}>
-      <div className="fixed top-0 right-0 h-14 bg-white shadow-sm flex items-center px-4 z-50 ml-16">
+      <div className="fixed top-0 right-0 h-14 bg-white shadow-sm flex items-center px-4 z-50">
         <DrawerMenu />
         <h1 className="text-xl font-semibold text-center flex-1">
           {isDisguised ? 'Notas Pessoais' : 'Safe Lady'}
@@ -117,7 +118,7 @@ const Index = () => {
         <div className="w-8" />
       </div>
       
-      <div className="container mx-auto px-4 pt-20 pb-16 flex flex-col min-h-screen ml-16">
+      <div className="container mx-auto px-4 pt-20 pb-20 flex flex-col min-h-screen">
         <div className="flex-1 flex flex-col items-center justify-center">
           {showPasswordPrompt && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -154,14 +155,15 @@ const Index = () => {
                 className={`
                   relative group flex items-center justify-center gap-3
                   w-40 h-40 sm:w-48 sm:h-48 rounded-full mx-auto
-                  bg-white shadow-lg hover:shadow-xl
+                  bg-white shadow-lg hover:shadow-xl active:scale-95
                   transition-all duration-300 ease-in-out mb-8
-                  ${isLoading ? "animate-button-press" : ""}
+                  hover:bg-red-50
+                  ${isLoading ? "animate-pulse bg-red-100" : ""}
                 `}
               >
                 <div className="absolute inset-0 bg-red-500 rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
                 <div className="flex flex-col items-center gap-2">
-                  <Shield size={40} className="text-red-500" />
+                  <Shield size={40} className={`text-red-500 ${isLoading ? "animate-pulse" : ""}`} />
                   <span className="text-base font-semibold text-gray-800">
                     {isLoading ? "Enviando..." : "Botão de Emergência"}
                   </span>
