@@ -1,13 +1,17 @@
+
 import { useState, useEffect } from "react";
 import { Shield, Users, BookOpen, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { DrawerMenu } from "@/components/DrawerMenu";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDisguised, setIsDisguised] = useState(false);
+  const [disguisePassword, setDisguisePassword] = useState("");
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -21,6 +25,33 @@ const Index = () => {
     });
     
     setIsLoading(false);
+  };
+
+  const handleDisguiseSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (disguisePassword) {
+      localStorage.setItem('disguisePassword', disguisePassword);
+      setIsDisguised(true);
+      setShowPasswordPrompt(false);
+      setDisguisePassword("");
+    }
+  };
+
+  const toggleDisguise = () => {
+    if (!isDisguised) {
+      setShowPasswordPrompt(true);
+    } else {
+      const savedPassword = prompt("Digite a senha para sair do modo disfarce:");
+      if (savedPassword === localStorage.getItem('disguisePassword')) {
+        setIsDisguised(false);
+      } else {
+        toast({
+          title: "Senha incorreta",
+          description: "A senha fornecida não está correta.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   useEffect(() => {
@@ -66,7 +97,7 @@ const Index = () => {
   return (
     <div className={`min-h-screen ${isDisguised ? 'bg-white' : 'bg-gradient-to-b from-rose-50 to-white'}`}>
       <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm flex items-center px-4 z-50">
-        <DrawerMenu />
+        <DrawerMenu onDisguiseToggle={toggleDisguise} isDisguised={isDisguised} />
         <h1 className="text-xl font-semibold text-center flex-1">
           {isDisguised ? 'Notas Pessoais' : 'Safe Lady'}
         </h1>
@@ -75,14 +106,41 @@ const Index = () => {
       
       <div className="container mx-auto px-4 pt-20 pb-16 flex flex-col min-h-screen">
         <div className="flex-1 flex flex-col items-center justify-center">
+          {showPasswordPrompt && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <form onSubmit={handleDisguiseSubmit} className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
+                <h3 className="text-lg font-semibold mb-4">Definir Senha do Modo Disfarce</h3>
+                <input
+                  type="password"
+                  value={disguisePassword}
+                  onChange={(e) => setDisguisePassword(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md mb-4"
+                  placeholder="Digite uma senha"
+                  required
+                />
+                <div className="flex gap-2">
+                  <Button type="submit" className="flex-1">Confirmar</Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowPasswordPrompt(false)}
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
+
           {!isDisguised && (
-            <>
+            <div className="w-full max-w-md space-y-6">
               <button
                 onClick={handleEmergencyContact}
                 disabled={isLoading}
                 className={`
                   relative group flex items-center justify-center gap-3
-                  w-40 h-40 sm:w-48 sm:h-48 rounded-full
+                  w-40 h-40 sm:w-48 sm:h-48 rounded-full mx-auto
                   bg-white shadow-lg hover:shadow-xl
                   transition-all duration-300 ease-in-out mb-8
                   ${isLoading ? "animate-button-press" : ""}
@@ -97,32 +155,32 @@ const Index = () => {
                 </div>
               </button>
 
-              <div className="grid grid-cols-3 gap-4 w-full max-w-xl mx-auto">
+              <div className="flex flex-col space-y-4">
                 <button
                   onClick={() => navigate("/support-network")}
-                  className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2"
+                  className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
                 >
                   <Users className="h-6 w-6 text-red-500" />
-                  <span className="text-sm font-medium text-gray-800 text-center">Rede de Apoio</span>
+                  <span className="font-medium text-gray-800">Rede de Apoio</span>
                 </button>
 
                 <button
                   onClick={() => navigate("/diary")}
-                  className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2"
+                  className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
                 >
                   <BookOpen className="h-6 w-6 text-red-500" />
-                  <span className="text-sm font-medium text-gray-800 text-center">Diário Seguro</span>
+                  <span className="font-medium text-gray-800">Diário Seguro</span>
                 </button>
 
                 <button
                   onClick={() => navigate("/safe-contact")}
-                  className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2"
+                  className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
                 >
                   <Phone className="h-6 w-6 text-red-500" />
-                  <span className="text-sm font-medium text-gray-800 text-center">Contato Seguro</span>
+                  <span className="font-medium text-gray-800">Contato Seguro</span>
                 </button>
               </div>
-            </>
+            </div>
           )}
 
           {isDisguised && (
