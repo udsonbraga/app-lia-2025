@@ -12,6 +12,7 @@ const Index = () => {
   const [isDisguised, setIsDisguised] = useState(false);
   const [disguisePassword, setDisguisePassword] = useState("");
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [notes, setNotes] = useState(() => localStorage.getItem('disguiseNotes') || "");
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -44,6 +45,7 @@ const Index = () => {
       const savedPassword = prompt("Digite a senha para sair do modo disfarce:");
       if (savedPassword === localStorage.getItem('disguisePassword')) {
         setIsDisguised(false);
+        localStorage.removeItem('disguisePassword');
       } else {
         toast({
           title: "Senha incorreta",
@@ -52,6 +54,12 @@ const Index = () => {
         });
       }
     }
+  };
+
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newNotes = e.target.value;
+    setNotes(newNotes);
+    localStorage.setItem('disguiseNotes', newNotes);
   };
 
   useEffect(() => {
@@ -76,7 +84,6 @@ const Index = () => {
       const deltaY = Math.abs(y - lastY);
       const deltaZ = Math.abs(z - lastZ);
       
-      // Se houver uma mudança significativa na aceleração
       if (deltaX + deltaY + deltaZ > 30) {
         handleEmergencyContact();
       }
@@ -188,6 +195,8 @@ const Index = () => {
               <textarea
                 className="w-full h-64 p-4 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-200"
                 placeholder="Digite suas anotações aqui..."
+                value={notes}
+                onChange={handleNotesChange}
               />
             </div>
           )}

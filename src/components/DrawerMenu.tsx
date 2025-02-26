@@ -10,10 +10,14 @@ import { Settings, Palette, LogOut, UserCircle, Eye, EyeOff } from "lucide-react
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-export const DrawerMenu = () => {
+interface DrawerMenuProps {
+  onDisguiseToggle?: () => void;
+  isDisguised?: boolean;
+}
+
+export const DrawerMenu = ({ onDisguiseToggle, isDisguised }: DrawerMenuProps) => {
   const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [isDisguised, setIsDisguised] = useState(false);
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -24,31 +28,27 @@ export const DrawerMenu = () => {
   };
 
   const handleLogout = () => {
-    navigate('/');
-  };
-
-  const toggleDisguise = () => {
-    setIsDisguised(!isDisguised);
-    document.body.classList.toggle('disguise-mode');
+    localStorage.removeItem('isAuthenticated');
+    navigate('/login');
   };
 
   const menuItems = [
     {
       title: isDisguised ? "Modo Normal" : "Modo Disfarce",
-      action: toggleDisguise,
+      action: onDisguiseToggle,
       icon: isDisguised ? <EyeOff className="h-5 w-5 text-gray-600" /> : <Eye className="h-5 w-5 text-gray-600" />,
       description: "Alterne entre os modos de visualização"
     },
     {
-      title: "Dados Cadastrais",
-      path: "/profile",
-      icon: <Settings className="h-5 w-5 text-gray-600" />,
-      description: "Atualize suas informações pessoais"
+      title: "Personalizar",
+      path: "/customize",
+      icon: <Palette className="h-5 w-5 text-gray-600" />,
+      description: "Mude cores e aparência do app"
     },
     {
       title: "Ajuda",
       path: "/help",
-      icon: null,
+      icon: <Settings className="h-5 w-5 text-gray-600" />,
       description: "Suporte e informações"
     },
   ];
