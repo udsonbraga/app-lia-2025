@@ -6,16 +6,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Settings, Palette, LogOut, UserCircle, Eye, EyeOff } from "lucide-react";
+import { LogOut, UserCircle, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-interface DrawerMenuProps {
-  onDisguiseToggle?: () => void;
-  isDisguised?: boolean;
-}
-
-export const DrawerMenu = ({ onDisguiseToggle, isDisguised }: DrawerMenuProps) => {
+export const DrawerMenu = () => {
   const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
@@ -33,18 +28,6 @@ export const DrawerMenu = ({ onDisguiseToggle, isDisguised }: DrawerMenuProps) =
   };
 
   const menuItems = [
-    {
-      title: isDisguised ? "Modo Normal" : "Modo Disfarce",
-      action: onDisguiseToggle,
-      icon: isDisguised ? <EyeOff className="h-5 w-5 text-gray-600" /> : <Eye className="h-5 w-5 text-gray-600" />,
-      description: "Alterne entre os modos de visualização"
-    },
-    {
-      title: "Personalizar",
-      path: "/customize",
-      icon: <Palette className="h-5 w-5 text-gray-600" />,
-      description: "Mude cores e aparência do app"
-    },
     {
       title: "Ajuda",
       path: "/help",
@@ -101,9 +84,7 @@ export const DrawerMenu = ({ onDisguiseToggle, isDisguised }: DrawerMenuProps) =
               <button
                 key={item.title}
                 onClick={() => {
-                  if (item.action) {
-                    item.action();
-                  } else if (item.path) {
+                  if (item.path) {
                     navigate(item.path);
                   }
                 }}

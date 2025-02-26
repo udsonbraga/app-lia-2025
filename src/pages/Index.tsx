@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Shield, Users, BookOpen, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -59,7 +58,14 @@ const Index = () => {
   const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newNotes = e.target.value;
     setNotes(newNotes);
-    localStorage.setItem('disguiseNotes', newNotes);
+  };
+
+  const handleSaveNotes = () => {
+    localStorage.setItem('disguiseNotes', notes);
+    toast({
+      title: "Notas salvas",
+      description: "Suas anotações foram salvas com sucesso.",
+    });
   };
 
   useEffect(() => {
@@ -103,15 +109,15 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen ${isDisguised ? 'bg-white' : 'bg-gradient-to-b from-rose-50 to-white'}`}>
-      <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm flex items-center px-4 z-50">
-        <DrawerMenu onDisguiseToggle={toggleDisguise} isDisguised={isDisguised} />
+      <div className="fixed top-0 right-0 h-14 bg-white shadow-sm flex items-center px-4 z-50 ml-16">
+        <DrawerMenu />
         <h1 className="text-xl font-semibold text-center flex-1">
           {isDisguised ? 'Notas Pessoais' : 'Safe Lady'}
         </h1>
         <div className="w-8" />
       </div>
       
-      <div className="container mx-auto px-4 pt-20 pb-16 flex flex-col min-h-screen">
+      <div className="container mx-auto px-4 pt-20 pb-16 flex flex-col min-h-screen ml-16">
         <div className="flex-1 flex flex-col items-center justify-center">
           {showPasswordPrompt && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -203,7 +209,12 @@ const Index = () => {
         </div>
       </div>
 
-      <BottomNavigation />
+      <BottomNavigation 
+        isDisguised={isDisguised}
+        onDisguiseToggle={toggleDisguise}
+        onSave={isDisguised ? handleSaveNotes : undefined}
+        showSave={isDisguised}
+      />
     </div>
   );
 };

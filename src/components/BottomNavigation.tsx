@@ -1,29 +1,55 @@
 
-import { Home, Palette } from "lucide-react";
+import { Home, Palette, Eye, EyeOff, Save } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export const BottomNavigation = () => {
+interface BottomNavigationProps {
+  isDisguised?: boolean;
+  onDisguiseToggle?: () => void;
+  onSave?: () => void;
+  showSave?: boolean;
+}
+
+export const BottomNavigation = ({ isDisguised, onDisguiseToggle, onSave, showSave }: BottomNavigationProps) => {
   const navigate = useNavigate();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-1 px-4">
-      <div className="flex justify-around items-center">
+    <div className="fixed left-0 top-0 bottom-0 w-16 bg-white border-r border-gray-200 flex flex-col items-center py-4 space-y-6">
+      <button
+        onClick={() => navigate("/")}
+        className="p-3 rounded-lg hover:bg-gray-100 transition-colors"
+        title="Início"
+      >
+        <Home className="h-6 w-6 text-red-500" />
+      </button>
+      
+      <button
+        onClick={onDisguiseToggle}
+        className="p-3 rounded-lg hover:bg-gray-100 transition-colors"
+        title={isDisguised ? "Modo Normal" : "Modo Disfarce"}
+      >
+        {isDisguised ? 
+          <EyeOff className="h-6 w-6 text-red-500" /> : 
+          <Eye className="h-6 w-6 text-red-500" />
+        }
+      </button>
+      
+      <button
+        onClick={() => navigate("/customize")}
+        className="p-3 rounded-lg hover:bg-gray-100 transition-colors"
+        title="Personalizar"
+      >
+        <Palette className="h-6 w-6 text-red-500" />
+      </button>
+
+      {showSave && (
         <button
-          onClick={() => navigate("/")}
-          className="flex flex-col items-center p-2"
+          onClick={onSave}
+          className="p-3 rounded-lg hover:bg-gray-100 transition-colors"
+          title="Salvar"
         >
-          <Home className="h-5 w-5 text-red-500" />
-          <span className="text-xs text-gray-600">Início</span>
+          <Save className="h-6 w-6 text-red-500" />
         </button>
-        
-        <button
-          onClick={() => navigate("/customize")}
-          className="flex flex-col items-center p-2"
-        >
-          <Palette className="h-5 w-5 text-red-500" />
-          <span className="text-xs text-gray-600">Personalizar</span>
-        </button>
-      </div>
+      )}
     </div>
   );
 };
