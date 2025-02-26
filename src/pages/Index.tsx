@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Shield, Users, BookOpen, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -110,12 +109,15 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen ${isDisguised ? 'bg-white' : 'bg-gradient-to-b from-rose-50 to-white'}`}>
-      <div className="fixed top-0 right-0 h-14 bg-white shadow-sm flex items-center px-4 z-50">
-        <DrawerMenu />
-        <h1 className="text-xl font-semibold text-center flex-1">
-          {isDisguised ? 'Notas Pessoais' : 'Safe Lady'}
-        </h1>
-        <div className="w-8" />
+      <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-50">
+        <div className="container mx-auto h-full">
+          <div className="flex items-center h-full px-4">
+            <DrawerMenu />
+            <h1 className="text-xl font-semibold ml-4 mr-auto">
+              {isDisguised ? 'Notas Pessoais' : 'Safe Lady'}
+            </h1>
+          </div>
+        </div>
       </div>
       
       <div className="container mx-auto px-4 pt-20 pb-20 flex flex-col min-h-screen">
