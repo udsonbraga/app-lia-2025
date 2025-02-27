@@ -1,9 +1,9 @@
+
 import { useState, useEffect } from "react";
-import { Shield, Users, BookOpen, Phone } from "lucide-react";
+import { Shield, Users, BookOpen, Phone, ArrowLeft, Eye, EyeOff, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { DrawerMenu } from "@/components/DrawerMenu";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
@@ -111,11 +111,28 @@ const Index = () => {
     <div className={`min-h-screen ${isDisguised ? 'bg-white' : 'bg-gradient-to-b from-rose-50 to-white'}`}>
       <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-50">
         <div className="container mx-auto h-full">
-          <div className="flex items-center h-full px-4">
-            <DrawerMenu />
-            <h1 className="text-xl font-semibold ml-4 mr-auto">
+          <div className="flex items-center justify-between h-full px-4">
+            {isDisguised ? (
+              <button
+                onClick={() => navigate('/')}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <ArrowLeft className="h-6 w-6 text-gray-700" />
+              </button>
+            ) : null}
+            <h1 className="text-xl font-semibold">
               {isDisguised ? 'Notas Pessoais' : 'Safe Lady'}
             </h1>
+            <button
+              onClick={toggleDisguise}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              title={isDisguised ? "Modo Normal" : "Modo Disfarce"}
+            >
+              {isDisguised ? 
+                <EyeOff className="h-6 w-6 text-red-500" /> : 
+                <Eye className="h-6 w-6 text-red-500" />
+              }
+            </button>
           </div>
         </div>
       </div>
@@ -201,13 +218,20 @@ const Index = () => {
           )}
 
           {isDisguised && (
-            <div className="w-full max-w-2xl mx-auto p-4">
+            <div className="w-full max-w-2xl mx-auto p-4 space-y-4">
               <textarea
                 className="w-full h-64 p-4 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-200"
                 placeholder="Digite suas anotações aqui..."
                 value={notes}
                 onChange={handleNotesChange}
               />
+              <Button
+                onClick={handleSaveNotes}
+                className="w-full flex items-center justify-center gap-2"
+              >
+                <Save className="h-4 w-4" />
+                Salvar
+              </Button>
             </div>
           )}
         </div>
@@ -216,8 +240,6 @@ const Index = () => {
       <BottomNavigation 
         isDisguised={isDisguised}
         onDisguiseToggle={toggleDisguise}
-        onSave={isDisguised ? handleSaveNotes : undefined}
-        showSave={isDisguised}
       />
     </div>
   );
