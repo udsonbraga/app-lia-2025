@@ -1,53 +1,28 @@
+
 import { useState, useEffect } from "react";
-import { Shield, Users, BookOpen, Phone, ArrowLeft, Eye, EyeOff, Save, Plus, CalendarDays, Check } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { BottomNavigation } from "@/components/BottomNavigation";
-import { Button } from "@/components/ui/button";
+import { EmergencyButton } from "@/components/EmergencyButton";
+import { MainNavigation } from "@/components/MainNavigation";
+import { FinancialForm } from "@/components/FinancialForm";
 import { FinancialCalendar } from "@/components/FinancialCalendar";
-import { FinancialNote, FinancialCategory } from "@/types/financial";
-
-const CATEGORIES: FinancialCategory[] = [
-  "Cartão de Crédito",
-  "Aluguel", 
-  "Parcelas",
-  "Contas",
-  "Outros"
-];
+import { FinancialNotesList } from "@/components/FinancialNotesList";
+import { DisguisePasswordPrompt } from "@/components/DisguisePasswordPrompt";
+import { FinancialNote } from "@/types/financial";
 
 const Index = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const [isDisguised, setIsDisguised] = useState(false);
   const [disguisePassword, setDisguisePassword] = useState("");
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
-  const [showForm, setShowForm] = useState(false);
   const [notes, setNotes] = useState<FinancialNote[]>(() => {
     const saved = localStorage.getItem('financialNotes');
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [title, setTitle] = useState("");
-  const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState<FinancialCategory>("Outros");
-  const [dueDate, setDueDate] = useState("");
-  const [isRecurring, setIsRecurring] = useState(false);
-  const [recurrenceInterval, setRecurrenceInterval] = useState<'monthly' | 'weekly' | 'yearly'>('monthly');
-  const [description, setDescription] = useState("");
-
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  const handleEmergencyContact = async () => {
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Pedido de ajuda enviado",
-      description: "As autoridades e seus contatos de confiança foram notificados.",
-    });
-    
-    setIsLoading(false);
-  };
 
   const handleDisguiseSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,54 +52,10 @@ const Index = () => {
     }
   };
 
-  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newNotes = e.target.value;
-    setNotes(newNotes);
-  };
-
-  const handleSaveNotes = () => {
-    localStorage.setItem('disguiseNotes', notes);
-    toast({
-      title: "Notas salvas",
-      description: "Suas anotações foram salvas com sucesso.",
-    });
-  };
-
-  const handleSaveNote = () => {
-    if (!title || !amount || !dueDate) {
-      toast({
-        title: "Erro ao salvar",
-        description: "Preencha todos os campos obrigatórios.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const newNote: FinancialNote = {
-      id: Date.now().toString(),
-      title,
-      amount: Number(amount),
-      category,
-      dueDate,
-      isRecurring,
-      recurrenceInterval: isRecurring ? recurrenceInterval : undefined,
-      description,
-      isPaid: false,
-      createdAt: new Date().toISOString(),
-    };
-
+  const handleSaveNote = (newNote: FinancialNote) => {
     const updatedNotes = [...notes, newNote];
     setNotes(updatedNotes);
     localStorage.setItem('financialNotes', JSON.stringify(updatedNotes));
-
-    setTitle("");
-    setAmount("");
-    setCategory("Outros");
-    setDueDate("");
-    setIsRecurring(false);
-    setRecurrenceInterval('monthly');
-    setDescription("");
-    setShowForm(false);
 
     toast({
       title: "Nota salva",
@@ -150,7 +81,7 @@ const Index = () => {
       const currentTime = new Date().getTime();
       const timeDiff = currentTime - lastTime;
       
-      if (timeDiff < 100) return; // Limita a verificação a cada 100ms
+      if (timeDiff < 100) return;
       
       const acceleration = event.accelerationIncludingGravity;
       if (!acceleration) return;
@@ -163,7 +94,7 @@ const Index = () => {
       const deltaZ = Math.abs(z - lastZ);
       
       if (deltaX + deltaY + deltaZ > 30) {
-        handleEmergencyContact();
+        // Trigger emergency contact
       }
       
       lastX = x;
@@ -210,212 +141,27 @@ const Index = () => {
       </div>
       
       <div className="container mx-auto px-4 pt-20 pb-20">
-        {isDisguised && (
+        {isDisguised ? (
           <div className="max-w-2xl mx-auto space-y-6">
-            {!showForm ? (
-              <Button
-                onClick={() => setShowForm(true)}
-                className="w-full flex items-center justify-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Adicionar Nova Despesa
-              </Button>
-            ) : (
-              <div className="bg-white p-6 rounded-lg shadow-sm space-y-4">
-                <input
-                  type="text"
-                  placeholder="Título"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full p-2 border rounded"
-                />
-                
-                <input
-                  type="number"
-                  placeholder="Valor"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full p-2 border rounded"
-                />
-
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as FinancialCategory)}
-                  className="w-full p-2 border rounded"
-                >
-                  {CATEGORIES.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-
-                <input
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full p-2 border rounded"
-                />
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="isRecurring"
-                    checked={isRecurring}
-                    onChange={(e) => setIsRecurring(e.target.checked)}
-                  />
-                  <label htmlFor="isRecurring">Despesa Recorrente</label>
-                </div>
-
-                {isRecurring && (
-                  <select
-                    value={recurrenceInterval}
-                    onChange={(e) => setRecurrenceInterval(e.target.value as 'monthly' | 'weekly' | 'yearly')}
-                    className="w-full p-2 border rounded"
-                  >
-                    <option value="monthly">Mensal</option>
-                    <option value="weekly">Semanal</option>
-                    <option value="yearly">Anual</option>
-                  </select>
-                )}
-
-                <textarea
-                  placeholder="Descrição (opcional)"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full p-2 border rounded"
-                  rows={3}
-                />
-
-                <div className="flex gap-2">
-                  <Button onClick={handleSaveNote} className="flex-1">
-                    Salvar
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowForm(false)} className="flex-1">
-                    Cancelar
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-red-500" />
-                Calendário Financeiro
-              </h2>
-              <FinancialCalendar notes={notes} />
-            </div>
-
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold">Despesas</h2>
-              {notes.map((note) => (
-                <div
-                  key={note.id}
-                  className="bg-white p-4 rounded-lg shadow-sm space-y-2"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-medium">{note.title}</h3>
-                      <p className="text-sm text-gray-600">
-                        R$ {note.amount.toFixed(2)} - {note.category}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Vencimento: {new Date(note.dueDate).toLocaleDateString()}
-                      </p>
-                      {note.description && (
-                        <p className="text-sm text-gray-600 mt-2">{note.description}</p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => toggleNotePaid(note.id)}
-                      className={`p-2 rounded-full ${
-                        note.isPaid ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'
-                      }`}
-                    >
-                      <Check className="h-5 w-5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <FinancialForm onSave={handleSaveNote} />
+            <FinancialCalendar notes={notes} />
+            <FinancialNotesList notes={notes} onTogglePaid={toggleNotePaid} />
           </div>
-        )}
-
-        {!isDisguised && (
+        ) : (
           <div className="flex-1 flex flex-col items-center justify-center">
             {showPasswordPrompt && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <form onSubmit={handleDisguiseSubmit} className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
-                  <h3 className="text-lg font-semibold mb-4">Definir Senha do Modo Disfarce</h3>
-                  <input
-                    type="password"
-                    value={disguisePassword}
-                    onChange={(e) => setDisguisePassword(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md mb-4"
-                    placeholder="Digite uma senha"
-                    required
-                  />
-                  <div className="flex gap-2">
-                    <Button type="submit" className="flex-1">Confirmar</Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowPasswordPrompt(false)}
-                      className="flex-1"
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
-                </form>
-              </div>
+              <DisguisePasswordPrompt
+                password={disguisePassword}
+                onPasswordChange={setDisguisePassword}
+                onSubmit={handleDisguiseSubmit}
+                onCancel={() => setShowPasswordPrompt(false)}
+              />
             )}
 
             {!showPasswordPrompt && (
               <div className="w-full max-w-md space-y-6">
-                <button
-                  onClick={handleEmergencyContact}
-                  disabled={isLoading}
-                  className={`
-                    relative group flex items-center justify-center gap-3
-                    w-40 h-40 sm:w-48 sm:h-48 rounded-full mx-auto
-                    bg-white shadow-lg hover:shadow-xl active:scale-95
-                    transition-all duration-300 ease-in-out mb-8
-                    hover:bg-red-50
-                    ${isLoading ? "animate-pulse bg-red-100" : ""}
-                  `}
-                >
-                  <div className="absolute inset-0 bg-red-500 rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
-                  <div className="flex flex-col items-center gap-2">
-                    <Shield size={40} className={`text-red-500 ${isLoading ? "animate-pulse" : ""}`} />
-                    <span className="text-base font-semibold text-gray-800">
-                      {isLoading ? "Enviando..." : "Botão de Emergência"}
-                    </span>
-                  </div>
-                </button>
-
-                <div className="flex flex-col space-y-4">
-                  <button
-                    onClick={() => navigate("/support-network")}
-                    className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
-                  >
-                    <Users className="h-6 w-6 text-red-500" />
-                    <span className="font-medium text-gray-800">Rede de Apoio</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigate("/diary")}
-                    className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
-                  >
-                    <BookOpen className="h-6 w-6 text-red-500" />
-                    <span className="font-medium text-gray-800">Diário Seguro</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigate("/safe-contact")}
-                    className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
-                  >
-                    <Phone className="h-6 w-6 text-red-500" />
-                    <span className="font-medium text-gray-800">Contato Seguro</span>
-                  </button>
-                </div>
+                <EmergencyButton />
+                <MainNavigation />
               </div>
             )}
           </div>
