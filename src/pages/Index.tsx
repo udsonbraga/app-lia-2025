@@ -7,7 +7,6 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { EmergencyButton } from "@/components/EmergencyButton";
 import { MainNavigation } from "@/components/MainNavigation";
 import { FinancialForm } from "@/components/FinancialForm";
-import { FinancialCalendar } from "@/components/FinancialCalendar";
 import { FinancialNotesList } from "@/components/FinancialNotesList";
 import { DisguisePasswordPrompt } from "@/components/DisguisePasswordPrompt";
 import { FinancialNote } from "@/types/financial";
@@ -20,6 +19,7 @@ const Index = () => {
     const saved = localStorage.getItem('financialNotes');
     return saved ? JSON.parse(saved) : [];
   });
+  const [noteToEdit, setNoteToEdit] = useState<FinancialNote | null>(null);
 
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -53,13 +53,39 @@ const Index = () => {
   };
 
   const handleSaveNote = (newNote: FinancialNote) => {
-    const updatedNotes = [...notes, newNote];
+    let updatedNotes;
+    if (noteToEdit) {
+      updatedNotes = notes.map(note => 
+        note.id === newNote.id ? newNote : note
+      );
+      setNoteToEdit(null);
+    } else {
+      updatedNotes = [...notes, newNote];
+    }
+    
     setNotes(updatedNotes);
     localStorage.setItem('financialNotes', JSON.stringify(updatedNotes));
 
     toast({
-      title: "Nota salva",
-      description: "Sua anotação financeira foi salva com sucesso.",
+      title: noteToEdit ? "Nota atualizada" : "Nota salva",
+      description: noteToEdit 
+        ? "Sua anotação financeira foi atualizada com sucesso."
+        : "Sua anotação financeira foi salva com sucesso.",
+    });
+  };
+
+  const handleEditNote = (note: FinancialNote) => {
+    setNoteToEdit(note);
+  };
+
+  const handleDeleteNote = (noteId: string) => {
+    const updatedNotes = notes.filter(note => note.id !== noteId);
+    setNotes(updatedNotes);
+    localStorage.setItem('financialNotes', JSON.stringify(updatedNotes));
+    
+    toast({
+      title: "Nota removida",
+      description: "A anotação financeira foi removida com sucesso.",
     });
   };
 
@@ -143,9 +169,17 @@ const Index = () => {
       <div className="container mx-auto px-4 pt-20 pb-20">
         {isDisguised ? (
           <div className="max-w-2xl mx-auto space-y-6">
-            <FinancialForm onSave={handleSaveNote} />
-            <FinancialCalendar notes={notes} />
-            <FinancialNotesList notes={notes} onTogglePaid={toggleNotePaid} />
+            <FinancialForm 
+              onSave={handleSaveNote}
+              noteToEdit={noteToEdit}
+              onCancelEdit={() => setNoteToEdit(null)}
+            />
+            <FinancialNotesList 
+              notes={notes}
+              onTogglePaid={toggleNotePaid}
+              onEdit={handleEditNote}
+              onDelete={handleDeleteNote}
+            />
           </div>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center">

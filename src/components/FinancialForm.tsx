@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Save } from "lucide-react";
 import { FinancialNote, FinancialCategory } from "@/types/financial";
@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 
 interface FinancialFormProps {
   onSave: (note: FinancialNote) => void;
+  noteToEdit?: FinancialNote | null;
+  onCancelEdit?: () => void;
 }
 
 const CATEGORIES: FinancialCategory[] = [
@@ -17,7 +19,7 @@ const CATEGORIES: FinancialCategory[] = [
   "Outros"
 ];
 
-export function FinancialForm({ onSave }: FinancialFormProps) {
+export function FinancialForm({ onSave, noteToEdit, onCancelEdit }: FinancialFormProps) {
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
@@ -27,6 +29,19 @@ export function FinancialForm({ onSave }: FinancialFormProps) {
   const [recurrenceInterval, setRecurrenceInterval] = useState<'monthly' | 'weekly' | 'yearly'>('monthly');
   const [description, setDescription] = useState("");
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (noteToEdit) {
+      setTitle(noteToEdit.title);
+      setAmount(noteToEdit.amount.toString());
+      setCategory(noteToEdit.category as FinancialCategory);
+      setDueDate(noteToEdit.dueDate);
+      setIsRecurring(noteToEdit.isRecurring);
+      setRecurrenceInterval(noteToEdit.recurrenceInterval || 'monthly');
+      setDescription(noteToEdit.description || "");
+      setShowForm(true);
+    }
+  }, [noteToEdit]);
 
   const handleSave = () => {
     if (!title || !amount || !dueDate) {
@@ -38,8 +53,8 @@ export function FinancialForm({ onSave }: FinancialFormProps) {
       return;
     }
 
-    const newNote: FinancialNote = {
-      id: Date.now().toString(),
+    const noteData: FinancialNote = {
+      id: noteToEdit?.id || Date.now().toString(),
       title,
       amount: Number(amount),
       category,
@@ -47,12 +62,15 @@ export function FinancialForm({ onSave }: FinancialFormProps) {
       isRecurring,
       recurrenceInterval: isRecurring ? recurrenceInterval : undefined,
       description,
-      isPaid: false,
-      createdAt: new Date().toISOString(),
+      isPaid: noteToEdit?.isPaid || false,
+      createdAt: noteToEdit?.createdAt || new Date().toISOString(),
     };
 
-    onSave(newNote);
+    onSave(noteData);
+    resetForm();
+  };
 
+  const resetForm = () => {
     setTitle("");
     setAmount("");
     setCategory("Outros");
@@ -61,9 +79,10 @@ export function FinancialForm({ onSave }: FinancialFormProps) {
     setRecurrenceInterval('monthly');
     setDescription("");
     setShowForm(false);
+    if (onCancelEdit) onCancelEdit();
   };
 
-  if (!showForm) {
+  if (!showForm && !noteToEdit) {
     return (
       <Button
         onClick={() => setShowForm(true)}
@@ -77,6 +96,9 @@ export function FinancialForm({ onSave }: FinancialFormProps) {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm space-y-4">
+      <h3 className="text-lg font-semibold">
+        {noteToEdit ? "Editar Despesa" : "Nova Despesa"}
+      </h3>
       <input
         type="text"
         placeholder="Título"
@@ -142,9 +164,10 @@ export function FinancialForm({ onSave }: FinancialFormProps) {
 
       <div className="flex gap-2">
         <Button onClick={handleSave} className="flex-1">
-          Salvar
+          <Save className="h-4 w-4 mr-2" />
+          {noteToEdit ? "Atualizar" : "Salvar"}
         </Button>
-        <Button variant="outline" onClick={() => setShowForm(false)} className="flex-1">
+        <Button variant="outline" onClick={resetForm} className="flex-1">
           Cancelar
         </Button>
       </div>
