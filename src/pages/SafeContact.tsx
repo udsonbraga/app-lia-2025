@@ -3,12 +3,16 @@ import { useState } from "react";
 import { DrawerMenu } from "@/components/DrawerMenu";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Phone } from "lucide-react";
+import { Phone, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const SafeContact = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [contactNumber, setContactNumber] = useState("");
   const [contactName, setContactName] = useState("");
+  const [ssid, setSsid] = useState("");
+  const [token, setToken] = useState("");
 
   const formatPhoneNumber = (value: string) => {
     const cleaned = value.replace(/\D/g, "");
@@ -30,7 +34,12 @@ const SafeContact = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
       <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm flex items-center px-4 z-50">
-        <DrawerMenu />
+        <button
+          onClick={() => navigate('/')}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <ArrowLeft className="h-6 w-6 text-gray-700" />
+        </button>
         <h1 className="text-xl font-semibold text-center flex-1">Contato Seguro</h1>
         <div className="w-8" />
       </div>
@@ -66,6 +75,34 @@ const SafeContact = () => {
                 value={contactNumber}
                 onChange={(e) => setContactNumber(formatPhoneNumber(e.target.value))}
                 placeholder="(00) 00000-0000"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="ssid" className="block text-sm font-medium text-gray-700">
+                SSID
+              </label>
+              <input
+                type="text"
+                id="ssid"
+                value={ssid}
+                onChange={(e) => setSsid(e.target.value)}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="token" className="block text-sm font-medium text-gray-700">
+                Token
+              </label>
+              <input
+                type="text"
+                id="token"
+                value={token}
+                onChange={(e) => setToken(e.target.value)}
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
                 required
               />
