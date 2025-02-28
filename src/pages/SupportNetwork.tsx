@@ -19,61 +19,61 @@ const SupportNetwork = () => {
   const [activeTab, setActiveTab] = useState<"police" | "hospitals" | "ngos" | "rights">("police");
   const [selectedLocation, setSelectedLocation] = useState<SupportLocation | null>(null);
 
-  // Mock data for demonstration
+  // Localizações em Manaus-AM
   const supportLocations: SupportLocation[] = [
     {
       id: "1",
-      name: "Delegacia da Mulher - Centro",
+      name: "Delegacia Especializada em Crimes Contra a Mulher - DECCM",
       type: "police",
-      address: "Av. São João, 1247 - Centro, São Paulo",
-      phone: "(11) 3241-3328",
-      latitude: -23.5373,
-      longitude: -46.6425
+      address: "Av. Mário Ypiranga, 3395 - Parque 10 de Novembro, Manaus - AM",
+      phone: "(92) 3236-7012",
+      latitude: -3.0953,
+      longitude: -60.0274
     },
     {
       id: "2",
-      name: "Delegacia da Mulher - Zona Sul",
+      name: "Delegacia Especializada em Crimes Contra a Mulher - Zona Norte",
       type: "police",
-      address: "Av. Onze de Junho, 89 - Vila Clementino, São Paulo",
-      phone: "(11) 5084-2579",
-      latitude: -23.5987,
-      longitude: -46.6381
+      address: "Av. Arquiteto José Henriques, Conj. Manôa, Manaus - AM",
+      phone: "(92) 3654-4226",
+      latitude: -3.0312,
+      longitude: -59.9857
     },
     {
       id: "3",
-      name: "Hospital das Clínicas",
+      name: "Hospital 28 de Agosto",
       type: "hospital",
-      address: "R. Dr. Ovídio Pires de Campos, 225 - Cerqueira César, São Paulo",
-      phone: "(11) 2661-0000",
-      latitude: -23.5575,
-      longitude: -46.6697
+      address: "Av. Mário Ypiranga, 1581 - Adrianópolis, Manaus - AM",
+      phone: "(92) 3643-7100",
+      latitude: -3.0908,
+      longitude: -60.0212
     },
     {
       id: "4",
-      name: "Instituto da Mulher - UNIFESP",
+      name: "Hospital e Pronto Socorro João Lúcio",
       type: "hospital",
-      address: "R. Napoleão de Barros, 715 - Vila Clementino, São Paulo",
-      phone: "(11) 5576-4848",
-      latitude: -23.5973,
-      longitude: -46.6430
+      address: "Av. Cosme Ferreira, 3937 - Coroado, Manaus - AM",
+      phone: "(92) 3249-9100",
+      latitude: -3.0734,
+      longitude: -59.9484
     },
     {
       id: "5",
-      name: "ONG Maria da Penha",
+      name: "ONG Marias da Amazônia",
       type: "ngo",
-      address: "Av. Paulista, 1048 - Bela Vista, São Paulo",
-      phone: "(11) 3242-0000",
-      latitude: -23.5648,
-      longitude: -46.6527
+      address: "Rua Ferreira Pena, 287 - Centro, Manaus - AM",
+      phone: "(92) 3233-8249",
+      latitude: -3.1297,
+      longitude: -60.0234
     },
     {
       id: "6",
-      name: "Instituto Avon",
+      name: "Centro de Referência Especializado de Assistência Social (CREAS)",
       type: "ngo",
-      address: "Av. Interlagos, 4300 - Jardim Brasil, São Paulo",
-      phone: "(11) 5694-7900",
-      latitude: -23.6790,
-      longitude: -46.6990
+      address: "Av. Presidente Kennedy, 1318 - Educandos, Manaus - AM",
+      phone: "(92) 3214-2222",
+      latitude: -3.1389,
+      longitude: -60.0112
     },
   ];
 

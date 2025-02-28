@@ -9,6 +9,7 @@ import { MainNavigation } from "@/components/MainNavigation";
 import { FinancialForm } from "@/components/FinancialForm";
 import { FinancialNotesList } from "@/components/FinancialNotesList";
 import { DisguisePasswordPrompt } from "@/components/DisguisePasswordPrompt";
+import { DrawerMenu } from "@/components/DrawerMenu";
 import { FinancialNote } from "@/types/financial";
 
 const Index = () => {
@@ -23,6 +24,14 @@ const Index = () => {
 
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Verifica se há uma senha de disfarce salva
+    const savedPassword = localStorage.getItem('disguisePassword');
+    if (savedPassword) {
+      setIsDisguised(true);
+    }
+  }, []);
 
   const handleDisguiseSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,12 +106,6 @@ const Index = () => {
   };
 
   useEffect(() => {
-    // Check for saved disguise mode
-    const savedPassword = localStorage.getItem('disguisePassword');
-    if (savedPassword) {
-      setIsDisguised(true);
-    }
-    
     // Motion detection code
     let lastY = 0;
     let lastX = 0;
@@ -154,20 +157,25 @@ const Index = () => {
               >
                 <ArrowLeft className="h-6 w-6 text-gray-700" />
               </button>
-            ) : null}
+            ) : (
+              <div className="w-8"></div>
+            )}
             <h1 className="text-xl font-semibold">
               {isDisguised ? 'Notas Pessoais' : 'Safe Lady'}
             </h1>
-            <button
-              onClick={toggleDisguise}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              title={isDisguised ? "Modo Normal" : "Modo Disfarce"}
-            >
-              {isDisguised ? 
-                <EyeOff className="h-6 w-6 text-red-500" /> : 
-                <Eye className="h-6 w-6 text-red-500" />
-              }
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleDisguise}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                title={isDisguised ? "Modo Normal" : "Modo Disfarce"}
+              >
+                {isDisguised ? 
+                  <EyeOff className="h-6 w-6 text-red-500" /> : 
+                  <Eye className="h-6 w-6 text-red-500" />
+                }
+              </button>
+              {!isDisguised && <DrawerMenu />}
+            </div>
           </div>
         </div>
       </div>
@@ -191,6 +199,7 @@ const Index = () => {
           <div className="flex-1 flex flex-col items-center justify-center">
             {showPasswordPrompt && (
               <DisguisePasswordPrompt
+                password={disguisePassword}
                 onPasswordChange={setDisguisePassword}
                 onSubmit={handleDisguiseSubmit}
                 onCancel={() => setShowPasswordPrompt(false)}

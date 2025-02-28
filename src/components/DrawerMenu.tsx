@@ -6,19 +6,23 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { LogOut, UserCircle, Settings } from "lucide-react";
+import { LogOut, UserCircle, Settings, Palette } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const DrawerMenu = () => {
   const navigate = useNavigate();
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(
+    localStorage.getItem("avatarUrl")
+  );
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setAvatarUrl(imageUrl);
+      localStorage.setItem("avatarUrl", imageUrl);
     }
   };
 
@@ -28,6 +32,12 @@ export const DrawerMenu = () => {
   };
 
   const menuItems = [
+    {
+      title: "Personalizar",
+      path: "/customize",
+      icon: <Palette className="h-5 w-5 text-purple-600" />,
+      description: "Alterar cores e fontes"
+    },
     {
       title: "Ajuda",
       path: "/help",
@@ -40,15 +50,12 @@ export const DrawerMenu = () => {
     <Drawer>
       <DrawerTrigger asChild>
         <button className="w-8 h-8 flex items-center justify-center">
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt="Avatar"
-              className="h-8 w-8 rounded-full object-cover ring-2 ring-gray-200"
-            />
-          ) : (
-            <UserCircle className="h-8 w-8 text-gray-700" />
-          )}
+          <Avatar className="h-8 w-8 border-2 border-gray-200">
+            <AvatarImage src={avatarUrl || ""} alt="Avatar" />
+            <AvatarFallback>
+              <UserCircle className="h-8 w-8 text-gray-700" />
+            </AvatarFallback>
+          </Avatar>
         </button>
       </DrawerTrigger>
       <DrawerContent>
@@ -65,15 +72,12 @@ export const DrawerMenu = () => {
               htmlFor="avatar-input"
               className="cursor-pointer block"
             >
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Avatar"
-                  className="h-20 w-20 rounded-full object-cover ring-4 ring-gray-100"
-                />
-              ) : (
-                <UserCircle className="h-20 w-20 text-gray-700" />
-              )}
+              <Avatar className="h-20 w-20 ring-4 ring-gray-100">
+                <AvatarImage src={avatarUrl || ""} alt="Avatar" />
+                <AvatarFallback>
+                  <UserCircle className="h-20 w-20 text-gray-700" />
+                </AvatarFallback>
+              </Avatar>
             </label>
           </div>
           <DrawerTitle>Menu</DrawerTitle>
