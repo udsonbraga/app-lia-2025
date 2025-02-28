@@ -30,7 +30,6 @@ const Index = () => {
       localStorage.setItem('disguisePassword', disguisePassword);
       setIsDisguised(true);
       setShowPasswordPrompt(false);
-      setDisguisePassword("");
     }
   };
 
@@ -98,6 +97,13 @@ const Index = () => {
   };
 
   useEffect(() => {
+    // Check for saved disguise mode
+    const savedPassword = localStorage.getItem('disguisePassword');
+    if (savedPassword) {
+      setIsDisguised(true);
+    }
+    
+    // Motion detection code
     let lastY = 0;
     let lastX = 0;
     let lastZ = 0;
@@ -185,7 +191,6 @@ const Index = () => {
           <div className="flex-1 flex flex-col items-center justify-center">
             {showPasswordPrompt && (
               <DisguisePasswordPrompt
-                password={disguisePassword}
                 onPasswordChange={setDisguisePassword}
                 onSubmit={handleDisguiseSubmit}
                 onCancel={() => setShowPasswordPrompt(false)}

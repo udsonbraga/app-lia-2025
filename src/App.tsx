@@ -8,6 +8,7 @@ import NotFound from "@/pages/NotFound";
 import Customize from "@/pages/Customize";
 import Diary from "@/pages/Diary";
 import SafeContact from "@/pages/SafeContact";
+import SupportNetwork from "@/pages/SupportNetwork";
 import "./App.css";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -51,6 +52,14 @@ function App() {
             element={
               <PrivateRoute>
                 <SafeContact />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/support-network"
+            element={
+              <PrivateRoute>
+                <SupportNetwork />
               </PrivateRoute>
             }
           />
