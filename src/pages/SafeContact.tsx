@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { DrawerMenu } from "@/components/DrawerMenu";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Phone, ArrowLeft } from "lucide-react";
+import { Phone, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const SafeContact = () => {
@@ -13,6 +13,7 @@ const SafeContact = () => {
   const [contactName, setContactName] = useState("");
   const [ssid, setSsid] = useState("");
   const [token, setToken] = useState("");
+  const [showFeedback, setShowFeedback] = useState(false);
 
   // Carregar dados salvos
   useEffect(() => {
@@ -36,6 +37,13 @@ const SafeContact = () => {
     return value;
   };
 
+  const clearFormData = () => {
+    setContactName("");
+    setContactNumber("");
+    setSsid("");
+    setToken("");
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -49,6 +57,19 @@ const SafeContact = () => {
       title: "Contato salvo",
       description: "O contato de emergência foi salvo com sucesso.",
     });
+
+    // Mostrar tela de feedback
+    setShowFeedback(true);
+    
+    // Limpar formulário após 3 segundos para segurança dos dados
+    setTimeout(() => {
+      clearFormData();
+    }, 3000);
+  };
+
+  const handleDone = () => {
+    setShowFeedback(false);
+    navigate('/');
   };
 
   return (
@@ -65,74 +86,93 @@ const SafeContact = () => {
       </div>
 
       <div className="container mx-auto px-4 pt-20 pb-16">
-        <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 space-y-6">
-          <div className="flex justify-center">
-            <Phone className="h-12 w-12 text-red-500" />
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Nome do Contato
-              </label>
-              <input
-                type="text"
-                id="name"
-                value={contactName}
-                onChange={(e) => setContactName(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
-                required
-              />
+        {showFeedback ? (
+          <div className="max-w-md mx-auto bg-white rounded-lg shadow p-8 space-y-6 text-center animate-fade-in">
+            <div className="flex justify-center mb-4">
+              <CheckCircle2 className="h-16 w-16 text-green-500" />
             </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Número de Telefone
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                value={contactNumber}
-                onChange={(e) => setContactNumber(formatPhoneNumber(e.target.value))}
-                placeholder="(00) 00000-0000"
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="ssid" className="block text-sm font-medium text-gray-700">
-                SSID
-              </label>
-              <input
-                type="text"
-                id="ssid"
-                value={ssid}
-                onChange={(e) => setSsid(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="token" className="block text-sm font-medium text-gray-700">
-                Token
-              </label>
-              <input
-                type="text"
-                id="token"
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
-                required
-              />
-            </div>
-
-            <Button type="submit" className="w-full">
-              Salvar Contato
+            <h2 className="text-2xl font-bold text-gray-800">Contato Cadastrado!</h2>
+            <p className="text-gray-600">
+              Seu contato de emergência foi cadastrado com sucesso. Em caso de emergência, 
+              este contato receberá sua localização e solicitação de ajuda.
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              Por segurança, os dados preenchidos serão limpos automaticamente.
+            </p>
+            <Button onClick={handleDone} className="mt-6 w-full">
+              Concluído
             </Button>
-          </form>
-        </div>
+          </div>
+        ) : (
+          <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 space-y-6">
+            <div className="flex justify-center">
+              <Phone className="h-12 w-12 text-red-500" />
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                  Nome do Contato
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  value={contactName}
+                  onChange={(e) => setContactName(e.target.value)}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                  Número de Telefone
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  value={contactNumber}
+                  onChange={(e) => setContactNumber(formatPhoneNumber(e.target.value))}
+                  placeholder="(00) 00000-0000"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="ssid" className="block text-sm font-medium text-gray-700">
+                  SSID
+                </label>
+                <input
+                  type="text"
+                  id="ssid"
+                  value={ssid}
+                  onChange={(e) => setSsid(e.target.value)}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="token" className="block text-sm font-medium text-gray-700">
+                  Token
+                </label>
+                <input
+                  type="text"
+                  id="token"
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
+                  required
+                />
+              </div>
+
+              <Button type="submit" className="w-full">
+                Salvar Contato
+              </Button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
