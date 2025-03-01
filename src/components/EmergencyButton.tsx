@@ -9,14 +9,83 @@ export function EmergencyButton() {
 
   const handleEmergencyContact = async () => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
     
-    toast({
-      title: "Pedido de ajuda enviado",
-      description: "As autoridades e seus contatos de confiança foram notificados.",
+    try {
+      // Obter contatos de emergência do localStorage
+      const contactName = localStorage.getItem("contactName");
+      const contactNumber = localStorage.getItem("contactNumber");
+      
+      // Verificar se contato está configurado
+      if (!contactName || !contactNumber) {
+        toast({
+          title: "Contato não configurado",
+          description: "Por favor, configure um contato de confiança nas configurações.",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Obter localização atual
+      const position = await getCurrentPosition();
+      const { latitude, longitude } = position.coords;
+      const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
+      
+      // Simular envio de SMS (em produção, isso seria conectado a uma API real)
+      // Aqui usamos uma simulação de API
+      await sendEmergencyMessage(contactNumber, contactName, locationLink);
+      
+      toast({
+        title: "Pedido de ajuda enviado",
+        description: "As autoridades e seus contatos de confiança foram notificados.",
+      });
+    } catch (error) {
+      console.error("Erro ao enviar alerta de emergência:", error);
+      toast({
+        title: "Erro ao enviar alerta",
+        description: "Não foi possível enviar o alerta de emergência. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Função para obter posição atual
+  const getCurrentPosition = (): Promise<GeolocationPosition> => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Geolocalização não suportada pelo navegador"));
+        return;
+      }
+      
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      });
     });
+  };
+  
+  // Função para simular envio de SMS (em um app real, seria conectado a uma API)
+  const sendEmergencyMessage = async (phoneNumber: string, contactName: string, locationLink: string) => {
+    // Simular o tempo de envio
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    setIsLoading(false);
+    // Preparar mensagem
+    const message = `EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`;
+    
+    console.log(`Enviando SMS para ${contactName} (${phoneNumber}): ${message}`);
+    
+    // Em uma aplicação real, aqui seria feita uma chamada API para um serviço de SMS
+    // return fetch('https://api.sms-service.com/send', {
+    //   method: 'POST',
+    //   body: JSON.stringify({ to: phoneNumber, message }),
+    //   headers: { 'Content-Type': 'application/json' }
+    // });
+    
+    // Para demonstração, apenas retornamos sucesso
+    return true;
   };
 
   return (

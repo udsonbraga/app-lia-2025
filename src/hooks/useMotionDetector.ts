@@ -1,13 +1,83 @@
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
+import { useToast } from "@/hooks/use-toast";
 
 export function useMotionDetector() {
+  const { toast } = useToast();
+
+  const handleEmergencyAlert = useCallback(async () => {
+    try {
+      // Obter contatos de emergência do localStorage
+      const contactName = localStorage.getItem("contactName");
+      const contactNumber = localStorage.getItem("contactNumber");
+      
+      // Verificar se contato está configurado
+      if (!contactName || !contactNumber) {
+        console.log("Contato de emergência não configurado");
+        return;
+      }
+      
+      // Obter localização atual
+      const position = await getCurrentPosition();
+      const { latitude, longitude } = position.coords;
+      const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
+      
+      // Simular envio de SMS (em produção, seria conectado a uma API real)
+      await sendEmergencyMessage(contactNumber, contactName, locationLink);
+      
+      toast({
+        title: "Alerta de emergência enviado",
+        description: "Detectamos movimento brusco. Alerta enviado aos seus contatos.",
+      });
+    } catch (error) {
+      console.error("Erro ao enviar alerta automático:", error);
+    }
+  }, [toast]);
+
+  // Função para obter posição atual
+  const getCurrentPosition = (): Promise<GeolocationPosition> => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Geolocalização não suportada pelo navegador"));
+        return;
+      }
+      
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      });
+    });
+  };
+  
+  // Função para simular envio de SMS (em um app real, seria conectado a uma API)
+  const sendEmergencyMessage = async (phoneNumber: string, contactName: string, locationLink: string) => {
+    // Simular o tempo de envio
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Preparar mensagem
+    const message = `ALERTA AUTOMÁTICO: Movimento brusco detectado. Possível situação de emergência! Localização atual: ${locationLink}`;
+    
+    console.log(`Enviando SMS para ${contactName} (${phoneNumber}): ${message}`);
+    
+    // Em uma aplicação real, aqui seria feita uma chamada API para um serviço de SMS
+    // return fetch('https://api.sms-service.com/send', {
+    //   method: 'POST',
+    //   body: JSON.stringify({ to: phoneNumber, message }),
+    //   headers: { 'Content-Type': 'application/json' }
+    // });
+    
+    // Para demonstração, apenas retornamos sucesso
+    return true;
+  };
+
   useEffect(() => {
     // Motion detection code
     let lastY = 0;
     let lastX = 0;
     let lastZ = 0;
     let lastTime = new Date().getTime();
+    let alertCooldown = false;
 
     const handleMotion = (event: DeviceMotionEvent) => {
       const currentTime = new Date().getTime();
@@ -25,8 +95,17 @@ export function useMotionDetector() {
       const deltaY = Math.abs(y - lastY);
       const deltaZ = Math.abs(z - lastZ);
       
-      if (deltaX + deltaY + deltaZ > 30) {
+      if (deltaX + deltaY + deltaZ > 30 && !alertCooldown) {
+        // Evitar múltiplos alertas em sequência
+        alertCooldown = true;
+        
         // Trigger emergency contact
+        handleEmergencyAlert();
+        
+        // Reset cooldown após 30 segundos
+        setTimeout(() => {
+          alertCooldown = false;
+        }, 30000);
       }
       
       lastX = x;
@@ -40,5 +119,5 @@ export function useMotionDetector() {
     return () => {
       window.removeEventListener('devicemotion', handleMotion);
     };
-  }, []);
+  }, [handleEmergencyAlert]);
 }

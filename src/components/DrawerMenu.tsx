@@ -49,7 +49,7 @@ export const DrawerMenu = () => {
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <button className="w-8 h-8 flex items-center justify-center">
+        <button className="w-8 h-8 flex items-center justify-center order-first">
           <Avatar className="h-8 w-8 border-2 border-gray-200">
             <AvatarImage src={avatarUrl || ""} alt="Avatar" />
             <AvatarFallback>

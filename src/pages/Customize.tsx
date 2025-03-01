@@ -1,25 +1,69 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DrawerMenu } from "@/components/DrawerMenu";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 const colorThemes = [
-  { name: "Padrão", primary: "bg-rose-500", secondary: "bg-rose-100" },
-  { name: "Roxo", primary: "bg-purple-500", secondary: "bg-purple-100" },
-  { name: "Azul", primary: "bg-blue-500", secondary: "bg-blue-100" },
-  { name: "Verde", primary: "bg-green-500", secondary: "bg-green-100" },
+  { name: "Padrão", primary: "bg-rose-500", secondary: "bg-rose-100", value: "rose" },
+  { name: "Roxo", primary: "bg-purple-500", secondary: "bg-purple-100", value: "purple" },
+  { name: "Azul", primary: "bg-blue-500", secondary: "bg-blue-100", value: "blue" },
+  { name: "Verde", primary: "bg-green-500", secondary: "bg-green-100", value: "green" },
 ];
 
 const Customize = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [selectedTheme, setSelectedTheme] = useState(0);
-  const [fontSize, setFontSize] = useState("normal");
+  const [selectedTheme, setSelectedTheme] = useState(() => {
+    const savedTheme = localStorage.getItem("themeIndex");
+    return savedTheme ? parseInt(savedTheme) : 0;
+  });
+  const [fontSize, setFontSize] = useState(() => {
+    return localStorage.getItem("fontSize") || "normal";
+  });
+
+  // Aplicar tema e tamanho da fonte ao carregar o componente
+  useEffect(() => {
+    applyTheme(selectedTheme);
+    applyFontSize(fontSize);
+  }, [selectedTheme, fontSize]);
+
+  const applyTheme = (index: number) => {
+    const theme = colorThemes[index];
+    const root = document.documentElement;
+    
+    // Remover todas as classes de tema anteriores
+    colorThemes.forEach(t => {
+      root.classList.remove(`theme-${t.value}`);
+    });
+    
+    // Adicionar nova classe de tema
+    root.classList.add(`theme-${theme.value}`);
+    
+    // Atualizar variáveis CSS
+    root.style.setProperty('--primary-color', `var(--${theme.value}-500)`);
+    root.style.setProperty('--primary-light', `var(--${theme.value}-100)`);
+    
+    localStorage.setItem("themeIndex", index.toString());
+  };
+
+  const applyFontSize = (size: string) => {
+    const root = document.documentElement;
+    
+    // Remover todas as classes de tamanho de fonte
+    root.classList.remove("text-small", "text-normal", "text-large");
+    
+    // Adicionar nova classe de tamanho
+    root.classList.add(`text-${size}`);
+    
+    localStorage.setItem("fontSize", size);
+  };
 
   const handleThemeChange = (index: number) => {
     setSelectedTheme(index);
+    applyTheme(index);
+    
     toast({
       title: "Tema atualizado",
       description: `O tema ${colorThemes[index].name} foi aplicado com sucesso.`,
@@ -28,10 +72,20 @@ const Customize = () => {
 
   const handleFontSizeChange = (size: string) => {
     setFontSize(size);
+    applyFontSize(size);
+    
     toast({
       title: "Tamanho da fonte atualizado",
       description: "A nova configuração foi aplicada com sucesso.",
     });
+  };
+
+  const handleSaveChanges = () => {
+    toast({
+      title: "Configurações salvas",
+      description: "Suas preferências foram salvas com sucesso.",
+    });
+    navigate("/");
   };
 
   return (
@@ -90,7 +144,7 @@ const Customize = () => {
           </div>
 
           <Button
-            onClick={() => navigate("/")}
+            onClick={handleSaveChanges}
             className="w-full"
           >
             Salvar Alterações

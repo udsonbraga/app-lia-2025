@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DrawerMenu } from "@/components/DrawerMenu";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,19 @@ const SafeContact = () => {
   const [ssid, setSsid] = useState("");
   const [token, setToken] = useState("");
 
+  // Carregar dados salvos
+  useEffect(() => {
+    const savedContactName = localStorage.getItem("contactName");
+    const savedContactNumber = localStorage.getItem("contactNumber");
+    const savedSsid = localStorage.getItem("contactSsid");
+    const savedToken = localStorage.getItem("contactToken");
+    
+    if (savedContactName) setContactName(savedContactName);
+    if (savedContactNumber) setContactNumber(savedContactNumber);
+    if (savedSsid) setSsid(savedSsid);
+    if (savedToken) setToken(savedToken);
+  }, []);
+
   const formatPhoneNumber = (value: string) => {
     const cleaned = value.replace(/\D/g, "");
     const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/);
@@ -25,6 +38,13 @@ const SafeContact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Salvar no localStorage
+    localStorage.setItem("contactName", contactName);
+    localStorage.setItem("contactNumber", contactNumber);
+    localStorage.setItem("contactSsid", ssid);
+    localStorage.setItem("contactToken", token);
+    
     toast({
       title: "Contato salvo",
       description: "O contato de emergência foi salvo com sucesso.",
