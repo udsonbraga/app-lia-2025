@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 const colorThemes = [
-  { name: "Padrão", primary: "bg-rose-500", secondary: "bg-rose-100", value: "rose" },
+  { name: "Padrão", primary: "bg-safelady", secondary: "bg-safelady-light", value: "safelady" },
   { name: "Roxo", primary: "bg-purple-500", secondary: "bg-purple-100", value: "purple" },
   { name: "Azul", primary: "bg-blue-500", secondary: "bg-blue-100", value: "blue" },
   { name: "Verde", primary: "bg-green-500", secondary: "bg-green-100", value: "green" },
@@ -44,6 +44,17 @@ const Customize = () => {
     // Atualizar variáveis CSS
     root.style.setProperty('--primary-color', `var(--${theme.value}-500)`);
     root.style.setProperty('--primary-light', `var(--${theme.value}-100)`);
+    
+    // Atualizar a cor de fundo do corpo do documento
+    if (theme.value === 'safelady') {
+      document.body.style.background = 'linear-gradient(to bottom, #FF84C6, #ffffff)';
+    } else if (theme.value === 'purple') {
+      document.body.style.background = 'linear-gradient(to bottom, rgb(139, 92, 246), #ffffff)';
+    } else if (theme.value === 'blue') {
+      document.body.style.background = 'linear-gradient(to bottom, rgb(59, 130, 246), #ffffff)';
+    } else if (theme.value === 'green') {
+      document.body.style.background = 'linear-gradient(to bottom, rgb(34, 197, 94), #ffffff)';
+    }
     
     localStorage.setItem("themeIndex", index.toString());
   };
@@ -89,7 +100,7 @@ const Customize = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-safelady-light to-white">
       <DrawerMenu />
       
       <div className="container mx-auto px-4 py-8">
@@ -105,7 +116,7 @@ const Customize = () => {
                   key={theme.name}
                   onClick={() => handleThemeChange(index)}
                   className={`p-4 rounded-lg border-2 transition-all ${
-                    selectedTheme === index ? "border-blue-500" : "border-transparent"
+                    selectedTheme === index ? "border-safelady" : "border-transparent"
                   }`}
                 >
                   <div className="flex flex-col items-center gap-2">

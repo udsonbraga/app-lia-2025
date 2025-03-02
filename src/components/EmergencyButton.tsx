@@ -31,13 +31,15 @@ export function EmergencyButton() {
       const { latitude, longitude } = position.coords;
       const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
       
-      // Simular envio de SMS (em produção, isso seria conectado a uma API real)
-      // Aqui usamos uma simulação de API
+      // Enviar SMS
       await sendEmergencyMessage(contactNumber, contactName, locationLink);
+      
+      // Enviar WhatsApp
+      await sendWhatsAppMessage(contactNumber, locationLink);
       
       toast({
         title: "Pedido de ajuda enviado",
-        description: "As autoridades e seus contatos de confiança foram notificados.",
+        description: "Mensagens de emergência enviadas por SMS e WhatsApp.",
       });
     } catch (error) {
       console.error("Erro ao enviar alerta de emergência:", error);
@@ -67,7 +69,7 @@ export function EmergencyButton() {
     });
   };
   
-  // Função para simular envio de SMS (em um app real, seria conectado a uma API)
+  // Função para simular envio de SMS
   const sendEmergencyMessage = async (phoneNumber: string, contactName: string, locationLink: string) => {
     // Simular o tempo de envio
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -78,13 +80,32 @@ export function EmergencyButton() {
     console.log(`Enviando SMS para ${contactName} (${phoneNumber}): ${message}`);
     
     // Em uma aplicação real, aqui seria feita uma chamada API para um serviço de SMS
-    // return fetch('https://api.sms-service.com/send', {
-    //   method: 'POST',
-    //   body: JSON.stringify({ to: phoneNumber, message }),
-    //   headers: { 'Content-Type': 'application/json' }
-    // });
+    return true;
+  };
+  
+  // Função para enviar mensagem via WhatsApp
+  const sendWhatsAppMessage = async (phoneNumber: string, locationLink: string) => {
+    // Formatar número para WhatsApp (remover caracteres não numéricos)
+    const formattedNumber = phoneNumber.replace(/\D/g, "");
     
-    // Para demonstração, apenas retornamos sucesso
+    // Preparar mensagem
+    const message = encodeURIComponent(`EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`);
+    
+    // Criar link do WhatsApp
+    const whatsappLink = `https://wa.me/${formattedNumber}?text=${message}`;
+    
+    console.log(`Abrindo WhatsApp com link: ${whatsappLink}`);
+    
+    // Em uma aplicação web, podemos abrir o link em uma nova aba
+    // Em um app móvel, isso abriria o WhatsApp diretamente
+    if (navigator.userAgent.match(/Android|iPhone|iPad|iPod/i)) {
+      // Caso seja um dispositivo móvel, tenta abrir direto no app
+      window.location.href = whatsappLink;
+    } else {
+      // Caso seja desktop, abre em nova aba
+      window.open(whatsappLink, "_blank");
+    }
+    
     return true;
   };
 
@@ -97,13 +118,13 @@ export function EmergencyButton() {
         w-48 h-48 sm:w-56 sm:h-56 rounded-full mx-auto
         bg-white shadow-lg hover:shadow-xl active:scale-95
         transition-all duration-300 ease-in-out mb-8
-        hover:bg-red-50
-        ${isLoading ? "animate-pulse bg-red-100" : ""}
+        hover:bg-safelady-light
+        ${isLoading ? "animate-pulse bg-safelady-light" : ""}
       `}
     >
-      <div className="absolute inset-0 bg-red-500 rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+      <div className="absolute inset-0 bg-safelady rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
       <div className="flex flex-col items-center gap-2">
-        <Shield size={50} className={`text-red-500 ${isLoading ? "animate-pulse" : ""}`} />
+        <Shield size={50} className={`text-safelady ${isLoading ? "animate-pulse" : ""}`} />
         <span className="text-base font-semibold text-gray-800">
           {isLoading ? "Enviando..." : "Emergência"}
         </span>

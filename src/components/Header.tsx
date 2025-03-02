@@ -52,8 +52,8 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
               title={isDisguised ? "Modo Normal" : "Modo Disfarce"}
             >
               {isDisguised ? 
-                <EyeOff className="h-6 w-6 text-[#8B5CF6]" /> : 
-                <Eye className="h-6 w-6 text-[#8B5CF6]" />
+                <EyeOff className="h-6 w-6 text-safelady" /> : 
+                <Eye className="h-6 w-6 text-safelady" />
               }
             </button>
           </div>

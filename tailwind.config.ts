@@ -53,6 +53,11 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        safelady: {
+          DEFAULT: "#FF84C6",
+          light: "#FFAED9",
+          dark: "#FF5AA9",
+        },
       },
       keyframes: {
         "button-press": {

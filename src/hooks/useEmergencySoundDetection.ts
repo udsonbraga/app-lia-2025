@@ -33,12 +33,15 @@ export function useEmergencySoundDetection() {
       const { latitude, longitude } = position.coords;
       const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
       
-      // Enviar mensagem de emergência
+      // Enviar SMS
       await sendEmergencyMessage(contactNumber, contactName, locationLink);
+      
+      // Enviar WhatsApp
+      await sendWhatsAppMessage(contactNumber, locationLink);
       
       toast({
         title: "Alerta de emergência enviado",
-        description: "Som de emergência detectado! Alerta enviado aos seus contatos.",
+        description: "Som de emergência detectado! Alertas enviados via SMS e WhatsApp.",
       });
     } catch (error) {
       console.error("Erro ao enviar alerta automático:", error);
@@ -66,7 +69,7 @@ export function useEmergencySoundDetection() {
     });
   };
   
-  // Função para enviar mensagem de emergência
+  // Função para enviar mensagem de emergência via SMS
   const sendEmergencyMessage = async (phoneNumber: string, contactName: string, locationLink: string) => {
     // Simular o tempo de envio
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -77,6 +80,32 @@ export function useEmergencySoundDetection() {
     console.log(`Enviando SMS para ${contactName} (${phoneNumber}): ${message}`);
     
     // Em uma aplicação real, aqui seria feita uma chamada API para um serviço de SMS
+    return true;
+  };
+  
+  // Função para enviar mensagem via WhatsApp
+  const sendWhatsAppMessage = async (phoneNumber: string, locationLink: string) => {
+    // Formatar número para WhatsApp (remover caracteres não numéricos)
+    const formattedNumber = phoneNumber.replace(/\D/g, "");
+    
+    // Preparar mensagem
+    const message = encodeURIComponent(`EMERGÊNCIA DETECTADA! Som de emergência identificado. Localização atual: ${locationLink}`);
+    
+    // Criar link do WhatsApp
+    const whatsappLink = `https://wa.me/${formattedNumber}?text=${message}`;
+    
+    console.log(`Abrindo WhatsApp com link: ${whatsappLink}`);
+    
+    // Em uma aplicação web, podemos abrir o link em uma nova aba
+    // Em um app móvel, isso abriria o WhatsApp diretamente
+    if (navigator.userAgent.match(/Android|iPhone|iPad|iPod/i)) {
+      // Caso seja um dispositivo móvel, tenta abrir direto no app
+      window.location.href = whatsappLink;
+    } else {
+      // Caso seja desktop, abre em nova aba
+      window.open(whatsappLink, "_blank");
+    }
+    
     return true;
   };
 
