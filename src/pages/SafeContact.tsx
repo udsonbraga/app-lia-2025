@@ -1,10 +1,16 @@
 
 import { useState, useEffect } from "react";
-import { DrawerMenu } from "@/components/DrawerMenu";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Phone, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Phone, ArrowLeft, CheckCircle2, List } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
+interface SafeContact {
+  name: string;
+  number: string;
+  ssid: string;
+  token: string;
+}
 
 const SafeContact = () => {
   const { toast } = useToast();
@@ -14,6 +20,8 @@ const SafeContact = () => {
   const [ssid, setSsid] = useState("");
   const [token, setToken] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showContactsList, setShowContactsList] = useState(false);
+  const [contacts, setContacts] = useState<SafeContact[]>([]);
 
   // Carregar dados salvos
   useEffect(() => {
@@ -26,6 +34,12 @@ const SafeContact = () => {
     if (savedContactNumber) setContactNumber(savedContactNumber);
     if (savedSsid) setSsid(savedSsid);
     if (savedToken) setToken(savedToken);
+    
+    // Carregar lista de contatos
+    const savedContacts = localStorage.getItem("safeContacts");
+    if (savedContacts) {
+      setContacts(JSON.parse(savedContacts));
+    }
   }, []);
 
   const formatPhoneNumber = (value: string) => {
@@ -47,11 +61,24 @@ const SafeContact = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Criar novo contato
+    const newContact: SafeContact = {
+      name: contactName,
+      number: contactNumber,
+      ssid,
+      token
+    };
+    
+    // Adicionar à lista de contatos
+    const updatedContacts = [...contacts, newContact];
+    setContacts(updatedContacts);
+    
     // Salvar no localStorage
     localStorage.setItem("contactName", contactName);
     localStorage.setItem("contactNumber", contactNumber);
     localStorage.setItem("contactSsid", ssid);
     localStorage.setItem("contactToken", token);
+    localStorage.setItem("safeContacts", JSON.stringify(updatedContacts));
     
     toast({
       title: "Contato salvo",
@@ -61,15 +88,17 @@ const SafeContact = () => {
     // Mostrar tela de feedback
     setShowFeedback(true);
     
-    // Limpar formulário após 3 segundos para segurança dos dados
-    setTimeout(() => {
-      clearFormData();
-    }, 3000);
+    // Limpar formulário imediatamente
+    clearFormData();
   };
 
   const handleDone = () => {
     setShowFeedback(false);
     navigate('/');
+  };
+
+  const toggleContactsList = () => {
+    setShowContactsList(!showContactsList);
   };
 
   return (
@@ -96,17 +125,57 @@ const SafeContact = () => {
               Seu contato de emergência foi cadastrado com sucesso. Em caso de emergência, 
               este contato receberá sua localização e solicitação de ajuda.
             </p>
-            <p className="text-sm text-gray-500 mt-2">
-              Por segurança, os dados preenchidos serão limpos automaticamente.
-            </p>
             <Button onClick={handleDone} className="mt-6 w-full">
               Concluído
             </Button>
           </div>
+        ) : showContactsList ? (
+          <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold text-gray-800">Lista de Contatos Seguros</h2>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={toggleContactsList}
+                className="text-safelady border-safelady hover:bg-safelady/10"
+              >
+                Voltar
+              </Button>
+            </div>
+            
+            {contacts.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">Nenhum contato cadastrado</p>
+            ) : (
+              <div className="space-y-4">
+                {contacts.map((contact, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-800">{contact.name}</h3>
+                    <p className="text-gray-600">{contact.number}</p>
+                    <div className="mt-2 text-xs text-gray-500">
+                      <p>SSID: {contact.ssid}</p>
+                      <p>Token: {contact.token}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         ) : (
           <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 space-y-6">
             <div className="flex justify-center">
-              <Phone className="h-12 w-12 text-red-500" />
+              <Phone className="h-12 w-12 text-safelady" />
+            </div>
+            
+            <div className="flex justify-end">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={toggleContactsList}
+                className="text-safelady border-safelady hover:bg-safelady/10 mb-2"
+              >
+                <List className="mr-1 h-4 w-4" />
+                Lista de Contatos
+              </Button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -119,7 +188,7 @@ const SafeContact = () => {
                   id="name"
                   value={contactName}
                   onChange={(e) => setContactName(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-safelady focus:ring-safelady"
                   required
                 />
               </div>
@@ -134,7 +203,7 @@ const SafeContact = () => {
                   value={contactNumber}
                   onChange={(e) => setContactNumber(formatPhoneNumber(e.target.value))}
                   placeholder="(00) 00000-0000"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-safelady focus:ring-safelady"
                   required
                 />
               </div>
@@ -148,7 +217,7 @@ const SafeContact = () => {
                   id="ssid"
                   value={ssid}
                   onChange={(e) => setSsid(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-safelady focus:ring-safelady"
                   required
                 />
               </div>
@@ -162,7 +231,7 @@ const SafeContact = () => {
                   id="token"
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-red-500 focus:ring-red-500"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-safelady focus:ring-safelady"
                   required
                 />
               </div>

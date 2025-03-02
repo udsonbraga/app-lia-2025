@@ -35,7 +35,7 @@ const Index = () => {
   const navigate = useNavigate();
 
   return (
-    <div className={`min-h-screen ${isDisguised ? 'bg-white' : 'bg-gradient-to-b from-safelady to-white'}`}>
+    <div className={`min-h-screen ${isDisguised ? 'bg-white' : 'bg-gradient-to-b from-rose-100 to-white'}`}>
       <Header 
         isDisguised={isDisguised} 
         toggleDisguise={toggleDisguise} 
@@ -69,11 +69,6 @@ const Index = () => {
           />
         )}
       </div>
-
-      <BottomNavigation 
-        isDisguised={isDisguised}
-        onDisguiseToggle={toggleDisguise}
-      />
       
       {!isDisguised && (
         <div className="fixed bottom-0 left-0 right-0 bg-black text-white py-1 text-xs text-center">

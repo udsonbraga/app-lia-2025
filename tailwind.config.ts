@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -57,6 +56,10 @@ export default {
           DEFAULT: "#FF84C6",
           light: "#FFAED9",
           dark: "#FF5AA9",
+        },
+        rose: {
+          50: "#FFF1F5",
+          100: "#FFDEE2",
         },
       },
       keyframes: {
