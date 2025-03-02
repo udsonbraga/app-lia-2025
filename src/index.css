@@ -9,8 +9,6 @@
   /* Color variables */
   --rose-500: rgb(244, 63, 94);
   --rose-100: rgb(255, 228, 230);
-  --purple-500: rgb(139, 92, 246);
-  --purple-100: rgb(243, 232, 255);
   --blue-500: rgb(59, 130, 246);
   --blue-100: rgb(219, 234, 254);
   --green-500: rgb(34, 197, 94);
@@ -36,10 +34,6 @@ html.text-large {
 /* Theme classes */
 html.theme-safelady .text-primary {
   color: var(--safelady);
-}
-
-html.theme-purple .text-primary {
-  color: var(--purple-500);
 }
 
 html.theme-blue .text-primary {

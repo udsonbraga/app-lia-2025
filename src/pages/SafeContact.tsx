@@ -2,14 +2,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Phone, ArrowLeft, CheckCircle2, List } from "lucide-react";
+import { ArrowLeft, CheckCircle2, List, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Input } from "@/components/ui/input";
 
 interface SafeContact {
   name: string;
   number: string;
-  ssid: string;
-  token: string;
 }
 
 const SafeContact = () => {
@@ -17,23 +16,18 @@ const SafeContact = () => {
   const navigate = useNavigate();
   const [contactNumber, setContactNumber] = useState("");
   const [contactName, setContactName] = useState("");
-  const [ssid, setSsid] = useState("");
-  const [token, setToken] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
   const [showContactsList, setShowContactsList] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [contacts, setContacts] = useState<SafeContact[]>([]);
 
   // Carregar dados salvos
   useEffect(() => {
     const savedContactName = localStorage.getItem("contactName");
     const savedContactNumber = localStorage.getItem("contactNumber");
-    const savedSsid = localStorage.getItem("contactSsid");
-    const savedToken = localStorage.getItem("contactToken");
     
     if (savedContactName) setContactName(savedContactName);
     if (savedContactNumber) setContactNumber(savedContactNumber);
-    if (savedSsid) setSsid(savedSsid);
-    if (savedToken) setToken(savedToken);
     
     // Carregar lista de contatos
     const savedContacts = localStorage.getItem("safeContacts");
@@ -43,7 +37,10 @@ const SafeContact = () => {
   }, []);
 
   const formatPhoneNumber = (value: string) => {
+    // Remove everything that's not a digit
     const cleaned = value.replace(/\D/g, "");
+    
+    // Format with Brazilian pattern
     const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/);
     if (match) {
       return `(${match[1]}) ${match[2]}-${match[3]}`;
@@ -54,8 +51,6 @@ const SafeContact = () => {
   const clearFormData = () => {
     setContactName("");
     setContactNumber("");
-    setSsid("");
-    setToken("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -64,9 +59,7 @@ const SafeContact = () => {
     // Criar novo contato
     const newContact: SafeContact = {
       name: contactName,
-      number: contactNumber,
-      ssid,
-      token
+      number: contactNumber
     };
     
     // Adicionar à lista de contatos
@@ -76,8 +69,6 @@ const SafeContact = () => {
     // Salvar no localStorage
     localStorage.setItem("contactName", contactName);
     localStorage.setItem("contactNumber", contactNumber);
-    localStorage.setItem("contactSsid", ssid);
-    localStorage.setItem("contactToken", token);
     localStorage.setItem("safeContacts", JSON.stringify(updatedContacts));
     
     toast({
@@ -87,6 +78,7 @@ const SafeContact = () => {
 
     // Mostrar tela de feedback
     setShowFeedback(true);
+    setShowForm(false);
     
     // Limpar formulário imediatamente
     clearFormData();
@@ -99,6 +91,12 @@ const SafeContact = () => {
 
   const toggleContactsList = () => {
     setShowContactsList(!showContactsList);
+    setShowForm(false);
+  };
+
+  const toggleContactForm = () => {
+    setShowForm(!showForm);
+    setShowContactsList(false);
   };
 
   return (
@@ -151,30 +149,22 @@ const SafeContact = () => {
                   <div key={index} className="border border-gray-200 rounded-lg p-4">
                     <h3 className="font-medium text-gray-800">{contact.name}</h3>
                     <p className="text-gray-600">{contact.number}</p>
-                    <div className="mt-2 text-xs text-gray-500">
-                      <p>SSID: {contact.ssid}</p>
-                      <p>Token: {contact.token}</p>
-                    </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
-        ) : (
+        ) : showForm ? (
           <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 space-y-6">
-            <div className="flex justify-center">
-              <Phone className="h-12 w-12 text-safelady" />
-            </div>
-            
-            <div className="flex justify-end">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-800">Cadastrar Contato</h2>
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={toggleContactsList}
-                className="text-safelady border-safelady hover:bg-safelady/10 mb-2"
+                onClick={toggleContactForm}
+                className="text-safelady border-safelady hover:bg-safelady/10"
               >
-                <List className="mr-1 h-4 w-4" />
-                Lista de Contatos
+                Voltar
               </Button>
             </div>
 
@@ -183,12 +173,12 @@ const SafeContact = () => {
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                   Nome do Contato
                 </label>
-                <input
+                <Input
                   type="text"
                   id="name"
                   value={contactName}
                   onChange={(e) => setContactName(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-safelady focus:ring-safelady"
+                  className="mt-1 w-full"
                   required
                 />
               </div>
@@ -197,49 +187,53 @@ const SafeContact = () => {
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
                   Número de Telefone
                 </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  value={contactNumber}
-                  onChange={(e) => setContactNumber(formatPhoneNumber(e.target.value))}
-                  placeholder="(00) 00000-0000"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-safelady focus:ring-safelady"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="ssid" className="block text-sm font-medium text-gray-700">
-                  SSID
-                </label>
-                <input
-                  type="text"
-                  id="ssid"
-                  value={ssid}
-                  onChange={(e) => setSsid(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-safelady focus:ring-safelady"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="token" className="block text-sm font-medium text-gray-700">
-                  Token
-                </label>
-                <input
-                  type="text"
-                  id="token"
-                  value={token}
-                  onChange={(e) => setToken(e.target.value)}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-safelady focus:ring-safelady"
-                  required
-                />
+                <div className="flex items-center mt-1">
+                  <span className="bg-gray-100 border border-gray-300 px-3 py-2 rounded-l-md text-gray-700">
+                    +55
+                  </span>
+                  <Input
+                    type="tel"
+                    id="phone"
+                    value={contactNumber}
+                    onChange={(e) => setContactNumber(formatPhoneNumber(e.target.value))}
+                    placeholder="(00) 00000-0000"
+                    className="rounded-l-none"
+                    required
+                  />
+                </div>
               </div>
 
               <Button type="submit" className="w-full">
                 Salvar Contato
               </Button>
             </form>
+          </div>
+        ) : (
+          <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 space-y-6">
+            <div className="flex flex-col gap-4">
+              <Button 
+                onClick={toggleContactForm}
+                className="w-full flex items-center justify-center gap-2"
+              >
+                <UserPlus className="h-5 w-5" />
+                Cadastrar Contato Seguro
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                onClick={toggleContactsList}
+                className="w-full flex items-center justify-center gap-2 text-safelady border-safelady hover:bg-safelady/10"
+              >
+                <List className="h-5 w-5" />
+                Lista de Contatos
+              </Button>
+            </div>
+            
+            <div className="text-center text-gray-600 mt-6">
+              <p className="text-sm">
+                Cadastre contatos de confiança para receber sua localização e pedido de ajuda em caso de emergência.
+              </p>
+            </div>
           </div>
         )}
       </div>
