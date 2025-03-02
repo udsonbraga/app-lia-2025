@@ -83,7 +83,7 @@ export function useEmergencySoundDetection() {
   useEffect(() => {
     if (!isListening) return;
 
-    let recognitionInstance: SpeechRecognition | null = null;
+    let recognitionInstance: any = null;
     let isRecognitionActive = false;
 
     const startSpeechRecognition = () => {
@@ -108,7 +108,7 @@ export function useEmergencySoundDetection() {
         recognitionInstance.interimResults = true;
         isRecognitionActive = true;
 
-        recognitionInstance.onresult = (event) => {
+        recognitionInstance.onresult = (event: any) => {
           for (let i = event.resultIndex; i < event.results.length; i++) {
             const transcript = event.results[i][0].transcript.toLowerCase();
             console.log("Texto detectado:", transcript);
@@ -126,7 +126,7 @@ export function useEmergencySoundDetection() {
           }
         };
 
-        recognitionInstance.onerror = (event) => {
+        recognitionInstance.onerror = (event: any) => {
           console.error("Erro de reconhecimento de fala:", event.error);
           if (isRecognitionActive) {
             // Tentar reiniciar em caso de erro
@@ -185,7 +185,7 @@ export function useEmergencySoundDetection() {
 // Adicionar TypeScript declarations para o SpeechRecognition
 declare global {
   interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
   }
 }

@@ -4,13 +4,13 @@
 @tailwind utilities;
 
 :root {
-  --primary-color: var(--rose-500);
-  --primary-light: var(--rose-100);
+  --primary-color: var(--purple-500);
+  --primary-light: var(--purple-100);
   
   /* Color variables */
   --rose-500: rgb(244, 63, 94);
   --rose-100: rgb(255, 228, 230);
-  --purple-500: rgb(168, 85, 247);
+  --purple-500: rgb(139, 92, 246);  /* Darker pink (more purple shade) */
   --purple-100: rgb(243, 232, 255);
   --blue-500: rgb(59, 130, 246);
   --blue-100: rgb(219, 234, 254);

@@ -1,10 +1,11 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield } from "lucide-react";
+import { Shield, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { validateForm, formatPhone } from "@/features/auth/utils/formValidation";
 
 interface FormData {
@@ -19,6 +20,7 @@ export function RegisterForm() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -31,6 +33,15 @@ export function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!acceptedTerms) {
+      toast({
+        title: "Termos não aceitos",
+        description: "Você precisa aceitar os termos de uso para continuar.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     const newErrors = validateForm(formData);
     setErrors(newErrors);
@@ -65,7 +76,7 @@ export function RegisterForm() {
   return (
     <div className="max-w-md mx-auto">
       <div className="text-center mb-8">
-        <Shield className="h-12 w-12 text-red-500 mx-auto mb-4" />
+        <Shield className="h-12 w-12 text-[#8B5CF6] mx-auto mb-4" />
         <h1 className="text-3xl font-bold text-gray-900">Criar Conta</h1>
         <p className="text-gray-600 mt-2">
           Proteja-se e junte-se à nossa rede de apoio
@@ -81,7 +92,7 @@ export function RegisterForm() {
             type="text"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent"
             placeholder="Digite seu nome completo"
           />
           {errors.name && (
@@ -97,7 +108,7 @@ export function RegisterForm() {
             type="email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent"
             placeholder="seu@email.com"
           />
           {errors.email && (
@@ -113,7 +124,7 @@ export function RegisterForm() {
             type="tel"
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent"
             placeholder="(00) 00000-0000"
           />
           {errors.phone && (
@@ -129,7 +140,7 @@ export function RegisterForm() {
             type="password"
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent"
             placeholder="••••••••"
           />
           {errors.password && (
@@ -145,7 +156,7 @@ export function RegisterForm() {
             type="tel"
             value={formData.emergencyContact}
             onChange={(e) => setFormData({ ...formData, emergencyContact: formatPhone(e.target.value) })}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent"
             placeholder="(00) 00000-0000"
           />
           {errors.emergencyContact && (
@@ -153,14 +164,42 @@ export function RegisterForm() {
           )}
         </div>
 
+        <div className="flex items-start space-x-2">
+          <Checkbox 
+            id="terms" 
+            checked={acceptedTerms}
+            onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
+            className="mt-1"
+          />
+          <div className="grid gap-1.5 leading-none">
+            <label
+              htmlFor="terms"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Eu li e aceito a Política de Privacidade
+            </label>
+            <a 
+              href="#" 
+              onClick={(e) => {
+                e.preventDefault();
+                window.open('/privacy-policy', '_blank');
+              }}
+              className="text-xs text-[#8B5CF6] underline flex items-center gap-1"
+            >
+              Leia nossa Política de Privacidade
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
+        </div>
+
         <Button
           type="submit"
-          disabled={isLoading}
-          className="w-full py-3 px-4 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isLoading || !acceptedTerms}
+          className="w-full py-3 px-4 rounded-lg bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? "Cadastrando..." : "Criar Conta"}
         </Button>
       </form>
     </div>
   );
-}
+};

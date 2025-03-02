@@ -6,7 +6,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { LogOut, UserCircle, Settings, Palette } from "lucide-react";
+import { LogOut, UserCircle, Settings, Palette, Upload, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -24,6 +24,11 @@ export const DrawerMenu = () => {
       setAvatarUrl(imageUrl);
       localStorage.setItem("avatarUrl", imageUrl);
     }
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarUrl(null);
+    localStorage.removeItem("avatarUrl");
   };
 
   const handleLogout = () => {
@@ -49,7 +54,7 @@ export const DrawerMenu = () => {
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <button className="w-8 h-8 flex items-center justify-center">
+        <button className="flex items-center justify-center">
           <Avatar className="h-8 w-8 border-2 border-gray-200">
             <AvatarImage src={avatarUrl || ""} alt="Avatar" />
             <AvatarFallback>
@@ -60,26 +65,39 @@ export const DrawerMenu = () => {
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="flex flex-col items-center">
-          <div className="relative mb-4">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              className="hidden"
-              id="avatar-input"
-            />
-            <label
-              htmlFor="avatar-input"
-              className="cursor-pointer block"
-            >
-              <Avatar className="h-20 w-20 ring-4 ring-gray-100">
-                <AvatarImage src={avatarUrl || ""} alt="Avatar" />
-                <AvatarFallback>
-                  <UserCircle className="h-20 w-20 text-gray-700" />
-                </AvatarFallback>
-              </Avatar>
-            </label>
+          <div className="relative mb-2">
+            <Avatar className="h-20 w-20 ring-4 ring-gray-100">
+              <AvatarImage src={avatarUrl || ""} alt="Avatar" />
+              <AvatarFallback>
+                <UserCircle className="h-20 w-20 text-gray-700" />
+              </AvatarFallback>
+            </Avatar>
           </div>
+          
+          <div className="flex gap-2 mb-4">
+            <label htmlFor="avatar-input" className="cursor-pointer flex items-center gap-1 text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded-md text-gray-700">
+              <Upload className="h-3 w-3" />
+              Alterar foto
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+                id="avatar-input"
+              />
+            </label>
+            
+            {avatarUrl && (
+              <button 
+                onClick={handleRemoveAvatar}
+                className="flex items-center gap-1 text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded-md text-gray-700"
+              >
+                <Trash2 className="h-3 w-3" />
+                Remover
+              </button>
+            )}
+          </div>
+          
           <DrawerTitle>Menu</DrawerTitle>
         </DrawerHeader>
         <div className="px-4 pb-6">

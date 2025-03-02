@@ -42,6 +42,13 @@ const Index = () => {
       />
       
       <div className="container mx-auto px-4 pt-20 pb-20">
+        {!isDisguised && (
+          <div className="mb-8 text-center animate-fade-in">
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">Bem-vinda ao Safe Lady</h1>
+            <p className="text-gray-600">Seu aplicativo pessoal de segurança e proteção</p>
+          </div>
+        )}
+        
         {isDisguised ? (
           <DisguisedMode 
             notes={notes}
@@ -67,6 +74,12 @@ const Index = () => {
         isDisguised={isDisguised}
         onDisguiseToggle={toggleDisguise}
       />
+      
+      {!isDisguised && (
+        <div className="fixed bottom-0 left-0 right-0 bg-black text-white py-1 text-xs text-center">
+          Desenvolvido por Udson Braga e Marco Duarte, todos os direitos reservados 2025
+        </div>
+      )}
     </div>
   );
 };
