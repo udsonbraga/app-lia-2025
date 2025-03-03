@@ -7,6 +7,8 @@ import { NormalMode } from "@/components/NormalMode";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 import { useFinancialNotes } from "@/hooks/useFinancialNotes";
 import { useMotionDetector } from "@/hooks/useMotionDetector";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 const Index = () => {
   const {
@@ -16,7 +18,8 @@ const Index = () => {
     setDisguisePassword,
     setShowPasswordPrompt,
     handleDisguiseSubmit,
-    toggleDisguise
+    toggleDisguise,
+    resetAllPasswords
   } = useDisguiseMode();
 
   const {
@@ -46,6 +49,18 @@ const Index = () => {
           <div className="mb-8 text-center animate-fade-in">
             <h1 className="text-2xl font-bold text-gray-800 mb-2">Bem-vinda ao Safe Lady</h1>
             <p className="text-gray-600">Seu aplicativo pessoal de segurança e proteção</p>
+            
+            <div className="mt-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2 mx-auto border-safelady text-safelady hover:bg-safelady/10"
+                onClick={resetAllPasswords}
+              >
+                <RefreshCw size={16} />
+                Resetar todas as senhas
+              </Button>
+            </div>
           </div>
         )}
         

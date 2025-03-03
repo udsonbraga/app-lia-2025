@@ -43,6 +43,26 @@ export function useDisguiseMode() {
     }
   };
 
+  // Nova função para resetar todas as senhas
+  const resetAllPasswords = () => {
+    // Limpar senha do modo disfarce
+    localStorage.removeItem('disguisePassword');
+    setIsDisguised(false);
+    setDisguisePassword("");
+    
+    // Limpar contatos de emergência (se existirem)
+    localStorage.removeItem('contactName');
+    localStorage.removeItem('contactNumber');
+    
+    // Limpar qualquer outra senha armazenada
+    localStorage.removeItem('contacts'); // Contatos seguros
+    
+    toast({
+      title: "Senhas resetadas",
+      description: "Todas as senhas e dados de contato foram removidos com sucesso.",
+    });
+  };
+
   return {
     isDisguised,
     disguisePassword,
@@ -50,6 +70,7 @@ export function useDisguiseMode() {
     setDisguisePassword,
     setShowPasswordPrompt,
     handleDisguiseSubmit,
-    toggleDisguise
+    toggleDisguise,
+    resetAllPasswords
   };
 }
