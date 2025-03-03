@@ -56,7 +56,7 @@ export function useMotionDetector() {
   // Função para enviar mensagem via Telegram Bot
   const sendTelegramMessage = async (telegramId: string, locationLink: string) => {
     try {
-      const botToken = "SEU_TOKEN_DO_BOT"; // Substituir pelo token real do seu bot
+      const botToken = "7583759027:AAEE7KUF9ye6esERLzac-ATth7VOjfvRx8s"; // Token real do bot SafeLady_bot
       const message = `ALERTA AUTOMÁTICO: Movimento brusco detectado. Possível situação de emergência! Localização atual: ${locationLink}`;
       
       // URL da API do Telegram para enviar mensagem
