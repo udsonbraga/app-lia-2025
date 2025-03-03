@@ -8,12 +8,12 @@ export function useMotionDetector() {
   const handleEmergencyAlert = useCallback(async () => {
     try {
       // Obter contatos de emergência do localStorage
-      const contactName = localStorage.getItem("contactName");
-      const contactNumber = localStorage.getItem("contactNumber");
+      const safeContacts = localStorage.getItem("safeContacts");
+      const contacts = safeContacts ? JSON.parse(safeContacts) : [];
       
-      // Verificar se contato está configurado
-      if (!contactName || !contactNumber) {
-        console.log("Contato de emergência não configurado");
+      // Verificar se há contatos configurados
+      if (contacts.length === 0) {
+        console.log("Contatos de emergência não configurados");
         return;
       }
       
@@ -22,8 +22,13 @@ export function useMotionDetector() {
       const { latitude, longitude } = position.coords;
       const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
       
-      // Simular envio de SMS (em produção, seria conectado a uma API real)
-      await sendEmergencyMessage(contactNumber, contactName, locationLink);
+      // Enviar mensagens para todos os contatos
+      for (const contact of contacts) {
+        // Enviar mensagens por diferentes canais
+        await sendEmergencyMessage(contact.number, contact.name, locationLink);
+        await sendWhatsAppMessage(contact.number, locationLink);
+        await sendTelegramMessage(contact.number, locationLink);
+      }
       
       toast({
         title: "Alerta de emergência enviado",
@@ -50,7 +55,7 @@ export function useMotionDetector() {
     });
   };
   
-  // Função para simular envio de SMS (em um app real, seria conectado a uma API)
+  // Função para simular envio de SMS
   const sendEmergencyMessage = async (phoneNumber: string, contactName: string, locationLink: string) => {
     // Simular o tempo de envio
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -61,13 +66,37 @@ export function useMotionDetector() {
     console.log(`Enviando SMS para ${contactName} (${phoneNumber}): ${message}`);
     
     // Em uma aplicação real, aqui seria feita uma chamada API para um serviço de SMS
-    // return fetch('https://api.sms-service.com/send', {
-    //   method: 'POST',
-    //   body: JSON.stringify({ to: phoneNumber, message }),
-    //   headers: { 'Content-Type': 'application/json' }
-    // });
+    return true;
+  };
+  
+  // Função para enviar mensagem via WhatsApp
+  const sendWhatsAppMessage = async (phoneNumber: string, locationLink: string) => {
+    // Formatar número para WhatsApp (remover caracteres não numéricos)
+    const formattedNumber = phoneNumber.replace(/\D/g, "");
     
-    // Para demonstração, apenas retornamos sucesso
+    // Preparar mensagem
+    const message = encodeURIComponent(`ALERTA AUTOMÁTICO: Movimento brusco detectado. Possível situação de emergência! Localização atual: ${locationLink}`);
+    
+    // Criar link do WhatsApp
+    const whatsappLink = `https://wa.me/55${formattedNumber}?text=${message}`;
+    
+    console.log(`Preparando mensagem WhatsApp: ${whatsappLink}`);
+    
+    // Em uma implementação real, isso seria feito via API do WhatsApp Business
+    return true;
+  };
+  
+  // Função para enviar mensagem via Telegram
+  const sendTelegramMessage = async (phoneNumber: string, locationLink: string) => {
+    // Formatar número para Telegram
+    const formattedNumber = phoneNumber.replace(/\D/g, "");
+    
+    // Preparar mensagem
+    const message = `ALERTA AUTOMÁTICO: Movimento brusco detectado. Possível situação de emergência! Localização atual: ${locationLink}`;
+    
+    console.log(`Preparando mensagem Telegram para +55${formattedNumber}: ${message}`);
+    
+    // Em uma implementação real, isso seria feito via API do Telegram Bot
     return true;
   };
 

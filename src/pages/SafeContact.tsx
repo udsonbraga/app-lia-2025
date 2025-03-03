@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, CheckCircle2, List, UserPlus, Trash2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, List, UserPlus, Trash2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 
@@ -10,6 +10,8 @@ interface SafeContact {
   name: string;
   number: string;
 }
+
+const MAX_CONTACTS = 3;
 
 const SafeContact = () => {
   const { toast } = useToast();
@@ -58,6 +60,16 @@ const SafeContact = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validar número de contatos
+    if (contacts.length >= MAX_CONTACTS) {
+      toast({
+        title: "Limite de contatos atingido",
+        description: `Você já cadastrou o máximo de ${MAX_CONTACTS} contatos seguros.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Criar novo contato
     const newContact: SafeContact = {
       name: contactName,
@@ -84,6 +96,10 @@ const SafeContact = () => {
     
     // Limpar formulário imediatamente
     clearFormData();
+  };
+
+  const closeFeedback = () => {
+    setShowFeedback(false);
   };
 
   const handleDone = () => {
@@ -143,7 +159,14 @@ const SafeContact = () => {
 
       <div className="container mx-auto px-4 pt-20 pb-16">
         {showFeedback ? (
-          <div className="max-w-md mx-auto bg-white rounded-lg shadow p-8 space-y-6 text-center animate-fade-in">
+          <div className="max-w-md mx-auto bg-white rounded-lg shadow p-8 space-y-6 text-center animate-fade-in relative">
+            <button 
+              onClick={closeFeedback}
+              className="absolute top-2 right-2 p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            
             <div className="flex justify-center mb-4">
               <CheckCircle2 className="h-16 w-16 text-green-500" />
             </div>
@@ -152,9 +175,18 @@ const SafeContact = () => {
               Seu contato de emergência foi cadastrado com sucesso. Em caso de emergência, 
               este contato receberá sua localização e solicitação de ajuda via WhatsApp, Telegram e SMS.
             </p>
-            <Button onClick={handleDone} className="mt-6 w-full">
-              Concluído
-            </Button>
+            <div className="flex flex-col space-y-3 mt-4">
+              <Button onClick={handleDone}>
+                Concluído
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={closeFeedback}
+                className="border-safelady text-safelady hover:bg-safelady/10"
+              >
+                Continuar cadastrando
+              </Button>
+            </div>
           </div>
         ) : showDeleteConfirmation ? (
           <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 space-y-4">
@@ -205,6 +237,12 @@ const SafeContact = () => {
                 ))}
               </div>
             )}
+            
+            <div className="flex justify-center">
+              <p className="text-sm text-gray-500">
+                {contacts.length}/{MAX_CONTACTS} contatos cadastrados
+              </p>
+            </div>
           </div>
         ) : showForm ? (
           <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 space-y-6">
@@ -283,7 +321,7 @@ const SafeContact = () => {
             
             <div className="text-center text-gray-600 mt-6">
               <p className="text-sm">
-                Cadastre contatos de confiança para receber sua localização e pedido de ajuda em caso de emergência via WhatsApp, Telegram e SMS.
+                Cadastre até 3 contatos de confiança para receber sua localização e pedido de ajuda em caso de emergência via WhatsApp, Telegram e SMS.
               </p>
             </div>
           </div>

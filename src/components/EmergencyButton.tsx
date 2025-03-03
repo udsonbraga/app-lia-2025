@@ -12,14 +12,14 @@ export function EmergencyButton() {
     
     try {
       // Obter contatos de emergência do localStorage
-      const contactName = localStorage.getItem("contactName");
-      const contactNumber = localStorage.getItem("contactNumber");
+      const safeContacts = localStorage.getItem("safeContacts");
+      const contacts = safeContacts ? JSON.parse(safeContacts) : [];
       
-      // Verificar se contato está configurado
-      if (!contactName || !contactNumber) {
+      // Verificar se há contatos configurados
+      if (contacts.length === 0) {
         toast({
-          title: "Contato não configurado",
-          description: "Por favor, configure um contato de confiança nas configurações.",
+          title: "Contatos não configurados",
+          description: "Por favor, configure pelo menos um contato de confiança nas configurações.",
           variant: "destructive"
         });
         setIsLoading(false);
@@ -31,18 +31,23 @@ export function EmergencyButton() {
       const { latitude, longitude } = position.coords;
       const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
       
-      // Enviar mensagens de emergência por diferentes canais
-      const promises = [
-        sendSMSMessage(contactNumber, contactName, locationLink),
-        sendWhatsAppMessage(contactNumber, locationLink),
-        sendTelegramMessage(contactNumber, locationLink)
-      ];
+      // Enviar mensagens para todos os contatos cadastrados
+      const promises = [];
       
-      await Promise.all(promises);
+      for (const contact of contacts) {
+        // Enviar por diferentes canais para cada contato
+        promises.push(
+          sendSMSMessage(contact.number, contact.name, locationLink),
+          sendWhatsAppMessage(contact.number, locationLink),
+          sendTelegramMessage(contact.number, locationLink)
+        );
+      }
+      
+      await Promise.allSettled(promises);
       
       toast({
         title: "Pedido de ajuda enviado",
-        description: "Mensagens de emergência enviadas por SMS, WhatsApp e Telegram.",
+        description: "Mensagens de emergência enviadas para todos os seus contatos seguros.",
       });
     } catch (error) {
       console.error("Erro ao enviar alerta de emergência:", error);
@@ -82,7 +87,7 @@ export function EmergencyButton() {
     
     console.log(`Enviando SMS para ${contactName} (${phoneNumber}): ${message}`);
     
-    // Em uma aplicação real, aqui seria feita uma chamada API para um serviço de SMS
+    // Em uma aplicação real, aqui seria feita uma chamada API para um serviço de SMS como Twilio
     return true;
   };
   
@@ -116,11 +121,10 @@ export function EmergencyButton() {
     // Formatar número para Telegram (remover caracteres não numéricos)
     const formattedNumber = phoneNumber.replace(/\D/g, "");
     
-    // Preparar mensagem
-    const message = encodeURIComponent(`EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`);
+    // Em uma implementação real, usaríamos a API do Telegram para enviar mensagens
+    // https://core.telegram.org/bots/api#sendmessage
     
-    // Criar link do Telegram (note que o Telegram não suporta diretamente enviar mensagens por número de telefone,
-    // então esta é uma abordagem aproximada - em um app real, seria necessário usar a API do Telegram)
+    // Para esta demonstração, vamos abrir o Telegram com o número
     const telegramLink = `https://t.me/+55${formattedNumber}`;
     
     console.log(`Abrindo Telegram para contato: ${telegramLink}`);
