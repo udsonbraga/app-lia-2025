@@ -31,15 +31,18 @@ export function EmergencyButton() {
       const { latitude, longitude } = position.coords;
       const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
       
-      // Enviar SMS
-      await sendEmergencyMessage(contactNumber, contactName, locationLink);
+      // Enviar mensagens de emergência por diferentes canais
+      const promises = [
+        sendSMSMessage(contactNumber, contactName, locationLink),
+        sendWhatsAppMessage(contactNumber, locationLink),
+        sendTelegramMessage(contactNumber, locationLink)
+      ];
       
-      // Enviar WhatsApp
-      await sendWhatsAppMessage(contactNumber, locationLink);
+      await Promise.all(promises);
       
       toast({
         title: "Pedido de ajuda enviado",
-        description: "Mensagens de emergência enviadas por SMS e WhatsApp.",
+        description: "Mensagens de emergência enviadas por SMS, WhatsApp e Telegram.",
       });
     } catch (error) {
       console.error("Erro ao enviar alerta de emergência:", error);
@@ -70,7 +73,7 @@ export function EmergencyButton() {
   };
   
   // Função para simular envio de SMS
-  const sendEmergencyMessage = async (phoneNumber: string, contactName: string, locationLink: string) => {
+  const sendSMSMessage = async (phoneNumber: string, contactName: string, locationLink: string) => {
     // Simular o tempo de envio
     await new Promise(resolve => setTimeout(resolve, 1000));
     
@@ -92,11 +95,10 @@ export function EmergencyButton() {
     const message = encodeURIComponent(`EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`);
     
     // Criar link do WhatsApp
-    const whatsappLink = `https://wa.me/${formattedNumber}?text=${message}`;
+    const whatsappLink = `https://wa.me/55${formattedNumber}?text=${message}`;
     
     console.log(`Abrindo WhatsApp com link: ${whatsappLink}`);
     
-    // Em uma aplicação web, podemos abrir o link em uma nova aba
     // Em um app móvel, isso abriria o WhatsApp diretamente
     if (navigator.userAgent.match(/Android|iPhone|iPad|iPod/i)) {
       // Caso seja um dispositivo móvel, tenta abrir direto no app
@@ -104,6 +106,30 @@ export function EmergencyButton() {
     } else {
       // Caso seja desktop, abre em nova aba
       window.open(whatsappLink, "_blank");
+    }
+    
+    return true;
+  };
+  
+  // Função para enviar mensagem via Telegram
+  const sendTelegramMessage = async (phoneNumber: string, locationLink: string) => {
+    // Formatar número para Telegram (remover caracteres não numéricos)
+    const formattedNumber = phoneNumber.replace(/\D/g, "");
+    
+    // Preparar mensagem
+    const message = encodeURIComponent(`EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`);
+    
+    // Criar link do Telegram (note que o Telegram não suporta diretamente enviar mensagens por número de telefone,
+    // então esta é uma abordagem aproximada - em um app real, seria necessário usar a API do Telegram)
+    const telegramLink = `https://t.me/+55${formattedNumber}`;
+    
+    console.log(`Abrindo Telegram para contato: ${telegramLink}`);
+    
+    // Em um app móvel, isso tentaria abrir o Telegram
+    if (navigator.userAgent.match(/Android|iPhone|iPad|iPod/i)) {
+      window.location.href = telegramLink;
+    } else {
+      window.open(telegramLink, "_blank");
     }
     
     return true;

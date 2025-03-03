@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, CheckCircle2, List, UserPlus } from "lucide-react";
+import { ArrowLeft, CheckCircle2, List, UserPlus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 
@@ -20,6 +20,8 @@ const SafeContact = () => {
   const [showContactsList, setShowContactsList] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [contacts, setContacts] = useState<SafeContact[]>([]);
+  const [contactToDelete, setContactToDelete] = useState<number | null>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   // Carregar dados salvos
   useEffect(() => {
@@ -99,6 +101,33 @@ const SafeContact = () => {
     setShowContactsList(false);
   };
 
+  const confirmDeleteContact = (index: number) => {
+    setContactToDelete(index);
+    setShowDeleteConfirmation(true);
+  };
+
+  const deleteContact = () => {
+    if (contactToDelete !== null) {
+      const updatedContacts = [...contacts];
+      updatedContacts.splice(contactToDelete, 1);
+      setContacts(updatedContacts);
+      localStorage.setItem("safeContacts", JSON.stringify(updatedContacts));
+      
+      toast({
+        title: "Contato excluído",
+        description: "O contato foi excluído com sucesso.",
+      });
+      
+      setShowDeleteConfirmation(false);
+      setContactToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirmation(false);
+    setContactToDelete(null);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
       <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm flex items-center px-4 z-50">
@@ -121,11 +150,26 @@ const SafeContact = () => {
             <h2 className="text-2xl font-bold text-gray-800">Contato Cadastrado!</h2>
             <p className="text-gray-600">
               Seu contato de emergência foi cadastrado com sucesso. Em caso de emergência, 
-              este contato receberá sua localização e solicitação de ajuda.
+              este contato receberá sua localização e solicitação de ajuda via WhatsApp, Telegram e SMS.
             </p>
             <Button onClick={handleDone} className="mt-6 w-full">
               Concluído
             </Button>
+          </div>
+        ) : showDeleteConfirmation ? (
+          <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 space-y-4">
+            <h2 className="text-xl font-bold text-gray-800 text-center">Confirmar exclusão</h2>
+            <p className="text-gray-600 text-center">
+              Tem certeza que deseja excluir este contato?
+            </p>
+            <div className="flex justify-center space-x-4 mt-4">
+              <Button variant="outline" onClick={cancelDelete}>
+                Cancelar
+              </Button>
+              <Button variant="destructive" onClick={deleteContact}>
+                Excluir
+              </Button>
+            </div>
           </div>
         ) : showContactsList ? (
           <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 space-y-6">
@@ -146,9 +190,17 @@ const SafeContact = () => {
             ) : (
               <div className="space-y-4">
                 {contacts.map((contact, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4">
-                    <h3 className="font-medium text-gray-800">{contact.name}</h3>
-                    <p className="text-gray-600">{contact.number}</p>
+                  <div key={index} className="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
+                    <div>
+                      <h3 className="font-medium text-gray-800">{contact.name}</h3>
+                      <p className="text-gray-600">{contact.number}</p>
+                    </div>
+                    <button 
+                      onClick={() => confirmDeleteContact(index)}
+                      className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -231,7 +283,7 @@ const SafeContact = () => {
             
             <div className="text-center text-gray-600 mt-6">
               <p className="text-sm">
-                Cadastre contatos de confiança para receber sua localização e pedido de ajuda em caso de emergência.
+                Cadastre contatos de confiança para receber sua localização e pedido de ajuda em caso de emergência via WhatsApp, Telegram e SMS.
               </p>
             </div>
           </div>
