@@ -24,10 +24,8 @@ export function useMotionDetector() {
       
       // Enviar mensagens para todos os contatos
       for (const contact of contacts) {
-        // Enviar mensagens por diferentes canais
-        await sendEmergencyMessage(contact.number, contact.name, locationLink);
-        await sendWhatsAppMessage(contact.number, locationLink);
-        await sendTelegramMessage(contact.number, locationLink);
+        // Enviar mensagens pelo Telegram
+        await sendTelegramMessage(contact.telegramId, locationLink);
       }
       
       toast({
@@ -55,49 +53,42 @@ export function useMotionDetector() {
     });
   };
   
-  // Função para simular envio de SMS
-  const sendEmergencyMessage = async (phoneNumber: string, contactName: string, locationLink: string) => {
-    // Simular o tempo de envio
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Preparar mensagem
-    const message = `ALERTA AUTOMÁTICO: Movimento brusco detectado. Possível situação de emergência! Localização atual: ${locationLink}`;
-    
-    console.log(`Enviando SMS para ${contactName} (${phoneNumber}): ${message}`);
-    
-    // Em uma aplicação real, aqui seria feita uma chamada API para um serviço de SMS
-    return true;
-  };
-  
-  // Função para enviar mensagem via WhatsApp
-  const sendWhatsAppMessage = async (phoneNumber: string, locationLink: string) => {
-    // Formatar número para WhatsApp (remover caracteres não numéricos)
-    const formattedNumber = phoneNumber.replace(/\D/g, "");
-    
-    // Preparar mensagem
-    const message = encodeURIComponent(`ALERTA AUTOMÁTICO: Movimento brusco detectado. Possível situação de emergência! Localização atual: ${locationLink}`);
-    
-    // Criar link do WhatsApp
-    const whatsappLink = `https://wa.me/55${formattedNumber}?text=${message}`;
-    
-    console.log(`Preparando mensagem WhatsApp: ${whatsappLink}`);
-    
-    // Em uma implementação real, isso seria feito via API do WhatsApp Business
-    return true;
-  };
-  
-  // Função para enviar mensagem via Telegram
-  const sendTelegramMessage = async (phoneNumber: string, locationLink: string) => {
-    // Formatar número para Telegram
-    const formattedNumber = phoneNumber.replace(/\D/g, "");
-    
-    // Preparar mensagem
-    const message = `ALERTA AUTOMÁTICO: Movimento brusco detectado. Possível situação de emergência! Localização atual: ${locationLink}`;
-    
-    console.log(`Preparando mensagem Telegram para +55${formattedNumber}: ${message}`);
-    
-    // Em uma implementação real, isso seria feito via API do Telegram Bot
-    return true;
+  // Função para enviar mensagem via Telegram Bot
+  const sendTelegramMessage = async (telegramId: string, locationLink: string) => {
+    try {
+      const botToken = "SEU_TOKEN_DO_BOT"; // Substituir pelo token real do seu bot
+      const message = `ALERTA AUTOMÁTICO: Movimento brusco detectado. Possível situação de emergência! Localização atual: ${locationLink}`;
+      
+      // URL da API do Telegram para enviar mensagem
+      const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+      
+      // Preparar o corpo da requisição
+      const requestBody = {
+        chat_id: telegramId,
+        text: message,
+        parse_mode: "HTML"
+      };
+      
+      // Fazer a requisição para a API do Telegram
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erro ao enviar mensagem: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Mensagem enviada com sucesso:', data);
+      return true;
+    } catch (error) {
+      console.error('Erro ao enviar mensagem via Telegram:', error);
+      return false;
+    }
   };
 
   useEffect(() => {

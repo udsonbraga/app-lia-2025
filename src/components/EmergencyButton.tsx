@@ -35,11 +35,9 @@ export function EmergencyButton() {
       const promises = [];
       
       for (const contact of contacts) {
-        // Enviar por diferentes canais para cada contato
+        // Enviar mensagem pelo Telegram
         promises.push(
-          sendSMSMessage(contact.number, contact.name, locationLink),
-          sendWhatsAppMessage(contact.number, locationLink),
-          sendTelegramMessage(contact.number, locationLink)
+          sendTelegramMessage(contact.telegramId, locationLink)
         );
       }
       
@@ -47,7 +45,7 @@ export function EmergencyButton() {
       
       toast({
         title: "Pedido de ajuda enviado",
-        description: "Mensagens de emergência enviadas para todos os seus contatos seguros.",
+        description: "Mensagens de emergência enviadas para todos os seus contatos seguros via Telegram.",
       });
     } catch (error) {
       console.error("Erro ao enviar alerta de emergência:", error);
@@ -77,66 +75,42 @@ export function EmergencyButton() {
     });
   };
   
-  // Função para simular envio de SMS
-  const sendSMSMessage = async (phoneNumber: string, contactName: string, locationLink: string) => {
-    // Simular o tempo de envio
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Preparar mensagem
-    const message = `EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`;
-    
-    console.log(`Enviando SMS para ${contactName} (${phoneNumber}): ${message}`);
-    
-    // Em uma aplicação real, aqui seria feita uma chamada API para um serviço de SMS como Twilio
-    return true;
-  };
-  
-  // Função para enviar mensagem via WhatsApp
-  const sendWhatsAppMessage = async (phoneNumber: string, locationLink: string) => {
-    // Formatar número para WhatsApp (remover caracteres não numéricos)
-    const formattedNumber = phoneNumber.replace(/\D/g, "");
-    
-    // Preparar mensagem
-    const message = encodeURIComponent(`EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`);
-    
-    // Criar link do WhatsApp
-    const whatsappLink = `https://wa.me/55${formattedNumber}?text=${message}`;
-    
-    console.log(`Abrindo WhatsApp com link: ${whatsappLink}`);
-    
-    // Em um app móvel, isso abriria o WhatsApp diretamente
-    if (navigator.userAgent.match(/Android|iPhone|iPad|iPod/i)) {
-      // Caso seja um dispositivo móvel, tenta abrir direto no app
-      window.location.href = whatsappLink;
-    } else {
-      // Caso seja desktop, abre em nova aba
-      window.open(whatsappLink, "_blank");
+  // Função para enviar mensagem via Telegram Bot
+  const sendTelegramMessage = async (telegramId: string, locationLink: string) => {
+    try {
+      const botToken = "SEU_TOKEN_DO_BOT"; // Substituir pelo token real do seu bot
+      const message = `EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`;
+      
+      // URL da API do Telegram para enviar mensagem
+      const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+      
+      // Preparar o corpo da requisição
+      const requestBody = {
+        chat_id: telegramId,
+        text: message,
+        parse_mode: "HTML"
+      };
+      
+      // Fazer a requisição para a API do Telegram
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erro ao enviar mensagem: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Mensagem enviada com sucesso:', data);
+      return true;
+    } catch (error) {
+      console.error('Erro ao enviar mensagem via Telegram:', error);
+      return false;
     }
-    
-    return true;
-  };
-  
-  // Função para enviar mensagem via Telegram
-  const sendTelegramMessage = async (phoneNumber: string, locationLink: string) => {
-    // Formatar número para Telegram (remover caracteres não numéricos)
-    const formattedNumber = phoneNumber.replace(/\D/g, "");
-    
-    // Em uma implementação real, usaríamos a API do Telegram para enviar mensagens
-    // https://core.telegram.org/bots/api#sendmessage
-    
-    // Para esta demonstração, vamos abrir o Telegram com o número
-    const telegramLink = `https://t.me/+55${formattedNumber}`;
-    
-    console.log(`Abrindo Telegram para contato: ${telegramLink}`);
-    
-    // Em um app móvel, isso tentaria abrir o Telegram
-    if (navigator.userAgent.match(/Android|iPhone|iPad|iPod/i)) {
-      window.location.href = telegramLink;
-    } else {
-      window.open(telegramLink, "_blank");
-    }
-    
-    return true;
   };
 
   return (

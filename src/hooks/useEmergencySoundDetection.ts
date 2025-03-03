@@ -15,14 +15,14 @@ export function useEmergencySoundDetection() {
   const handleEmergencyDetected = useCallback(async () => {
     try {
       // Obter contatos de emergência do localStorage
-      const contactName = localStorage.getItem("contactName");
-      const contactNumber = localStorage.getItem("contactNumber");
+      const safeContacts = localStorage.getItem("safeContacts");
+      const contacts = safeContacts ? JSON.parse(safeContacts) : [];
       
-      // Verificar se contato está configurado
-      if (!contactName || !contactNumber) {
+      // Verificar se há contatos configurados
+      if (contacts.length === 0) {
         toast({
-          title: "Contato não configurado",
-          description: "Por favor, configure um contato de confiança nas configurações.",
+          title: "Contatos não configurados",
+          description: "Por favor, configure pelo menos um contato de confiança nas configurações.",
           variant: "destructive"
         });
         return;
@@ -33,15 +33,15 @@ export function useEmergencySoundDetection() {
       const { latitude, longitude } = position.coords;
       const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
       
-      // Enviar SMS
-      await sendEmergencyMessage(contactNumber, contactName, locationLink);
-      
-      // Enviar WhatsApp
-      await sendWhatsAppMessage(contactNumber, locationLink);
+      // Enviar mensagens para todos os contatos
+      for (const contact of contacts) {
+        // Enviar mensagem pelo Telegram
+        await sendTelegramMessage(contact.telegramId, locationLink);
+      }
       
       toast({
         title: "Alerta de emergência enviado",
-        description: "Som de emergência detectado! Alertas enviados via SMS e WhatsApp.",
+        description: "Som de emergência detectado! Alertas enviados via Telegram.",
       });
     } catch (error) {
       console.error("Erro ao enviar alerta automático:", error);
@@ -69,44 +69,42 @@ export function useEmergencySoundDetection() {
     });
   };
   
-  // Função para enviar mensagem de emergência via SMS
-  const sendEmergencyMessage = async (phoneNumber: string, contactName: string, locationLink: string) => {
-    // Simular o tempo de envio
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Preparar mensagem
-    const message = `EMERGÊNCIA DETECTADA! Som de emergência identificado. Localização atual: ${locationLink}`;
-    
-    console.log(`Enviando SMS para ${contactName} (${phoneNumber}): ${message}`);
-    
-    // Em uma aplicação real, aqui seria feita uma chamada API para um serviço de SMS
-    return true;
-  };
-  
-  // Função para enviar mensagem via WhatsApp
-  const sendWhatsAppMessage = async (phoneNumber: string, locationLink: string) => {
-    // Formatar número para WhatsApp (remover caracteres não numéricos)
-    const formattedNumber = phoneNumber.replace(/\D/g, "");
-    
-    // Preparar mensagem
-    const message = encodeURIComponent(`EMERGÊNCIA DETECTADA! Som de emergência identificado. Localização atual: ${locationLink}`);
-    
-    // Criar link do WhatsApp
-    const whatsappLink = `https://wa.me/${formattedNumber}?text=${message}`;
-    
-    console.log(`Abrindo WhatsApp com link: ${whatsappLink}`);
-    
-    // Em uma aplicação web, podemos abrir o link em uma nova aba
-    // Em um app móvel, isso abriria o WhatsApp diretamente
-    if (navigator.userAgent.match(/Android|iPhone|iPad|iPod/i)) {
-      // Caso seja um dispositivo móvel, tenta abrir direto no app
-      window.location.href = whatsappLink;
-    } else {
-      // Caso seja desktop, abre em nova aba
-      window.open(whatsappLink, "_blank");
+  // Função para enviar mensagem via Telegram Bot
+  const sendTelegramMessage = async (telegramId: string, locationLink: string) => {
+    try {
+      const botToken = "SEU_TOKEN_DO_BOT"; // Substituir pelo token real do seu bot
+      const message = `EMERGÊNCIA DETECTADA! Som de emergência identificado. Localização atual: ${locationLink}`;
+      
+      // URL da API do Telegram para enviar mensagem
+      const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+      
+      // Preparar o corpo da requisição
+      const requestBody = {
+        chat_id: telegramId,
+        text: message,
+        parse_mode: "HTML"
+      };
+      
+      // Fazer a requisição para a API do Telegram
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erro ao enviar mensagem: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Mensagem enviada com sucesso:', data);
+      return true;
+    } catch (error) {
+      console.error('Erro ao enviar mensagem via Telegram:', error);
+      return false;
     }
-    
-    return true;
   };
 
   useEffect(() => {

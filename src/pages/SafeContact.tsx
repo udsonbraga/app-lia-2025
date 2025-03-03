@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 interface SafeContact {
   name: string;
   number: string;
+  telegramId: string;
 }
 
 const MAX_CONTACTS = 3;
@@ -18,6 +19,7 @@ const SafeContact = () => {
   const navigate = useNavigate();
   const [contactNumber, setContactNumber] = useState("");
   const [contactName, setContactName] = useState("");
+  const [telegramId, setTelegramId] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
   const [showContactsList, setShowContactsList] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -29,9 +31,11 @@ const SafeContact = () => {
   useEffect(() => {
     const savedContactName = localStorage.getItem("contactName");
     const savedContactNumber = localStorage.getItem("contactNumber");
+    const savedTelegramId = localStorage.getItem("telegramId");
     
     if (savedContactName) setContactName(savedContactName);
     if (savedContactNumber) setContactNumber(savedContactNumber);
+    if (savedTelegramId) setTelegramId(savedTelegramId);
     
     // Carregar lista de contatos
     const savedContacts = localStorage.getItem("safeContacts");
@@ -55,6 +59,7 @@ const SafeContact = () => {
   const clearFormData = () => {
     setContactName("");
     setContactNumber("");
+    setTelegramId("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -73,7 +78,8 @@ const SafeContact = () => {
     // Criar novo contato
     const newContact: SafeContact = {
       name: contactName,
-      number: contactNumber
+      number: contactNumber,
+      telegramId: telegramId
     };
     
     // Adicionar à lista de contatos
@@ -83,6 +89,7 @@ const SafeContact = () => {
     // Salvar no localStorage
     localStorage.setItem("contactName", contactName);
     localStorage.setItem("contactNumber", contactNumber);
+    localStorage.setItem("telegramId", telegramId);
     localStorage.setItem("safeContacts", JSON.stringify(updatedContacts));
     
     toast({
@@ -173,7 +180,7 @@ const SafeContact = () => {
             <h2 className="text-2xl font-bold text-gray-800">Contato Cadastrado!</h2>
             <p className="text-gray-600">
               Seu contato de emergência foi cadastrado com sucesso. Em caso de emergência, 
-              este contato receberá sua localização e solicitação de ajuda via WhatsApp, Telegram e SMS.
+              este contato receberá sua localização e pedido de ajuda via Telegram.
             </p>
             <div className="flex flex-col space-y-3 mt-4">
               <Button onClick={handleDone}>
@@ -226,6 +233,7 @@ const SafeContact = () => {
                     <div>
                       <h3 className="font-medium text-gray-800">{contact.name}</h3>
                       <p className="text-gray-600">{contact.number}</p>
+                      <p className="text-gray-600 text-sm">ID Telegram: {contact.telegramId}</p>
                     </div>
                     <button 
                       onClick={() => confirmDeleteContact(index)}
@@ -293,6 +301,24 @@ const SafeContact = () => {
                 </div>
               </div>
 
+              <div>
+                <label htmlFor="telegramId" className="block text-sm font-medium text-gray-700">
+                  ID do Telegram
+                </label>
+                <Input
+                  type="text"
+                  id="telegramId"
+                  value={telegramId}
+                  onChange={(e) => setTelegramId(e.target.value)}
+                  placeholder="ID do usuário do Telegram"
+                  className="mt-1 w-full"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Para encontrar seu ID do Telegram, envie uma mensagem para @SafeLady_bot e digite /start
+                </p>
+              </div>
+
               <Button type="submit" className="w-full">
                 Salvar Contato
               </Button>
@@ -321,7 +347,7 @@ const SafeContact = () => {
             
             <div className="text-center text-gray-600 mt-6">
               <p className="text-sm">
-                Cadastre até 3 contatos de confiança para receber sua localização e pedido de ajuda em caso de emergência via WhatsApp, Telegram e SMS.
+                Cadastre até 3 contatos de confiança para receber sua localização e pedido de ajuda em caso de emergência via Telegram.
               </p>
             </div>
           </div>
