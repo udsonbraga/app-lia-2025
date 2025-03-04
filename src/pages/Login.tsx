@@ -24,11 +24,37 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Validação simulada
-      if (email === "usuario@teste.com" && password === "senha123") {
+      // Check for stored users
+      const storedUsers = localStorage.getItem('users');
+      const users = storedUsers ? JSON.parse(storedUsers) : [];
+      
+      const foundUser = users.find((user: any) => 
+        user.email === email && user.password === password
+      );
+      
+      if (foundUser) {
         await new Promise(resolve => setTimeout(resolve, 1000));
         localStorage.setItem('isAuthenticated', 'true');
-        navigate('/');
+        localStorage.setItem('userName', foundUser.name);
+        
+        toast({
+          title: "Login efetuado com sucesso",
+          description: `Bem-vinda de volta, ${foundUser.name}!`,
+        });
+        
+        navigate('/home');
+      } else if (email === "usuario@teste.com" && password === "senha123") {
+        // Fallback test user
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('userName', 'Usuária Teste');
+        
+        toast({
+          title: "Login efetuado com sucesso",
+          description: "Bem-vinda de volta, Usuária Teste!",
+        });
+        
+        navigate('/home');
       } else {
         throw new Error("Credenciais inválidas");
       }
@@ -49,7 +75,14 @@ const Login = () => {
       // Simular login com Google
       await new Promise(resolve => setTimeout(resolve, 1000));
       localStorage.setItem('isAuthenticated', 'true');
-      navigate('/');
+      localStorage.setItem('userName', 'Usuária Google');
+      
+      toast({
+        title: "Login efetuado com sucesso",
+        description: "Bem-vinda, Usuária Google!",
+      });
+      
+      navigate('/home');
     } catch (error) {
       toast({
         title: "Erro ao fazer login com Google",
@@ -66,17 +99,26 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Simulação de envio de recuperação
+      // Simulate sending a recovery email or SMS
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const message = recoveryMethod === "email" 
-        ? `Enviamos um link de recuperação para o email ${recoveryEmail}`
-        : `Enviamos um código de recuperação para o número ${recoveryPhone}`;
-      
-      toast({
-        title: "Recuperação de senha iniciada",
-        description: message,
-      });
+      if (recoveryMethod === "email") {
+        // In a real app, you would send an actual email here
+        console.log(`Recovery email sent to: ${recoveryEmail}`);
+        
+        toast({
+          title: "Email de recuperação enviado",
+          description: `Enviamos um link de recuperação para ${recoveryEmail}. Por favor, verifique sua caixa de entrada e spam.`,
+        });
+      } else {
+        // In a real app, you would send an actual SMS here
+        console.log(`Recovery SMS sent to: ${recoveryPhone}`);
+        
+        toast({
+          title: "SMS de recuperação enviado",
+          description: `Enviamos um código de recuperação para ${recoveryPhone}. Por favor, aguarde o recebimento da mensagem.`,
+        });
+      }
       
       setShowRecovery(false);
       setRecoveryEmail("");
@@ -84,7 +126,7 @@ const Login = () => {
     } catch (error) {
       toast({
         title: "Erro ao recuperar senha",
-        description: "Não foi possível processar sua solicitação",
+        description: "Não foi possível processar sua solicitação. Tente novamente mais tarde.",
         variant: "destructive",
       });
     } finally {

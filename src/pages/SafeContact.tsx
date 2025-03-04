@@ -1,424 +1,253 @@
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, CheckCircle2, List, UserPlus, Trash2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Shield, User, Phone, MessageSquare, Trash2, UserPlus, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue 
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-interface SafeContact {
+interface Contact {
+  id: string;
   name: string;
-  number: string;
+  phone: string;
   telegramId: string;
   relationship: string;
 }
 
-const MAX_CONTACTS = 3;
-
 const SafeContact = () => {
-  const { toast } = useToast();
   const navigate = useNavigate();
-  const [contactNumber, setContactNumber] = useState("");
-  const [contactName, setContactName] = useState("");
-  const [telegramId, setTelegramId] = useState("");
-  const [relationship, setRelationship] = useState("");
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [showContactsList, setShowContactsList] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [contacts, setContacts] = useState<SafeContact[]>([]);
-  const [contactToDelete, setContactToDelete] = useState<number | null>(null);
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-
-  // Carregar dados salvos
-  useEffect(() => {
-    const savedContactName = localStorage.getItem("contactName");
-    const savedContactNumber = localStorage.getItem("contactNumber");
-    const savedTelegramId = localStorage.getItem("telegramId");
-    const savedRelationship = localStorage.getItem("relationship");
-    
-    if (savedContactName) setContactName(savedContactName);
-    if (savedContactNumber) setContactNumber(savedContactNumber);
-    if (savedTelegramId) setTelegramId(savedTelegramId);
-    if (savedRelationship) setRelationship(savedRelationship);
-    
-    // Carregar lista de contatos
+  const { toast } = useToast();
+  const [contacts, setContacts] = useState<Contact[]>(() => {
     const savedContacts = localStorage.getItem("safeContacts");
-    if (savedContacts) {
-      setContacts(JSON.parse(savedContacts));
-    }
-  }, []);
+    return savedContacts ? JSON.parse(savedContacts) : [];
+  });
 
-  const formatPhoneNumber = (value: string) => {
-    // Remove everything that's not a digit
-    const cleaned = value.replace(/\D/g, "");
-    
-    // Format with Brazilian pattern
-    const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/);
-    if (match) {
-      return `(${match[1]}) ${match[2]}-${match[3]}`;
+  const [newContact, setNewContact] = useState<Omit<Contact, "id">>({
+    name: "",
+    phone: "",
+    telegramId: "",
+    relationship: "",
+  });
+
+  const [isAdding, setIsAdding] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem("safeContacts", JSON.stringify(contacts));
+  }, [contacts]);
+
+  const handleAddContact = () => {
+    if (!newContact.name || !newContact.phone || !newContact.telegramId || !newContact.relationship) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Preencha todos os campos para adicionar um contato.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (contacts.length >= 3) {
+      toast({
+        title: "Limite de contatos atingido",
+        description: "Você pode adicionar no máximo 3 contatos de segurança.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newContactWithId = {
+      ...newContact,
+      id: Date.now().toString(),
+    };
+
+    setContacts([...contacts, newContactWithId]);
+    setNewContact({ name: "", phone: "", telegramId: "", relationship: "" });
+    setIsAdding(false);
+
+    toast({
+      title: "Contato adicionado",
+      description: "Contato de segurança adicionado com sucesso.",
+    });
+  };
+
+  const handleRemoveContact = (id: string) => {
+    setContacts(contacts.filter((contact) => contact.id !== id));
+    toast({
+      title: "Contato removido",
+      description: "Contato de segurança removido com sucesso.",
+    });
+  };
+
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, "");
+    if (numbers.length <= 11) {
+      return numbers.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
     }
     return value;
   };
 
-  const clearFormData = () => {
-    setContactName("");
-    setContactNumber("");
-    setTelegramId("");
-    setRelationship("");
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validar número de contatos
-    if (contacts.length >= MAX_CONTACTS) {
-      toast({
-        title: "Limite de contatos atingido",
-        description: `Você já cadastrou o máximo de ${MAX_CONTACTS} contatos seguros.`,
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Validar campos obrigatórios
-    if (!contactName || !contactNumber || !telegramId || !relationship) {
-      toast({
-        title: "Campos incompletos",
-        description: "Preencha todos os campos para cadastrar o contato.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Criar novo contato
-    const newContact: SafeContact = {
-      name: contactName,
-      number: contactNumber,
-      telegramId: telegramId,
-      relationship: relationship
-    };
-    
-    // Adicionar à lista de contatos
-    const updatedContacts = [...contacts, newContact];
-    setContacts(updatedContacts);
-    
-    // Salvar no localStorage
-    localStorage.setItem("contactName", contactName);
-    localStorage.setItem("contactNumber", contactNumber);
-    localStorage.setItem("telegramId", telegramId);
-    localStorage.setItem("relationship", relationship);
-    localStorage.setItem("safeContacts", JSON.stringify(updatedContacts));
-    
-    toast({
-      title: "Contato salvo",
-      description: "O contato de emergência foi salvo com sucesso.",
-    });
-
-    // Mostrar tela de feedback
-    setShowFeedback(true);
-    setShowForm(false);
-    
-    // Limpar formulário imediatamente
-    clearFormData();
-  };
-
-  const closeFeedback = () => {
-    setShowFeedback(false);
-  };
-
-  const handleDone = () => {
-    setShowFeedback(false);
-    navigate('/');
-  };
-
-  const toggleContactsList = () => {
-    setShowContactsList(!showContactsList);
-    setShowForm(false);
-  };
-
-  const toggleContactForm = () => {
-    setShowForm(!showForm);
-    setShowContactsList(false);
-  };
-
-  const confirmDeleteContact = (index: number) => {
-    setContactToDelete(index);
-    setShowDeleteConfirmation(true);
-  };
-
-  const deleteContact = () => {
-    if (contactToDelete !== null) {
-      const updatedContacts = [...contacts];
-      updatedContacts.splice(contactToDelete, 1);
-      setContacts(updatedContacts);
-      localStorage.setItem("safeContacts", JSON.stringify(updatedContacts));
-      
-      toast({
-        title: "Contato excluído",
-        description: "O contato foi excluído com sucesso.",
-      });
-      
-      setShowDeleteConfirmation(false);
-      setContactToDelete(null);
-    }
-  };
-
-  const cancelDelete = () => {
-    setShowDeleteConfirmation(false);
-    setContactToDelete(null);
-  };
-
-  // Função para formatar o texto de parentesco
-  const getRelationshipLabel = (relationship: string) => {
-    const options: Record<string, string> = {
-      "pai": "Pai",
-      "mae": "Mãe",
-      "irmao": "Irmão/Irmã",
-      "tio": "Tio",
-      "tia": "Tia",
-      "outros": "Outros"
-    };
-    
-    return options[relationship] || relationship;
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
-      <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm flex items-center px-4 z-50">
-        <button
-          onClick={() => navigate('/')}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-        >
-          <ArrowLeft className="h-6 w-6 text-gray-700" />
-        </button>
-        <h1 className="text-xl font-semibold text-center flex-1">Contato Seguro</h1>
-        <div className="w-8" />
+    <div className="min-h-screen bg-gradient-to-b from-safelady-light to-white">
+      <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-50">
+        <div className="container mx-auto h-full">
+          <div className="flex items-center justify-between h-full px-4">
+            <button
+              onClick={() => navigate('/home')}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <ArrowLeft className="h-6 w-6 text-gray-700" />
+            </button>
+            <h1 className="text-xl font-semibold">Contatos de Segurança</h1>
+            <div className="w-8" />
+          </div>
+        </div>
       </div>
 
-      <div className="container mx-auto px-4 pt-20 pb-16">
-        {showFeedback ? (
-          <div className="max-w-md mx-auto bg-white rounded-lg shadow p-8 space-y-6 text-center animate-fade-in relative">
-            <button 
-              onClick={closeFeedback}
-              className="absolute top-2 right-2 p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            
-            <div className="flex justify-center mb-4">
-              <CheckCircle2 className="h-16 w-16 text-green-500" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-800">Contato Cadastrado!</h2>
-            <p className="text-gray-600">
-              Seu contato de emergência foi cadastrado com sucesso. Em caso de emergência, 
-              este contato receberá sua localização e pedido de ajuda via Telegram.
-            </p>
-            <div className="flex flex-col space-y-3 mt-4">
-              <Button onClick={handleDone}>
-                Concluído
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={closeFeedback}
-                className="border-safelady text-safelady hover:bg-safelady/10"
-              >
-                Continuar cadastrando
-              </Button>
-            </div>
+      <div className="container mx-auto px-4 pt-20 pb-20">
+        <div className="bg-white rounded-lg shadow-sm p-6 max-w-md mx-auto">
+          <div className="flex items-center gap-2 mb-6">
+            <Shield className="h-6 w-6 text-safelady" />
+            <h2 className="text-xl font-bold text-gray-900">Contatos de Emergência</h2>
           </div>
-        ) : showDeleteConfirmation ? (
-          <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 space-y-4">
-            <h2 className="text-xl font-bold text-gray-800 text-center">Confirmar exclusão</h2>
-            <p className="text-gray-600 text-center">
-              Tem certeza que deseja excluir este contato?
-            </p>
-            <div className="flex justify-center space-x-4 mt-4">
-              <Button variant="outline" onClick={cancelDelete}>
-                Cancelar
-              </Button>
-              <Button variant="destructive" onClick={deleteContact}>
-                Excluir
-              </Button>
-            </div>
-          </div>
-        ) : showContactsList ? (
-          <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800">Lista de Contatos Seguros</h2>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={toggleContactsList}
-                className="text-safelady border-safelady hover:bg-safelady/10"
-              >
-                Voltar
-              </Button>
-            </div>
-            
-            {contacts.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">Nenhum contato cadastrado</p>
-            ) : (
-              <div className="space-y-4">
-                {contacts.map((contact, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
-                    <div>
-                      <h3 className="font-medium text-gray-800">{contact.name}</h3>
-                      <p className="text-gray-600">{contact.number}</p>
-                      <p className="text-gray-600 text-sm">ID Telegram: {contact.telegramId}</p>
-                      {contact.relationship && (
-                        <p className="text-gray-600 text-sm">
-                          Parentesco: {getRelationshipLabel(contact.relationship)}
-                        </p>
-                      )}
-                    </div>
-                    <button 
-                      onClick={() => confirmDeleteContact(index)}
-                      className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
+
+          <p className="text-gray-600 mb-8">
+            Adicione até 3 contatos de confiança que receberão alertas em
+            situações de emergência.
+          </p>
+
+          {contacts.length > 0 ? (
+            <div className="space-y-4 mb-8">
+              {contacts.map((contact) => (
+                <div
+                  key={contact.id}
+                  className="flex items-center justify-between bg-gray-50 p-4 rounded-lg"
+                >
+                  <div className="flex-1">
+                    <h3 className="font-medium flex items-center">
+                      <User className="h-4 w-4 mr-2 text-safelady" />
+                      {contact.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 flex items-center mt-1">
+                      <Phone className="h-3 w-3 mr-2 text-gray-400" />
+                      {contact.phone}
+                    </p>
+                    <p className="text-sm text-gray-600 flex items-center mt-1">
+                      <MessageSquare className="h-3 w-3 mr-2 text-gray-400" />
+                      Telegram: @{contact.telegramId}
+                    </p>
+                    <p className="text-sm text-gray-600 mt-1">
+                      <span className="text-gray-500">Parentesco:</span> {contact.relationship}
+                    </p>
                   </div>
-                ))}
+                  <button
+                    onClick={() => handleRemoveContact(contact.id)}
+                    className="p-1 hover:bg-red-50 rounded-full"
+                  >
+                    <Trash2 className="h-5 w-5 text-red-500" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 mb-4">
+              <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <User className="h-8 w-8 text-gray-400" />
               </div>
-            )}
-            
-            <div className="flex justify-center">
-              <p className="text-sm text-gray-500">
-                {contacts.length}/{MAX_CONTACTS} contatos cadastrados
+              <p className="text-gray-500">
+                Você ainda não adicionou contatos de segurança.
               </p>
             </div>
-          </div>
-        ) : showForm ? (
-          <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 space-y-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-800">Cadastrar Contato</h2>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={toggleContactForm}
-                className="text-safelady border-safelady hover:bg-safelady/10"
-              >
-                Voltar
-              </Button>
-            </div>
+          )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+          {isAdding ? (
+            <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-medium">Adicionar Novo Contato</h3>
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                  Nome do Contato
-                </label>
+                <label className="block text-sm text-gray-600 mb-1">Nome</label>
                 <Input
-                  type="text"
-                  id="name"
-                  value={contactName}
-                  onChange={(e) => setContactName(e.target.value)}
-                  className="mt-1 w-full"
-                  required
+                  placeholder="Nome do contato"
+                  value={newContact.name}
+                  onChange={(e) =>
+                    setNewContact({ ...newContact, name: e.target.value })
+                  }
                 />
               </div>
-
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                  Número de Telefone
+                <label className="block text-sm text-gray-600 mb-1">
+                  Telefone
                 </label>
-                <div className="flex items-center mt-1">
-                  <span className="bg-gray-100 border border-gray-300 px-3 py-2 rounded-l-md text-gray-700">
-                    +55
-                  </span>
-                  <Input
-                    type="tel"
-                    id="phone"
-                    value={contactNumber}
-                    onChange={(e) => setContactNumber(formatPhoneNumber(e.target.value))}
-                    placeholder="(00) 00000-0000"
-                    className="rounded-l-none"
-                    required
-                  />
-                </div>
+                <Input
+                  placeholder="(00) 00000-0000"
+                  value={newContact.phone}
+                  onChange={(e) =>
+                    setNewContact({
+                      ...newContact,
+                      phone: formatPhone(e.target.value),
+                    })
+                  }
+                />
               </div>
-
               <div>
-                <label htmlFor="telegramId" className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm text-gray-600 mb-1">
                   ID do Telegram
                 </label>
                 <Input
-                  type="text"
-                  id="telegramId"
-                  value={telegramId}
-                  onChange={(e) => setTelegramId(e.target.value)}
-                  placeholder="ID do usuário do Telegram"
-                  className="mt-1 w-full"
-                  required
+                  placeholder="username (sem @)"
+                  value={newContact.telegramId}
+                  onChange={(e) =>
+                    setNewContact({
+                      ...newContact,
+                      telegramId: e.target.value,
+                    })
+                  }
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Para encontrar seu ID do Telegram, envie uma mensagem para @SafeLady_bot e digite /start
-                </p>
               </div>
-
               <div>
-                <Label htmlFor="relationship" className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm text-gray-600 mb-1">
                   Parentesco
-                </Label>
-                <Select 
-                  value={relationship} 
-                  onValueChange={(value) => setRelationship(value)}
-                  required
+                </label>
+                <Select
+                  value={newContact.relationship}
+                  onValueChange={(value) =>
+                    setNewContact({
+                      ...newContact,
+                      relationship: value,
+                    })
+                  }
                 >
-                  <SelectTrigger className="w-full mt-1">
+                  <SelectTrigger>
                     <SelectValue placeholder="Selecione o parentesco" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pai">Pai</SelectItem>
-                    <SelectItem value="mae">Mãe</SelectItem>
-                    <SelectItem value="irmao">Irmão/Irmã</SelectItem>
-                    <SelectItem value="tio">Tio</SelectItem>
-                    <SelectItem value="tia">Tia</SelectItem>
-                    <SelectItem value="outros">Outros</SelectItem>
+                    <SelectItem value="Pai">Pai</SelectItem>
+                    <SelectItem value="Mãe">Mãe</SelectItem>
+                    <SelectItem value="Irmão/Irmã">Irmão/Irmã</SelectItem>
+                    <SelectItem value="Tio/Tia">Tio/Tia</SelectItem>
+                    <SelectItem value="Amigo/Amiga">Amigo/Amiga</SelectItem>
+                    <SelectItem value="Outro">Outro</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-
-              <Button type="submit" className="w-full">
-                Salvar Contato
-              </Button>
-            </form>
-          </div>
-        ) : (
-          <div className="max-w-md mx-auto bg-white rounded-lg shadow p-6 space-y-6">
-            <div className="flex flex-col gap-4">
-              <Button 
-                onClick={toggleContactForm}
+              <div className="flex gap-2 pt-2">
+                <Button variant="outline" onClick={() => setIsAdding(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleAddContact}>Adicionar Contato</Button>
+              </div>
+            </div>
+          ) : (
+            contacts.length < 3 && (
+              <Button
+                variant="outline"
+                onClick={() => setIsAdding(true)}
                 className="w-full flex items-center justify-center gap-2"
               >
-                <UserPlus className="h-5 w-5" />
-                Cadastrar Contato Seguro
+                <UserPlus className="h-4 w-4" />
+                Adicionar Contato de Segurança
               </Button>
-              
-              <Button 
-                variant="outline" 
-                onClick={toggleContactsList}
-                className="w-full flex items-center justify-center gap-2 text-safelady border-safelady hover:bg-safelady/10"
-              >
-                <List className="h-5 w-5" />
-                Lista de Contatos
-              </Button>
-            </div>
-            
-            <div className="text-center text-gray-600 mt-6">
-              <p className="text-sm">
-                Cadastre até 3 contatos de confiança para receber sua localização e pedido de ajuda em caso de emergência via Telegram.
-              </p>
-            </div>
-          </div>
-        )}
+            )
+          )}
+        </div>
       </div>
     </div>
   );

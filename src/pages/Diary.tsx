@@ -6,13 +6,15 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import html2pdf from 'html2pdf.js';
 
 interface DiaryEntry {
   id: string;
   text: string;
-  attachments: string[];
+  attachments: Array<{
+    name: string;
+    url?: string;
+  }>;
   location: string;
   createdAt: Date;
 }
@@ -23,6 +25,7 @@ const Diary = () => {
   const [text, setText] = useState("");
   const [location, setLocation] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [attachmentPreviews, setAttachmentPreviews] = useState<Array<{file: File, url: string}>>([]);
   const [entries, setEntries] = useState<DiaryEntry[]>(() => {
     const saved = localStorage.getItem('diaryEntries');
     return saved ? JSON.parse(saved) : [];
@@ -31,7 +34,16 @@ const Diary = () => {
   const handleAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
-      setAttachments(prev => [...prev, ...Array.from(files)]);
+      const newFiles = Array.from(files);
+      setAttachments(prev => [...prev, ...newFiles]);
+      
+      // Create previews for images
+      newFiles.forEach(file => {
+        if (file.type.startsWith('image/')) {
+          const url = URL.createObjectURL(file);
+          setAttachmentPreviews(prev => [...prev, {file, url}]);
+        }
+      });
     }
   };
 
@@ -45,10 +57,19 @@ const Diary = () => {
       return;
     }
 
+    // Create structured attachment data with URLs for images
+    const attachmentData = attachments.map(file => {
+      const preview = attachmentPreviews.find(p => p.file === file);
+      return {
+        name: file.name,
+        url: preview?.url || undefined
+      };
+    });
+
     const newEntry: DiaryEntry = {
       id: Date.now().toString(),
       text,
-      attachments: attachments.map(file => file.name),
+      attachments: attachmentData,
       location: location || "Não informado",
       createdAt: new Date(),
     };
@@ -60,6 +81,7 @@ const Diary = () => {
     setText("");
     setLocation("");
     setAttachments([]);
+    setAttachmentPreviews([]);
 
     toast({
       title: "Diário salvo",
@@ -80,6 +102,24 @@ const Diary = () => {
 
   const generatePDF = (entry: DiaryEntry) => {
     const content = document.createElement('div');
+    
+    let imagesHtml = '';
+    if (entry.attachments.some(att => att.url)) {
+      imagesHtml = `
+        <h2>Imagens</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; margin-bottom: 20px;">
+          ${entry.attachments
+            .filter(att => att.url)
+            .map(att => `
+              <div style="margin-bottom: 10px;">
+                <img src="${att.url}" style="max-width: 300px; max-height: 200px; border: 1px solid #ccc; border-radius: 4px;" />
+                <p style="margin-top: 5px; font-size: 12px; color: #666;">${att.name}</p>
+              </div>
+            `).join('')}
+        </div>
+      `;
+    }
+    
     content.innerHTML = `
       <div style="padding: 20px; font-family: Arial, sans-serif;">
         <h1 style="text-align: center; color: #FF84C6;">Relatório Seguro</h1>
@@ -87,10 +127,13 @@ const Diary = () => {
         <p><strong>Local:</strong> ${entry.location}</p>
         <h2>Descrição da Ocorrência</h2>
         <p style="white-space: pre-wrap;">${entry.text}</p>
+        
+        ${imagesHtml}
+        
         ${entry.attachments.length > 0 ? `
           <h2>Anexos</h2>
           <ul>
-            ${entry.attachments.map(attachment => `<li>${attachment}</li>`).join('')}
+            ${entry.attachments.map(attachment => `<li>${attachment.name}</li>`).join('')}
           </ul>
         ` : ''}
       </div>
@@ -100,7 +143,7 @@ const Diary = () => {
       margin: 10,
       filename: `relato-${format(new Date(entry.createdAt), "dd-MM-yyyy")}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
+      html2canvas: { scale: 2, useCORS: true, logging: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
@@ -118,7 +161,7 @@ const Diary = () => {
         <div className="container mx-auto h-full">
           <div className="flex items-center justify-between h-full px-4">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/home')}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
               <ArrowLeft className="h-6 w-6 text-gray-700" />
@@ -177,10 +220,29 @@ const Diary = () => {
                 id="file-input"
                 type="file"
                 multiple
+                accept="image/*,.pdf,.doc,.docx,.txt"
                 className="hidden"
                 onChange={handleAttachment}
               />
             </div>
+
+            {attachmentPreviews.length > 0 && (
+              <div className="space-y-2 mt-2">
+                <p className="text-sm font-medium text-gray-700">Pré-visualização:</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {attachmentPreviews.map((preview, index) => (
+                    <div key={index} className="border rounded-md p-2">
+                      <img 
+                        src={preview.url} 
+                        alt={preview.file.name}
+                        className="h-40 w-full object-cover rounded mb-2" 
+                      />
+                      <p className="text-xs text-gray-600 truncate">{preview.file.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {attachments.length > 0 && (
               <div className="space-y-2">
@@ -236,13 +298,33 @@ const Diary = () => {
                       <p className="text-sm text-gray-600">{entry.location}</p>
                     </div>
                     <p className="text-gray-700 whitespace-pre-wrap">{entry.text}</p>
+                    
+                    {entry.attachments.some(att => att.url) && (
+                      <div className="mt-4">
+                        <h4 className="text-sm font-medium mb-2">Imagens:</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                          {entry.attachments
+                            .filter(att => att.url)
+                            .map((att, idx) => (
+                              <div key={idx} className="border rounded-md overflow-hidden">
+                                <img 
+                                  src={att.url} 
+                                  alt={att.name}
+                                  className="h-32 w-full object-cover" 
+                                />
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                    
                     {entry.attachments.length > 0 && (
                       <div className="mt-2">
                         <p className="text-sm font-medium text-gray-600">Anexos:</p>
                         <ul className="mt-1 space-y-1">
                           {entry.attachments.map((attachment, index) => (
                             <li key={index} className="text-sm text-gray-500">
-                              {attachment}
+                              {attachment.name}
                             </li>
                           ))}
                         </ul>

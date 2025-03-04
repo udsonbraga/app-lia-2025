@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,15 +8,36 @@
   --primary-light: var(--safelady-light);
   
   /* Color variables */
-  --rose-500: rgb(244, 63, 94);
-  --rose-100: rgb(255, 240, 245); /* Lighter pink */
-  --blue-500: rgb(59, 130, 246);
-  --blue-100: rgb(219, 234, 254);
-  --green-500: rgb(34, 197, 94);
-  --green-100: rgb(220, 252, 231);
   --safelady: #FF84C6;
   --safelady-light: #FFAED9;
   --safelady-dark: #FF5AA9;
+  
+  --rose-500: rgb(244, 63, 94);
+  --rose-100: rgb(255, 240, 245);
+  
+  --blue-500: rgb(59, 130, 246);
+  --blue-100: rgb(219, 234, 254);
+  
+  --green-500: rgb(34, 197, 94);
+  --green-100: rgb(220, 252, 231);
+  
+  --purple-500: rgb(139, 92, 246);
+  --purple-100: rgb(237, 233, 254);
+  
+  --orange-500: rgb(249, 115, 22);
+  --orange-100: rgb(255, 237, 213);
+  
+  --red-500: rgb(239, 68, 68);
+  --red-100: rgb(254, 226, 226);
+  
+  --yellow-500: rgb(234, 179, 8);
+  --yellow-100: rgb(254, 249, 195);
+  
+  --cyan-500: rgb(6, 182, 212);
+  --cyan-100: rgb(207, 250, 254);
+  
+  --indigo-500: rgb(79, 70, 229);
+  --indigo-100: rgb(224, 231, 255);
 }
 
 /* Font size classes */
@@ -42,6 +64,30 @@ html.theme-blue .text-primary {
 
 html.theme-green .text-primary {
   color: var(--green-500);
+}
+
+html.theme-purple .text-primary {
+  color: var(--purple-500);
+}
+
+html.theme-orange .text-primary {
+  color: var(--orange-500);
+}
+
+html.theme-red .text-primary {
+  color: var(--red-500);
+}
+
+html.theme-yellow .text-primary {
+  color: var(--yellow-500);
+}
+
+html.theme-cyan .text-primary {
+  color: var(--cyan-500);
+}
+
+html.theme-indigo .text-primary {
+  color: var(--indigo-500);
 }
 
 @layer base {
@@ -114,4 +160,34 @@ html.theme-green .text-primary {
 
 .animate-fade-in {
   animation: fadeIn 0.5s ease forwards;
+}
+
+/* Logo animation for splash screen */
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+.logo-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Splash screen fade */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.fade-out {
+  animation: fadeOut 0.5s ease-out forwards;
 }

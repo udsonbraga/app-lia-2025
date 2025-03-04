@@ -6,10 +6,15 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 const colorThemes = [
-  { name: "Padrão", primary: "bg-safelady", secondary: "bg-safelady-light", value: "safelady" },
+  { name: "Rosa (Padrão)", primary: "bg-safelady", secondary: "bg-safelady-light", value: "safelady" },
   { name: "Roxo", primary: "bg-purple-500", secondary: "bg-purple-100", value: "purple" },
   { name: "Azul", primary: "bg-blue-500", secondary: "bg-blue-100", value: "blue" },
   { name: "Verde", primary: "bg-green-500", secondary: "bg-green-100", value: "green" },
+  { name: "Laranja", primary: "bg-orange-500", secondary: "bg-orange-100", value: "orange" },
+  { name: "Vermelho", primary: "bg-red-500", secondary: "bg-red-100", value: "red" },
+  { name: "Amarelo", primary: "bg-yellow-500", secondary: "bg-yellow-100", value: "yellow" },
+  { name: "Ciano", primary: "bg-cyan-500", secondary: "bg-cyan-100", value: "cyan" },
+  { name: "Indigo", primary: "bg-indigo-500", secondary: "bg-indigo-100", value: "indigo" },
 ];
 
 const Customize = () => {
@@ -54,6 +59,16 @@ const Customize = () => {
       document.body.style.background = 'linear-gradient(to bottom, rgb(59, 130, 246), #ffffff)';
     } else if (theme.value === 'green') {
       document.body.style.background = 'linear-gradient(to bottom, rgb(34, 197, 94), #ffffff)';
+    } else if (theme.value === 'orange') {
+      document.body.style.background = 'linear-gradient(to bottom, rgb(249, 115, 22), #ffffff)';
+    } else if (theme.value === 'red') {
+      document.body.style.background = 'linear-gradient(to bottom, rgb(239, 68, 68), #ffffff)';
+    } else if (theme.value === 'yellow') {
+      document.body.style.background = 'linear-gradient(to bottom, rgb(234, 179, 8), #ffffff)';
+    } else if (theme.value === 'cyan') {
+      document.body.style.background = 'linear-gradient(to bottom, rgb(6, 182, 212), #ffffff)';
+    } else if (theme.value === 'indigo') {
+      document.body.style.background = 'linear-gradient(to bottom, rgb(79, 70, 229), #ffffff)';
     }
     
     localStorage.setItem("themeIndex", index.toString());
@@ -96,7 +111,7 @@ const Customize = () => {
       title: "Configurações salvas",
       description: "Suas preferências foram salvas com sucesso.",
     });
-    navigate("/");
+    navigate("/home");
   };
 
   return (
@@ -110,7 +125,7 @@ const Customize = () => {
           {/* Temas de Cores */}
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <h2 className="text-lg font-semibold mb-4">Tema de Cores</h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               {colorThemes.map((theme, index) => (
                 <button
                   key={theme.name}
@@ -122,7 +137,7 @@ const Customize = () => {
                   <div className="flex flex-col items-center gap-2">
                     <div className={`w-full h-8 rounded ${theme.primary}`} />
                     <div className={`w-full h-4 rounded ${theme.secondary}`} />
-                    <span className="text-sm font-medium">{theme.name}</span>
+                    <span className="text-xs font-medium">{theme.name}</span>
                   </div>
                 </button>
               ))}

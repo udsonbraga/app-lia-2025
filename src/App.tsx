@@ -9,6 +9,8 @@ import Customize from "@/pages/Customize";
 import Diary from "@/pages/Diary";
 import SafeContact from "@/pages/SafeContact";
 import SupportNetwork from "@/pages/SupportNetwork";
+import { SplashScreen } from "@/components/SplashScreen";
+import Help from "@/pages/Help";
 import "./App.css";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -21,10 +23,11 @@ function App() {
     <Router>
       <div className="bg-white min-h-screen">
         <Routes>
+          <Route path="/" element={<SplashScreen />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
-            path="/"
+            path="/home"
             element={
               <PrivateRoute>
                 <Index />
@@ -60,6 +63,14 @@ function App() {
             element={
               <PrivateRoute>
                 <SupportNetwork />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/help"
+            element={
+              <PrivateRoute>
+                <Help />
               </PrivateRoute>
             }
           />

@@ -41,17 +41,41 @@ export function RegisterForm() {
       return;
     }
     
-    const newErrors = validateFormData(formData);
-    setErrors(newErrors);
+    const validationErrors = validateForm(formData);
+    setErrors(validationErrors);
     
-    if (Object.keys(newErrors).length > 0) {
+    if (Object.keys(validationErrors).length > 0) {
       return;
     }
 
     setIsLoading(true);
     
     try {
-      // Simular envio para o backend
+      // Check if user already exists
+      const storedUsers = localStorage.getItem('users');
+      const users = storedUsers ? JSON.parse(storedUsers) : [];
+      
+      const userExists = users.some((user: any) => user.email === formData.email);
+      
+      if (userExists) {
+        toast({
+          title: "Email já cadastrado",
+          description: "Já existe uma conta com este email. Tente fazer login.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Add the new user
+      const newUser = {...formData};
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      // Set the user as authenticated and store name
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userName', formData.name);
+      
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       toast({
@@ -59,7 +83,7 @@ export function RegisterForm() {
         description: "Bem-vinda ao SafeLady.",
       });
       
-      navigate("/");
+      navigate("/home");
     } catch (error) {
       toast({
         title: "Erro ao realizar cadastro",
@@ -69,29 +93,6 @@ export function RegisterForm() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Validação de formulário específica para este componente
-  const validateFormData = (data: FormData): Partial<FormData> => {
-    const errors: Partial<FormData> = {};
-
-    if (!data.name) {
-      errors.name = "Nome é obrigatório";
-    }
-
-    if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      errors.email = "E-mail inválido";
-    }
-
-    if (!data.phone || !/^\(\d{2}\) \d{5}-\d{4}$/.test(data.phone)) {
-      errors.phone = "Telefone inválido - Use o formato (99) 99999-9999";
-    }
-
-    if (!data.password || data.password.length < 6) {
-      errors.password = "A senha deve ter pelo menos 6 caracteres";
-    }
-
-    return errors;
   };
 
   return (
@@ -187,7 +188,7 @@ export function RegisterForm() {
               href="#" 
               onClick={(e) => {
                 e.preventDefault();
-                window.open('/privacy-policy', '_blank');
+                navigate('/help');
               }}
               className="text-xs text-[#8B5CF6] underline flex items-center gap-1"
             >
