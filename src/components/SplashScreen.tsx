@@ -23,7 +23,7 @@ export const SplashScreen = () => {
         fadeOut ? "opacity-0" : "opacity-100"
       }`}
     >
-      <div className="w-40 h-40 mb-6">
+      <div className="w-48 h-48 mb-6 logo-pulse">
         <img
           src="/logo-shield.png"
           alt="Safe Lady Logo"

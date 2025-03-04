@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield, Mail, Phone } from "lucide-react";
@@ -138,7 +137,7 @@ const Login = () => {
     <div className="min-h-screen bg-gradient-to-b from-[#FF84C6] to-white flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <Shield className="h-12 w-12 text-white" />
+          <Shield className="h-16 w-16 text-[#FEF7CD] drop-shadow-md" />
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
           Safe Lady
@@ -269,13 +268,21 @@ const Login = () => {
                   </div>
                 </div>
 
-                <div>
+                <div className="space-y-4">
                   <Button
                     type="submit"
-                    className="w-full bg-[#FF84C6] hover:bg-[#FF5AA9]"
+                    className="w-full bg-[#FF84C6] hover:bg-[#FF5AA9] transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                     disabled={isLoading}
                   >
                     {isLoading ? "Entrando..." : "Entrar"}
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="w-full transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                    onClick={() => navigate("/register")}
+                  >
+                    Criar nova conta
                   </Button>
                 </div>
               </form>
@@ -295,7 +302,7 @@ const Login = () => {
                     type="button"
                     onClick={handleGoogleLogin}
                     disabled={isLoading}
-                    className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                   >
                     <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" width="24" height="24">
                       <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
@@ -308,16 +315,6 @@ const Login = () => {
                     Google
                   </button>
                 </div>
-              </div>
-
-              <div className="mt-6">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => navigate("/register")}
-                >
-                  Criar nova conta
-                </Button>
               </div>
             </>
           )}

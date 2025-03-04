@@ -1,7 +1,7 @@
 
 import { SupportLocation } from "./types";
 
-// Localizações em Manaus-AM
+// Localizações em Manaus-AM com coordenadas atualizadas
 export const supportLocations: SupportLocation[] = [
   {
     id: "1",
@@ -45,8 +45,8 @@ export const supportLocations: SupportLocation[] = [
     type: "hospital",
     address: "Av. Mário Ypiranga, 1581 - Adrianópolis, Manaus - AM",
     phone: "(92) 3643-7100",
-    latitude: -3.1001,
-    longitude: -60.0108
+    latitude: -3.0957,
+    longitude: -60.0238
   },
   {
     id: "6",
@@ -54,8 +54,8 @@ export const supportLocations: SupportLocation[] = [
     type: "hospital",
     address: "Av. Cosme Ferreira, 3937 - Coroado, Manaus - AM",
     phone: "(92) 3249-9100",
-    latitude: -3.0703,
-    longitude: -59.9439
+    latitude: -3.0754,
+    longitude: -59.9425
   },
   {
     id: "7",
@@ -72,8 +72,8 @@ export const supportLocations: SupportLocation[] = [
     type: "hospital",
     address: "Rua Dona Otília, s/n - Tarumã, Manaus - AM",
     phone: "(92) 3215-2500",
-    latitude: -3.0155,
-    longitude: -60.0453
+    latitude: -3.0171,
+    longitude: -60.0472
   },
   {
     id: "9",
@@ -81,8 +81,8 @@ export const supportLocations: SupportLocation[] = [
     type: "hospital",
     address: "Av. Camapuã, 1424 - Cidade Nova, Manaus - AM",
     phone: "(92) 3641-8011",
-    latitude: -3.0258,
-    longitude: -59.9634
+    latitude: -3.0238,
+    longitude: -59.9642
   },
   {
     id: "10",

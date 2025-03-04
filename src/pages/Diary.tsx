@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Paperclip, Save, MapPin, Trash2, FileDown } from "lucide-react";
@@ -122,7 +121,7 @@ const Diary = () => {
     
     content.innerHTML = `
       <div style="padding: 20px; font-family: Arial, sans-serif;">
-        <h1 style="text-align: center; color: #FF84C6;">Relatório Seguro</h1>
+        <h1 style="text-align: center; color: #000000; font-size: 28px; font-weight: bold;">Relatório Seguro</h1>
         <p><strong>Data:</strong> ${format(new Date(entry.createdAt), "dd/MM/yyyy 'às' HH:mm")}</p>
         <p><strong>Local:</strong> ${entry.location}</p>
         <h2>Descrição da Ocorrência</h2>

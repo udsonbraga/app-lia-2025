@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Info, Shield, Users, Book } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -49,7 +48,7 @@ const Help = () => {
                 </p>
                 
                 <p>
-                  Fundado em 2023 por uma equipe multidisciplinar de profissionais comprometidos com a causa do combate à violência contra a mulher, nosso aplicativo combina tecnologia e conscientização para criar uma rede de apoio eficiente.
+                  Fundado em 2025 pelos estudantes Udson Braga de Miranda e Marco Duarte do curso técnico de Desenvolvimento de Software na Fundação Desembargador Paulo Feitosa FPF Tech, nosso aplicativo combina tecnologia e conscientização para criar uma rede de apoio eficiente.
                 </p>
                 
                 <p>
@@ -82,7 +81,7 @@ const Help = () => {
               
               <div className="space-y-4 text-gray-700">
                 <p>
-                  <strong>Última atualização:</strong> Julho de 2023
+                  <strong>Última atualização:</strong> Fevereiro de 2025
                 </p>
                 
                 <p>
