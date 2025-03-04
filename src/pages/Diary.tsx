@@ -1,15 +1,19 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Paperclip, Save } from "lucide-react";
+import { ArrowLeft, Paperclip, Save, MapPin, Trash2, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import html2pdf from 'html2pdf.js';
 
 interface DiaryEntry {
   id: string;
   text: string;
   attachments: string[];
+  location: string;
   createdAt: Date;
 }
 
@@ -17,6 +21,7 @@ const Diary = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [text, setText] = useState("");
+  const [location, setLocation] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
   const [entries, setEntries] = useState<DiaryEntry[]>(() => {
     const saved = localStorage.getItem('diaryEntries');
@@ -44,6 +49,7 @@ const Diary = () => {
       id: Date.now().toString(),
       text,
       attachments: attachments.map(file => file.name),
+      location: location || "Não informado",
       createdAt: new Date(),
     };
 
@@ -52,11 +58,57 @@ const Diary = () => {
     localStorage.setItem('diaryEntries', JSON.stringify(updatedEntries));
 
     setText("");
+    setLocation("");
     setAttachments([]);
 
     toast({
       title: "Diário salvo",
       description: "Suas anotações foram salvas com sucesso.",
+    });
+  };
+
+  const handleDeleteEntry = (id: string) => {
+    const updatedEntries = entries.filter(entry => entry.id !== id);
+    setEntries(updatedEntries);
+    localStorage.setItem('diaryEntries', JSON.stringify(updatedEntries));
+
+    toast({
+      title: "Relato removido",
+      description: "O relato foi removido com sucesso.",
+    });
+  };
+
+  const generatePDF = (entry: DiaryEntry) => {
+    const content = document.createElement('div');
+    content.innerHTML = `
+      <div style="padding: 20px; font-family: Arial, sans-serif;">
+        <h1 style="text-align: center; color: #FF84C6;">Relatório Seguro</h1>
+        <p><strong>Data:</strong> ${format(new Date(entry.createdAt), "dd/MM/yyyy 'às' HH:mm")}</p>
+        <p><strong>Local:</strong> ${entry.location}</p>
+        <h2>Descrição da Ocorrência</h2>
+        <p style="white-space: pre-wrap;">${entry.text}</p>
+        ${entry.attachments.length > 0 ? `
+          <h2>Anexos</h2>
+          <ul>
+            ${entry.attachments.map(attachment => `<li>${attachment}</li>`).join('')}
+          </ul>
+        ` : ''}
+      </div>
+    `;
+
+    const opt = {
+      margin: 10,
+      filename: `relato-${format(new Date(entry.createdAt), "dd-MM-yyyy")}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().from(content).set(opt).save();
+
+    toast({
+      title: "PDF gerado",
+      description: "O relatório foi exportado com sucesso.",
     });
   };
 
@@ -79,12 +131,36 @@ const Diary = () => {
 
       <div className="container mx-auto px-4 pt-20 pb-20">
         <div className="max-w-2xl mx-auto space-y-6">
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Escreva seus pensamentos aqui..."
-            className="w-full h-48 p-4 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
-          />
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="location" className="block text-sm font-medium text-gray-700">
+                Local da Ocorrência
+              </label>
+              <div className="mt-1 flex items-center">
+                <MapPin className="h-5 w-5 text-gray-400 mr-2" />
+                <Input
+                  id="location"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Onde ocorreu o incidente?"
+                  className="flex-1"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="diary-text" className="block text-sm font-medium text-gray-700">
+                Descreva o Ocorrido
+              </label>
+              <textarea
+                id="diary-text"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Escreva seus pensamentos aqui..."
+                className="w-full h-48 p-4 mt-1 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+          </div>
 
           <div className="space-y-4">
             <div className="flex items-center gap-4">
@@ -138,6 +214,26 @@ const Diary = () => {
                       <time className="text-sm text-gray-500">
                         {format(new Date(entry.createdAt), "dd/MM/yyyy 'às' HH:mm")}
                       </time>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => generatePDF(entry)}
+                          className="p-1 text-gray-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors"
+                          title="Exportar como PDF"
+                        >
+                          <FileDown className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteEntry(entry.id)}
+                          className="p-1 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                          title="Remover relato"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2 mb-2">
+                      <MapPin className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-gray-600">{entry.location}</p>
                     </div>
                     <p className="text-gray-700 whitespace-pre-wrap">{entry.text}</p>
                     {entry.attachments.length > 0 && (

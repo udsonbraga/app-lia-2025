@@ -13,7 +13,6 @@ interface FormData {
   email: string;
   phone: string;
   password: string;
-  emergencyContact: string;
 }
 
 export function RegisterForm() {
@@ -26,7 +25,6 @@ export function RegisterForm() {
     email: "",
     phone: "",
     password: "",
-    emergencyContact: "",
   });
 
   const [errors, setErrors] = useState<Partial<FormData>>({});
@@ -43,7 +41,7 @@ export function RegisterForm() {
       return;
     }
     
-    const newErrors = validateForm(formData);
+    const newErrors = validateFormData(formData);
     setErrors(newErrors);
     
     if (Object.keys(newErrors).length > 0) {
@@ -71,6 +69,29 @@ export function RegisterForm() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Validação de formulário específica para este componente
+  const validateFormData = (data: FormData): Partial<FormData> => {
+    const errors: Partial<FormData> = {};
+
+    if (!data.name) {
+      errors.name = "Nome é obrigatório";
+    }
+
+    if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      errors.email = "E-mail inválido";
+    }
+
+    if (!data.phone || !/^\(\d{2}\) \d{5}-\d{4}$/.test(data.phone)) {
+      errors.phone = "Telefone inválido - Use o formato (99) 99999-9999";
+    }
+
+    if (!data.password || data.password.length < 6) {
+      errors.password = "A senha deve ter pelo menos 6 caracteres";
+    }
+
+    return errors;
   };
 
   return (
@@ -145,22 +166,6 @@ export function RegisterForm() {
           />
           {errors.password && (
             <p className="text-sm text-red-500 mt-1">{errors.password}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Contato de Emergência
-          </label>
-          <Input
-            type="tel"
-            value={formData.emergencyContact}
-            onChange={(e) => setFormData({ ...formData, emergencyContact: formatPhone(e.target.value) })}
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent"
-            placeholder="(00) 00000-0000"
-          />
-          {errors.emergencyContact && (
-            <p className="text-sm text-red-500 mt-1">{errors.emergencyContact}</p>
           )}
         </div>
 

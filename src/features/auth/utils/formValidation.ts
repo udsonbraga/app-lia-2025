@@ -4,7 +4,6 @@ interface FormData {
   email: string;
   phone: string;
   password: string;
-  emergencyContact: string;
 }
 
 export const validateEmail = (email: string): boolean => {
@@ -40,10 +39,6 @@ export const validateForm = (formData: FormData): Partial<FormData> => {
 
   if (!formData.password || formData.password.length < 6) {
     errors.password = "A senha deve ter pelo menos 6 caracteres";
-  }
-
-  if (!formData.emergencyContact || !validatePhone(formData.emergencyContact)) {
-    errors.emergencyContact = "Contato de emergência inválido - Use o formato (99) 99999-9999";
   }
 
   return errors;

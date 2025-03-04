@@ -5,11 +5,20 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, CheckCircle2, List, UserPlus, Trash2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue 
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface SafeContact {
   name: string;
   number: string;
   telegramId: string;
+  relationship: string;
 }
 
 const MAX_CONTACTS = 3;
@@ -20,6 +29,7 @@ const SafeContact = () => {
   const [contactNumber, setContactNumber] = useState("");
   const [contactName, setContactName] = useState("");
   const [telegramId, setTelegramId] = useState("");
+  const [relationship, setRelationship] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
   const [showContactsList, setShowContactsList] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -32,10 +42,12 @@ const SafeContact = () => {
     const savedContactName = localStorage.getItem("contactName");
     const savedContactNumber = localStorage.getItem("contactNumber");
     const savedTelegramId = localStorage.getItem("telegramId");
+    const savedRelationship = localStorage.getItem("relationship");
     
     if (savedContactName) setContactName(savedContactName);
     if (savedContactNumber) setContactNumber(savedContactNumber);
     if (savedTelegramId) setTelegramId(savedTelegramId);
+    if (savedRelationship) setRelationship(savedRelationship);
     
     // Carregar lista de contatos
     const savedContacts = localStorage.getItem("safeContacts");
@@ -60,6 +72,7 @@ const SafeContact = () => {
     setContactName("");
     setContactNumber("");
     setTelegramId("");
+    setRelationship("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -75,11 +88,22 @@ const SafeContact = () => {
       return;
     }
     
+    // Validar campos obrigatórios
+    if (!contactName || !contactNumber || !telegramId || !relationship) {
+      toast({
+        title: "Campos incompletos",
+        description: "Preencha todos os campos para cadastrar o contato.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Criar novo contato
     const newContact: SafeContact = {
       name: contactName,
       number: contactNumber,
-      telegramId: telegramId
+      telegramId: telegramId,
+      relationship: relationship
     };
     
     // Adicionar à lista de contatos
@@ -90,6 +114,7 @@ const SafeContact = () => {
     localStorage.setItem("contactName", contactName);
     localStorage.setItem("contactNumber", contactNumber);
     localStorage.setItem("telegramId", telegramId);
+    localStorage.setItem("relationship", relationship);
     localStorage.setItem("safeContacts", JSON.stringify(updatedContacts));
     
     toast({
@@ -149,6 +174,20 @@ const SafeContact = () => {
   const cancelDelete = () => {
     setShowDeleteConfirmation(false);
     setContactToDelete(null);
+  };
+
+  // Função para formatar o texto de parentesco
+  const getRelationshipLabel = (relationship: string) => {
+    const options: Record<string, string> = {
+      "pai": "Pai",
+      "mae": "Mãe",
+      "irmao": "Irmão/Irmã",
+      "tio": "Tio",
+      "tia": "Tia",
+      "outros": "Outros"
+    };
+    
+    return options[relationship] || relationship;
   };
 
   return (
@@ -234,6 +273,11 @@ const SafeContact = () => {
                       <h3 className="font-medium text-gray-800">{contact.name}</h3>
                       <p className="text-gray-600">{contact.number}</p>
                       <p className="text-gray-600 text-sm">ID Telegram: {contact.telegramId}</p>
+                      {contact.relationship && (
+                        <p className="text-gray-600 text-sm">
+                          Parentesco: {getRelationshipLabel(contact.relationship)}
+                        </p>
+                      )}
                     </div>
                     <button 
                       onClick={() => confirmDeleteContact(index)}
@@ -317,6 +361,29 @@ const SafeContact = () => {
                 <p className="text-xs text-gray-500 mt-1">
                   Para encontrar seu ID do Telegram, envie uma mensagem para @SafeLady_bot e digite /start
                 </p>
+              </div>
+
+              <div>
+                <Label htmlFor="relationship" className="block text-sm font-medium text-gray-700">
+                  Parentesco
+                </Label>
+                <Select 
+                  value={relationship} 
+                  onValueChange={(value) => setRelationship(value)}
+                  required
+                >
+                  <SelectTrigger className="w-full mt-1">
+                    <SelectValue placeholder="Selecione o parentesco" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pai">Pai</SelectItem>
+                    <SelectItem value="mae">Mãe</SelectItem>
+                    <SelectItem value="irmao">Irmão/Irmã</SelectItem>
+                    <SelectItem value="tio">Tio</SelectItem>
+                    <SelectItem value="tia">Tia</SelectItem>
+                    <SelectItem value="outros">Outros</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <Button type="submit" className="w-full">
