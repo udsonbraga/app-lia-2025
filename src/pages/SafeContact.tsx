@@ -7,24 +7,24 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SafeContact, UserPremiumStatus } from "@/features/support-network/types";
+import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 
-interface Contact {
-  id: string;
-  name: string;
-  phone: string;
-  telegramId: string;
-  relationship: string;
-}
-
-const SafeContact = () => {
+const SafeContactPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [contacts, setContacts] = useState<Contact[]>(() => {
+  const { isDisguised } = useDisguiseMode();
+  const [contacts, setContacts] = useState<SafeContact[]>(() => {
     const savedContacts = localStorage.getItem("safeContacts");
     return savedContacts ? JSON.parse(savedContacts) : [];
   });
 
-  const [newContact, setNewContact] = useState<Omit<Contact, "id">>({
+  const [premiumStatus, setPremiumStatus] = useState<UserPremiumStatus>(() => {
+    const savedStatus = localStorage.getItem("premiumStatus");
+    return savedStatus ? JSON.parse(savedStatus) : { isPremium: false, maxContacts: 1 };
+  });
+
+  const [newContact, setNewContact] = useState<Omit<SafeContact, "id">>({
     name: "",
     phone: "",
     telegramId: "",
@@ -33,10 +33,16 @@ const SafeContact = () => {
 
   const [isAdding, setIsAdding] = useState(false);
   const [showPremiumDialog, setShowPremiumDialog] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     localStorage.setItem("safeContacts", JSON.stringify(contacts));
   }, [contacts]);
+
+  useEffect(() => {
+    localStorage.setItem("premiumStatus", JSON.stringify(premiumStatus));
+  }, [premiumStatus]);
 
   const handleAddContact = () => {
     if (!newContact.name || !newContact.phone || !newContact.telegramId || !newContact.relationship) {
@@ -48,7 +54,7 @@ const SafeContact = () => {
       return;
     }
 
-    if (contacts.length >= 1) {
+    if (contacts.length >= premiumStatus.maxContacts) {
       setShowPremiumDialog(true);
       return;
     }
@@ -84,13 +90,47 @@ const SafeContact = () => {
     return value;
   };
 
+  const handleNavigateBack = () => {
+    if (isDisguised) {
+      setShowPasswordDialog(true);
+    } else {
+      navigate('/home');
+    }
+  };
+
+  const handlePasswordSubmit = () => {
+    const savedPassword = localStorage.getItem('disguisePassword');
+    if (password === savedPassword) {
+      navigate('/home');
+    } else {
+      toast({
+        title: "Senha incorreta",
+        description: "A senha fornecida não está correta.",
+        variant: "destructive",
+      });
+    }
+    setPassword("");
+    setShowPasswordDialog(false);
+  };
+
+  const upgradeToPremium = () => {
+    // In a real app, this would connect to a payment processor
+    // For now, we'll just simulate an upgrade
+    setPremiumStatus({ isPremium: true, maxContacts: 3 });
+    toast({
+      title: "Assinatura Premium ativada",
+      description: "Agora você pode adicionar até 3 contatos de segurança!",
+    });
+    setShowPremiumDialog(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-safelady-light to-white">
       <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-50">
         <div className="container mx-auto h-full">
           <div className="flex items-center justify-between h-full px-4">
             <button
-              onClick={() => navigate('/home')}
+              onClick={handleNavigateBack}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
               <ArrowLeft className="h-6 w-6 text-gray-700" />
@@ -109,8 +149,9 @@ const SafeContact = () => {
           </div>
 
           <p className="text-gray-600 mb-8">
-            Adicione 1 contato de confiança que receberá alertas em
-            situações de emergência.
+            {premiumStatus.isPremium 
+              ? `Adicione até ${premiumStatus.maxContacts} contatos de confiança que receberão alertas em situações de emergência.`
+              : "Adicione 1 contato de confiança que receberá alertas em situações de emergência."}
           </p>
 
           {contacts.length > 0 ? (
@@ -234,7 +275,7 @@ const SafeContact = () => {
               </div>
             </div>
           ) : (
-            contacts.length < 1 && (
+            contacts.length < premiumStatus.maxContacts && (
               <Button
                 variant="outline"
                 onClick={() => setIsAdding(true)}
@@ -260,13 +301,45 @@ const SafeContact = () => {
           <div className="flex flex-col items-center justify-center p-4 space-y-4">
             <Shield className="h-16 w-16 text-amber-500" />
             <p className="text-center">
-              Com o plano premium você poderá adicionar até 5 contatos de segurança, 
+              Com o plano premium você poderá adicionar até 3 contatos de segurança, 
               além de ter acesso a recursos exclusivos.
             </p>
           </div>
-          <DialogFooter className="flex flex-col sm:flex-row sm:justify-center">
-            <Button onClick={() => setShowPremiumDialog(false)}>
-              Entendi
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-center gap-2">
+            <Button variant="outline" onClick={() => setShowPremiumDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={upgradeToPremium} className="bg-amber-500 hover:bg-amber-600">
+              Adquirir Premium (R$9,90/mês)
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Password Dialog for Disguise Mode */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">Verificação de Senha</DialogTitle>
+            <DialogDescription className="text-center">
+              Para sair do modo disfarce, digite sua senha.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-4">
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Digite sua senha"
+              className="mb-4"
+            />
+          </div>
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-center gap-2">
+            <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handlePasswordSubmit}>
+              Confirmar
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -275,4 +348,4 @@ const SafeContact = () => {
   );
 };
 
-export default SafeContact;
+export default SafeContactPage;

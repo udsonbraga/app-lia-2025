@@ -9,26 +9,32 @@ export function MainNavigation() {
     <div className="flex flex-col space-y-4">
       <button
         onClick={() => navigate("/support-network")}
-        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
+        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center"
       >
-        <Users className="h-6 w-6 text-red-500" />
-        <span className="font-medium text-gray-800">Rede de Apoio</span>
+        <div className="flex items-center gap-3 mx-auto">
+          <Users className="h-6 w-6 text-red-500" />
+          <span className="font-medium text-gray-800">Rede de Apoio</span>
+        </div>
       </button>
 
       <button
         onClick={() => navigate("/diary")}
-        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
+        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center"
       >
-        <BookOpen className="h-6 w-6 text-red-500" />
-        <span className="font-medium text-gray-800">Diário Seguro</span>
+        <div className="flex items-center gap-3 mx-auto">
+          <BookOpen className="h-6 w-6 text-red-500" />
+          <span className="font-medium text-gray-800">Diário Seguro</span>
+        </div>
       </button>
 
       <button
         onClick={() => navigate("/safe-contact")}
-        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-3"
+        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center"
       >
-        <Phone className="h-6 w-6 text-red-500" />
-        <span className="font-medium text-gray-800">Contato Seguro</span>
+        <div className="flex items-center gap-3 mx-auto">
+          <Phone className="h-6 w-6 text-red-500" />
+          <span className="font-medium text-gray-800">Contato Seguro</span>
+        </div>
       </button>
     </div>
   );

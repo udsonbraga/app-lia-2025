@@ -11,3 +11,16 @@ export interface SupportLocation {
   longitude: number;
   mapUrl?: string;  // Optional URL for direct Google Maps link
 }
+
+export interface SafeContact {
+  id: string;
+  name: string;
+  phone: string;
+  telegramId: string;
+  relationship: string;
+}
+
+export interface UserPremiumStatus {
+  isPremium: boolean;
+  maxContacts: number;
+}
