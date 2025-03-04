@@ -1,14 +1,13 @@
 
-export type SupportLocationType = "police" | "hospital" | "ngo";
+export type ActiveTab = "police" | "hospitals" | "ngos" | "rights";
 
-export type SupportLocation = {
+export interface SupportLocation {
   id: string;
   name: string;
-  type: SupportLocationType;
+  type: "police" | "hospital" | "ngo";
   address: string;
   phone: string;
   latitude: number;
   longitude: number;
+  mapUrl?: string;  // Optional URL for direct Google Maps link
 }
-
-export type ActiveTab = "police" | "hospitals" | "ngos" | "rights";

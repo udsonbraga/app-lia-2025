@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Info, Shield, Users, Book } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -48,7 +49,7 @@ const Help = () => {
                 </p>
                 
                 <p>
-                  Fundado em 2025 pelos estudantes Udson Braga de Miranda e Marco Duarte do curso técnico de Desenvolvimento de Software na Fundação Desembargador Paulo Feitosa FPF Tech, nosso aplicativo combina tecnologia e conscientização para criar uma rede de apoio eficiente.
+                  Fundado em 2025 pelos estudantes Udson Braga de Miranda e Marco Aurélio de Souza Duarte do curso técnico de Desenvolvimento de Software na Fundação Desembargador Paulo Feitoza FPF Tech, nosso aplicativo combina tecnologia e conscientização para criar uma rede de apoio eficiente.
                 </p>
                 
                 <p>

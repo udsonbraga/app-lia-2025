@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Contact {
   id: string;
@@ -31,6 +32,7 @@ const SafeContact = () => {
   });
 
   const [isAdding, setIsAdding] = useState(false);
+  const [showPremiumDialog, setShowPremiumDialog] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("safeContacts", JSON.stringify(contacts));
@@ -46,12 +48,8 @@ const SafeContact = () => {
       return;
     }
 
-    if (contacts.length >= 3) {
-      toast({
-        title: "Limite de contatos atingido",
-        description: "Você pode adicionar no máximo 3 contatos de segurança.",
-        variant: "destructive",
-      });
+    if (contacts.length >= 1) {
+      setShowPremiumDialog(true);
       return;
     }
 
@@ -111,7 +109,7 @@ const SafeContact = () => {
           </div>
 
           <p className="text-gray-600 mb-8">
-            Adicione até 3 contatos de confiança que receberão alertas em
+            Adicione 1 contato de confiança que receberá alertas em
             situações de emergência.
           </p>
 
@@ -236,7 +234,7 @@ const SafeContact = () => {
               </div>
             </div>
           ) : (
-            contacts.length < 3 && (
+            contacts.length < 1 && (
               <Button
                 variant="outline"
                 onClick={() => setIsAdding(true)}
@@ -249,6 +247,30 @@ const SafeContact = () => {
           )}
         </div>
       </div>
+
+      {/* Premium Dialog */}
+      <Dialog open={showPremiumDialog} onOpenChange={setShowPremiumDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">Plano Premium Necessário</DialogTitle>
+            <DialogDescription className="text-center">
+              Para adicionar mais contatos de segurança, é necessário adquirir o plano premium do Safe Lady.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center p-4 space-y-4">
+            <Shield className="h-16 w-16 text-amber-500" />
+            <p className="text-center">
+              Com o plano premium você poderá adicionar até 5 contatos de segurança, 
+              além de ter acesso a recursos exclusivos.
+            </p>
+          </div>
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-center">
+            <Button onClick={() => setShowPremiumDialog(false)}>
+              Entendi
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
