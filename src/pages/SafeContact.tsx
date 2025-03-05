@@ -114,14 +114,15 @@ const SafeContactPage = () => {
   };
 
   const upgradeToPremium = () => {
-    // In a real app, this would connect to a payment processor
-    // For now, we'll just simulate an upgrade
-    setPremiumStatus({ isPremium: true, maxContacts: 3 });
-    toast({
-      title: "Assinatura Premium ativada",
-      description: "Agora você pode adicionar até 3 contatos de segurança!",
-    });
+    // Redirect to Google when premium subscription is clicked
+    window.open("https://www.google.com", "_blank");
     setShowPremiumDialog(false);
+    
+    // Do not upgrade their status to premium since they need to actually complete the purchase
+    toast({
+      title: "Redirecionando para assinatura Premium",
+      description: "Você será redirecionado para concluir sua assinatura Premium.",
+    });
   };
 
   // Function to check if user can add more contacts and show premium dialog if needed
