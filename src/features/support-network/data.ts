@@ -1,4 +1,27 @@
+
 import { SupportLocation } from "./types";
+
+export const openMap = (location: SupportLocation) => {
+  if (location.mapUrl) {
+    window.open(location.mapUrl, "_blank");
+  } else {
+    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`;
+    window.open(googleMapsUrl, "_blank");
+  }
+};
+
+export const getFilteredLocations = (
+  locations: SupportLocation[],
+  searchTerm: string
+) => {
+  if (!searchTerm) return locations;
+  
+  return locations.filter(
+    (location) =>
+      location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      location.address.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+};
 
 export const policeLocations: SupportLocation[] = [
   {
