@@ -13,7 +13,7 @@ export function MainNavigation() {
       >
         <div className="flex items-center gap-3 mx-auto">
           <Users className="h-6 w-6 text-red-500" />
-          <span className="font-medium text-gray-800">Rede de Apoio</span>
+          <span className="font-medium text-gray-800 text-center">Rede de Apoio</span>
         </div>
       </button>
 
@@ -23,7 +23,7 @@ export function MainNavigation() {
       >
         <div className="flex items-center gap-3 mx-auto">
           <BookOpen className="h-6 w-6 text-red-500" />
-          <span className="font-medium text-gray-800">Diário Seguro</span>
+          <span className="font-medium text-gray-800 text-center">Diário Seguro</span>
         </div>
       </button>
 
@@ -33,7 +33,7 @@ export function MainNavigation() {
       >
         <div className="flex items-center gap-3 mx-auto">
           <Phone className="h-6 w-6 text-red-500" />
-          <span className="font-medium text-gray-800">Contato Seguro</span>
+          <span className="font-medium text-gray-800 text-center">Contato Seguro</span>
         </div>
       </button>
     </div>

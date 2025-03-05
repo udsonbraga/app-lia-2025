@@ -9,7 +9,7 @@ export interface SupportLocation {
   phone: string;
   latitude: number;
   longitude: number;
-  mapUrl?: string;  // Optional URL for direct Google Maps link
+  mapUrl: string;  // Changed from optional to required
 }
 
 export interface SafeContact {

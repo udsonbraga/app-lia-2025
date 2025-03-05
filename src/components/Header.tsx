@@ -1,5 +1,5 @@
 
-import { ArrowLeft, Eye, EyeOff, Mic, MicOff } from "lucide-react";
+import { Eye, EyeOff, Mic, MicOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DrawerMenu } from "@/components/DrawerMenu";
 import { useEmergencySoundDetection } from "@/hooks/useEmergencySoundDetection";
@@ -18,16 +18,8 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
       <div className="container mx-auto h-full">
         <div className="flex items-center justify-between h-full px-4">
           <div className="flex items-center">
-            <DrawerMenu />
-            
-            {isDisguised && (
-              <button
-                onClick={() => navigate('/')}
-                className="ml-2 p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <ArrowLeft className="h-6 w-6 text-gray-700" />
-              </button>
-            )}
+            {/* Only show drawer menu when not in disguise mode */}
+            {!isDisguised && <DrawerMenu />}
           </div>
           
           <h1 className="text-xl font-semibold">
@@ -35,16 +27,18 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
           </h1>
           
           <div className="flex items-center gap-2">
-            <button
-              onClick={toggleSoundDetection}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              title={isListening ? "Desativar detecção de som" : "Ativar detecção de som"}
-            >
-              {isListening ? 
-                <Mic className="h-6 w-6 text-green-500" /> : 
-                <MicOff className="h-6 w-6 text-gray-500" />
-              }
-            </button>
+            {!isDisguised && (
+              <button
+                onClick={toggleSoundDetection}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                title={isListening ? "Desativar detecção de som" : "Ativar detecção de som"}
+              >
+                {isListening ? 
+                  <Mic className="h-6 w-6 text-green-500" /> : 
+                  <MicOff className="h-6 w-6 text-gray-500" />
+                }
+              </button>
+            )}
             
             <button
               onClick={toggleDisguise}

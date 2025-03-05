@@ -1,12 +1,15 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export function useDisguiseMode() {
   const [isDisguised, setIsDisguised] = useState(false);
   const [disguisePassword, setDisguisePassword] = useState("");
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [showExitPasswordPrompt, setShowExitPasswordPrompt] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Verifica se há uma senha de disfarce salva
@@ -29,18 +32,29 @@ export function useDisguiseMode() {
     if (!isDisguised) {
       setShowPasswordPrompt(true);
     } else {
-      const savedPassword = prompt("Digite a senha para sair do modo disfarce:");
-      if (savedPassword === localStorage.getItem('disguisePassword')) {
-        setIsDisguised(false);
-        localStorage.removeItem('disguisePassword');
-      } else {
-        toast({
-          title: "Senha incorreta",
-          description: "A senha fornecida não está correta.",
-          variant: "destructive",
-        });
-      }
+      setShowExitPasswordPrompt(true);
     }
+  };
+
+  const exitDisguiseMode = (password: string) => {
+    const savedPassword = localStorage.getItem('disguisePassword');
+    
+    if (password === savedPassword) {
+      setIsDisguised(false);
+      localStorage.removeItem('disguisePassword');
+      navigate('/home');
+      toast({
+        title: "Modo disfarce desativado",
+        description: "Você saiu do modo disfarce com sucesso.",
+      });
+    } else {
+      toast({
+        title: "Senha incorreta",
+        description: "A senha fornecida não está correta.",
+        variant: "destructive",
+      });
+    }
+    setShowExitPasswordPrompt(false);
   };
 
   // Nova função para resetar todas as senhas
@@ -67,10 +81,13 @@ export function useDisguiseMode() {
     isDisguised,
     disguisePassword,
     showPasswordPrompt,
+    showExitPasswordPrompt,
     setDisguisePassword,
     setShowPasswordPrompt,
+    setShowExitPasswordPrompt,
     handleDisguiseSubmit,
     toggleDisguise,
+    exitDisguiseMode,
     resetAllPasswords
   };
 }

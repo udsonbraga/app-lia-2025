@@ -124,6 +124,15 @@ const SafeContactPage = () => {
     setShowPremiumDialog(false);
   };
 
+  // Function to check if user can add more contacts and show premium dialog if needed
+  const handleNewContactClick = () => {
+    if (contacts.length >= premiumStatus.maxContacts) {
+      setShowPremiumDialog(true);
+    } else {
+      setIsAdding(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-safelady-light to-white">
       <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-50">
@@ -275,16 +284,14 @@ const SafeContactPage = () => {
               </div>
             </div>
           ) : (
-            contacts.length < premiumStatus.maxContacts && (
-              <Button
-                variant="outline"
-                onClick={() => setIsAdding(true)}
-                className="w-full flex items-center justify-center gap-2"
-              >
-                <UserPlus className="h-4 w-4" />
-                Adicionar Contato de Segurança
-              </Button>
-            )
+            <Button
+              variant="outline"
+              onClick={handleNewContactClick}
+              className="w-full flex items-center justify-center gap-2"
+            >
+              <UserPlus className="h-4 w-4" />
+              Adicionar Contato de Segurança
+            </Button>
           )}
         </div>
       </div>
