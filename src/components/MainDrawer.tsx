@@ -5,19 +5,17 @@ import {
   DrawerHeader,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Menu, UserCircle, Upload, Trash2, Eye, EyeOff, LogOut, Palette, HelpCircle, Mic, PhoneIncoming } from "lucide-react";
+import { Menu, UserCircle, Upload, Trash2, Mic, PhoneIncoming, Palette, HelpCircle, LogOut, Moon, Sun } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 import { useEmergencySoundDetection } from "@/hooks/useEmergencySoundDetection";
 import { useMotionDetector } from "@/hooks/useMotionDetector";
 import { Separator } from "@/components/ui/separator";
 
 export const MainDrawer = () => {
   const navigate = useNavigate();
-  const { isDisguised, toggleDisguise } = useDisguiseMode();
   const { isListening, toggleSoundDetection } = useEmergencySoundDetection();
   const { isMotionDetectionEnabled, toggleMotionDetection } = useMotionDetector();
   
@@ -25,13 +23,23 @@ export const MainDrawer = () => {
     localStorage.getItem("avatarUrl")
   );
   const [userName, setUserName] = useState<string>("");
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    return localStorage.getItem("darkMode") === "true";
+  });
 
   useEffect(() => {
     const storedName = localStorage.getItem("userName");
     if (storedName) {
       setUserName(storedName);
     }
-  }, []);
+
+    // Apply dark mode class if enabled
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDarkMode]);
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -50,6 +58,12 @@ export const MainDrawer = () => {
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
     navigate('/login');
+  };
+
+  const toggleDarkMode = () => {
+    const newDarkModeState = !isDarkMode;
+    setIsDarkMode(newDarkModeState);
+    localStorage.setItem("darkMode", newDarkModeState.toString());
   };
 
   const menuItems = [
@@ -121,23 +135,23 @@ export const MainDrawer = () => {
             <button className="w-full text-left">
               <div className="flex items-center">
                 <div className="flex items-center gap-3">
-                  {isDisguised ? 
-                    <EyeOff className="h-5 w-5 text-safelady" /> : 
-                    <Eye className="h-5 w-5 text-safelady" />
+                  {isDarkMode ? 
+                    <Moon className="h-5 w-5 text-indigo-600" /> : 
+                    <Sun className="h-5 w-5 text-yellow-500" />
                   }
                   <div>
-                    <div className="font-medium text-gray-900">Modo Disfarce</div>
+                    <div className="font-medium text-gray-900">Modo Noturno</div>
                     <div className="text-sm text-gray-500">
-                      Oculta o app transformando-o em um app de notas pessoais
+                      Alterar entre tema claro e escuro
                     </div>
                   </div>
                 </div>
                 <div className="ml-auto">
                   <Switch 
-                    id="disguise-mode" 
-                    checked={isDisguised}
-                    onCheckedChange={toggleDisguise}
-                    className={isDisguised ? "bg-green-500" : ""}
+                    id="dark-mode" 
+                    checked={isDarkMode}
+                    onCheckedChange={toggleDarkMode}
+                    className={isDarkMode ? "bg-green-500" : ""}
                   />
                 </div>
               </div>

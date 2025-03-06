@@ -3,15 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { MainDrawer } from "@/components/MainDrawer";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserCircle } from "lucide-react";
+import { Eye, EyeOff, UserCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Switch } from "@/components/ui/switch";
 
 interface HeaderProps {
   isDisguised: boolean;
   toggleDisguise: () => void;
 }
 
-export function Header({ isDisguised }: HeaderProps) {
+export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
   const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>("");
@@ -43,19 +44,33 @@ export function Header({ isDisguised }: HeaderProps) {
             {isDisguised ? 'Notas Pessoais' : 'Safe Lady'}
           </h1>
           
-          {!isDisguised && (
-            <div className="flex items-center">
-              {userName && (
-                <span className="text-sm font-medium mr-2 hidden sm:block">{userName}</span>
-              )}
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={avatarUrl || ""} alt="Avatar" />
-                <AvatarFallback>
-                  {userName ? userName.charAt(0).toUpperCase() : <UserCircle className="h-8 w-8" />}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            {!isDisguised && (
+              <div className="flex items-center mr-2">
+                <button 
+                  onClick={toggleDisguise}
+                  className="flex items-center gap-2 text-sm px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
+                >
+                  <Eye className="h-5 w-5 text-safelady" />
+                  <span className="hidden sm:inline text-safelady">Modo Disfarce</span>
+                </button>
+              </div>
+            )}
+            
+            {!isDisguised && (
+              <div className="flex items-center">
+                {userName && (
+                  <span className="text-sm font-medium mr-2 hidden sm:block">{userName}</span>
+                )}
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={avatarUrl || ""} alt="Avatar" />
+                  <AvatarFallback>
+                    {userName ? userName.charAt(0).toUpperCase() : <UserCircle className="h-8 w-8" />}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
