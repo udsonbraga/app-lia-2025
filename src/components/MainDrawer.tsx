@@ -1,11 +1,10 @@
-
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Menu, UserCircle, Upload, Trash2, Eye, EyeOff, LogOut, Palette, HelpCircle, Mic, PhoneAlert } from "lucide-react";
+import { Menu, UserCircle, Upload, Trash2, Eye, EyeOff, LogOut, Palette, HelpCircle, Mic, PhoneIncoming } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,7 +27,6 @@ export const MainDrawer = () => {
   const [userName, setUserName] = useState<string>("");
 
   useEffect(() => {
-    // Get user name from localStorage
     const storedName = localStorage.getItem("userName");
     if (storedName) {
       setUserName(storedName);
@@ -120,7 +118,6 @@ export const MainDrawer = () => {
         
         <div className="px-4 pb-6">
           <div className="w-full space-y-4 mb-6">
-            {/* Modo disfarce toggle */}
             <div className="flex items-center">
               <div className="flex items-center gap-3">
                 {isDisguised ? 
@@ -144,7 +141,6 @@ export const MainDrawer = () => {
               </div>
             </div>
             
-            {/* Detecção de som toggle */}
             <div className="flex items-center">
               <div className="flex items-center gap-3">
                 <Mic className="h-5 w-5 text-blue-600" />
@@ -165,10 +161,9 @@ export const MainDrawer = () => {
               </div>
             </div>
             
-            {/* Detecção de movimento toggle */}
             <div className="flex items-center">
               <div className="flex items-center gap-3">
-                <PhoneAlert className="h-5 w-5 text-orange-600" />
+                <PhoneIncoming className="h-5 w-5 text-orange-600" />
                 <div>
                   <div className="font-medium text-gray-900">Detecção de Movimento</div>
                   <div className="text-sm text-gray-500">

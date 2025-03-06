@@ -1,111 +1,19 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/hooks/use-toast";
+import { EMERGENCY_KEYWORDS } from "@/constants/emergencyKeywords";
+import { handleEmergencyAlert } from "@/utils/emergencyUtils";
 
+/**
+ * Hook for handling emergency sound detection functionality
+ */
 export function useEmergencySoundDetection() {
   const [isListening, setIsListening] = useState(false);
   const { toast } = useToast();
 
-  // Estado para armazenar a configuração de palavras-chave de emergência
-  const [emergencyKeywords] = useState<string[]>([
-    "socorro", "ajuda", "emergência", "polícia", "help", 
-    "auxílio", "stop", "para", "não", "abuso"
-  ]);
-
   const handleEmergencyDetected = useCallback(async () => {
-    try {
-      // Obter contatos de emergência do localStorage
-      const safeContacts = localStorage.getItem("safeContacts");
-      const contacts = safeContacts ? JSON.parse(safeContacts) : [];
-      
-      // Verificar se há contatos configurados
-      if (contacts.length === 0) {
-        toast({
-          title: "Contatos não configurados",
-          description: "Por favor, configure pelo menos um contato de confiança nas configurações.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Obter localização atual
-      const position = await getCurrentPosition();
-      const { latitude, longitude } = position.coords;
-      const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
-      
-      // Enviar mensagens para todos os contatos
-      for (const contact of contacts) {
-        // Enviar mensagem pelo Telegram
-        await sendTelegramMessage(contact.telegramId, locationLink);
-      }
-      
-      toast({
-        title: "Alerta de emergência enviado",
-        description: "Som de emergência detectado! Alertas enviados via Telegram.",
-      });
-    } catch (error) {
-      console.error("Erro ao enviar alerta automático:", error);
-      toast({
-        title: "Erro ao enviar alerta",
-        description: "Não foi possível enviar o alerta de emergência. Tente novamente.",
-        variant: "destructive"
-      });
-    }
+    await handleEmergencyAlert({ toast });
   }, [toast]);
-
-  // Função para obter posição atual
-  const getCurrentPosition = (): Promise<GeolocationPosition> => {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error("Geolocalização não suportada pelo navegador"));
-        return;
-      }
-      
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
-      });
-    });
-  };
-  
-  // Função para enviar mensagem via Telegram Bot
-  const sendTelegramMessage = async (telegramId: string, locationLink: string) => {
-    try {
-      const botToken = "7583759027:AAEE7KUF9ye6esERLzac-ATth7VOjfvRx8s"; // Token real do bot SafeLady_bot
-      const message = `EMERGÊNCIA DETECTADA! Som de emergência identificado. Localização atual: ${locationLink}`;
-      
-      // URL da API do Telegram para enviar mensagem
-      const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-      
-      // Preparar o corpo da requisição
-      const requestBody = {
-        chat_id: telegramId,
-        text: message,
-        parse_mode: "HTML"
-      };
-      
-      // Fazer a requisição para a API do Telegram
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Erro ao enviar mensagem: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      console.log('Mensagem enviada com sucesso:', data);
-      return true;
-    } catch (error) {
-      console.error('Erro ao enviar mensagem via Telegram:', error);
-      return false;
-    }
-  };
 
   useEffect(() => {
     if (!isListening) return;
@@ -141,7 +49,7 @@ export function useEmergencySoundDetection() {
             console.log("Texto detectado:", transcript);
             
             // Verificar se alguma palavra-chave de emergência foi detectada
-            const detected = emergencyKeywords.some(keyword => 
+            const detected = EMERGENCY_KEYWORDS.some(keyword => 
               transcript.includes(keyword.toLowerCase())
             );
             
@@ -197,7 +105,7 @@ export function useEmergencySoundDetection() {
         }
       }
     };
-  }, [isListening, handleEmergencyDetected, emergencyKeywords, toast]);
+  }, [isListening, handleEmergencyDetected, toast]);
 
   const toggleSoundDetection = () => {
     setIsListening(prevState => !prevState);
