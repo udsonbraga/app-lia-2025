@@ -12,7 +12,7 @@ export function useDisguiseMode() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Verifica se há uma senha de disfarce salva
+    // Check if there's a saved disguise password
     const savedPassword = localStorage.getItem('disguisePassword');
     if (savedPassword) {
       setIsDisguised(true);
@@ -25,6 +25,12 @@ export function useDisguiseMode() {
       localStorage.setItem('disguisePassword', disguisePassword);
       setIsDisguised(true);
       setShowPasswordPrompt(false);
+      toast({
+        title: "Modo disfarce ativado",
+        description: "O aplicativo agora está em modo disfarce",
+      });
+      // Force page reload to apply disguise
+      window.location.reload();
     }
   };
 
@@ -47,6 +53,8 @@ export function useDisguiseMode() {
         title: "Modo disfarce desativado",
         description: "Você saiu do modo disfarce com sucesso.",
       });
+      // Force page reload to exit disguise
+      window.location.reload();
     } else {
       toast({
         title: "Senha incorreta",
@@ -57,19 +65,19 @@ export function useDisguiseMode() {
     setShowExitPasswordPrompt(false);
   };
 
-  // Nova função para resetar todas as senhas
+  // Function to reset all passwords
   const resetAllPasswords = () => {
-    // Limpar senha do modo disfarce
+    // Clear disguise mode password
     localStorage.removeItem('disguisePassword');
     setIsDisguised(false);
     setDisguisePassword("");
     
-    // Limpar contatos de emergência (se existirem)
+    // Clear emergency contacts (if they exist)
     localStorage.removeItem('contactName');
     localStorage.removeItem('contactNumber');
     
-    // Limpar qualquer outra senha armazenada
-    localStorage.removeItem('contacts'); // Contatos seguros
+    // Clear any other stored password
+    localStorage.removeItem('contacts'); // Safe contacts
     
     toast({
       title: "Senhas resetadas",

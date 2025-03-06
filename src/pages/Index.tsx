@@ -10,7 +10,7 @@ import { useMotionDetector } from "@/hooks/useMotionDetector";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Index = () => {
   const {
@@ -38,8 +38,17 @@ const Index = () => {
 
   const [exitPassword, setExitPassword] = useState("");
 
-  // Usar o detector de movimento
+  // Use motion detector
   useMotionDetector();
+
+  // Apply disguise class to document body
+  useEffect(() => {
+    if (isDisguised) {
+      document.body.classList.add('disguised-mode');
+    } else {
+      document.body.classList.remove('disguised-mode');
+    }
+  }, [isDisguised]);
 
   const navigate = useNavigate();
 

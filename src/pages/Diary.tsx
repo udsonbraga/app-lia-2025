@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Save, MapPin, Trash2, FileDown } from "lucide-react";
@@ -30,6 +29,14 @@ const Diary = () => {
     const saved = localStorage.getItem('diaryEntries');
     return saved ? JSON.parse(saved) : [];
   });
+  const [userName, setUserName] = useState<string>("");
+
+  useEffect(() => {
+    const storedName = localStorage.getItem("userName");
+    if (storedName) {
+      setUserName(storedName);
+    }
+  }, []);
 
   const handleAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -102,6 +109,7 @@ const Diary = () => {
 
   const generatePDF = (entry: DiaryEntry) => {
     const content = document.createElement('div');
+    const currentUserName = localStorage.getItem('userName') || 'Usuário';
     
     let imagesHtml = '';
     if (entry.attachments.some(att => att.url)) {
@@ -140,6 +148,11 @@ const Diary = () => {
         <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; opacity: 0.1; transform: rotate(-30deg); font-size: 80px; color: #FF84C6; font-weight: bold;">
           SAFE LADY
         </div>
+        
+        <footer style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 10px; text-align: right; font-size: 12px; color: #666;">
+          <p>Documento gerado por: ${currentUserName}</p>
+          <p>Data de geração: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}</p>
+        </footer>
       </div>
     `;
 
@@ -217,8 +230,8 @@ const Diary = () => {
                 onClick={() => document.getElementById('file-input')?.click()}
                 className="flex items-center gap-2"
               >
-                <Camera className="h-5 w-5" />
-                Capturar ou Anexar
+                <Camera className="h-6 w-6" />
+                Capturar
               </Button>
               <input
                 id="file-input"
@@ -226,7 +239,21 @@ const Diary = () => {
                 multiple
                 accept="image/*,video/*,.pdf,.doc,.docx,.txt"
                 className="hidden"
-                onChange={handleAttachment}
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (files) {
+                    const newFiles = Array.from(files);
+                    setAttachments(prev => [...prev, ...newFiles]);
+                    
+                    // Create previews for images
+                    newFiles.forEach(file => {
+                      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                        const url = URL.createObjectURL(file);
+                        setAttachmentPreviews(prev => [...prev, {file, url}]);
+                      }
+                    });
+                  }
+                }}
               />
             </div>
 

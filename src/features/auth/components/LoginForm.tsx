@@ -128,7 +128,7 @@ export const LoginForm = () => {
         
         <Button
           variant="outline"
-          className="w-full transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] bg-[#D6BCFA] hover:bg-[#C4B5FD] text-purple-800 border-purple-300"
           onClick={() => navigate("/register")}
         >
           Criar nova conta

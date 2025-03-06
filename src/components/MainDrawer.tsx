@@ -1,3 +1,4 @@
+
 import {
   Drawer,
   DrawerContent,
@@ -9,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 import { useEmergencySoundDetection } from "@/hooks/useEmergencySoundDetection";
 import { useMotionDetector } from "@/hooks/useMotionDetector";
@@ -118,68 +118,74 @@ export const MainDrawer = () => {
         
         <div className="px-4 pb-6">
           <div className="w-full space-y-4 mb-6">
-            <div className="flex items-center">
-              <div className="flex items-center gap-3">
-                {isDisguised ? 
-                  <EyeOff className="h-5 w-5 text-safelady" /> : 
-                  <Eye className="h-5 w-5 text-safelady" />
-                }
-                <div>
-                  <div className="font-medium text-gray-900">Modo Disfarce</div>
-                  <div className="text-sm text-gray-500">
-                    Oculta o app transformando-o em um app de notas pessoais
+            <button className="w-full text-left">
+              <div className="flex items-center">
+                <div className="flex items-center gap-3">
+                  {isDisguised ? 
+                    <EyeOff className="h-5 w-5 text-safelady" /> : 
+                    <Eye className="h-5 w-5 text-safelady" />
+                  }
+                  <div>
+                    <div className="font-medium text-gray-900">Modo Disfarce</div>
+                    <div className="text-sm text-gray-500">
+                      Oculta o app transformando-o em um app de notas pessoais
+                    </div>
                   </div>
                 </div>
+                <div className="ml-auto">
+                  <Switch 
+                    id="disguise-mode" 
+                    checked={isDisguised}
+                    onCheckedChange={toggleDisguise}
+                    className={isDisguised ? "bg-green-500" : ""}
+                  />
+                </div>
               </div>
-              <div className="ml-auto">
-                <Switch 
-                  id="disguise-mode" 
-                  checked={isDisguised}
-                  onCheckedChange={toggleDisguise}
-                  className={isDisguised ? "bg-green-500" : ""}
-                />
-              </div>
-            </div>
+            </button>
             
-            <div className="flex items-center">
-              <div className="flex items-center gap-3">
-                <Mic className="h-5 w-5 text-blue-600" />
-                <div>
-                  <div className="font-medium text-gray-900">Detecção de Áudio</div>
-                  <div className="text-sm text-gray-500">
-                    Envia alerta automático ao detectar palavras de emergência
+            <button className="w-full text-left">
+              <div className="flex items-center">
+                <div className="flex items-center gap-3">
+                  <Mic className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <div className="font-medium text-gray-900">Detecção de Áudio</div>
+                    <div className="text-sm text-gray-500">
+                      Envia alerta automático ao detectar palavras de emergência
+                    </div>
                   </div>
                 </div>
+                <div className="ml-auto">
+                  <Switch 
+                    id="sound-detection" 
+                    checked={isListening}
+                    onCheckedChange={toggleSoundDetection}
+                    className={isListening ? "bg-green-500" : ""}
+                  />
+                </div>
               </div>
-              <div className="ml-auto">
-                <Switch 
-                  id="sound-detection" 
-                  checked={isListening}
-                  onCheckedChange={toggleSoundDetection}
-                  className={isListening ? "bg-green-500" : ""}
-                />
-              </div>
-            </div>
+            </button>
             
-            <div className="flex items-center">
-              <div className="flex items-center gap-3">
-                <PhoneIncoming className="h-5 w-5 text-orange-600" />
-                <div>
-                  <div className="font-medium text-gray-900">Detecção de Movimento</div>
-                  <div className="text-sm text-gray-500">
-                    Alerta seus contatos em caso de movimento brusco
+            <button className="w-full text-left">
+              <div className="flex items-center">
+                <div className="flex items-center gap-3">
+                  <PhoneIncoming className="h-5 w-5 text-orange-600" />
+                  <div>
+                    <div className="font-medium text-gray-900">Detecção de Movimento</div>
+                    <div className="text-sm text-gray-500">
+                      Alerta seus contatos em caso de movimento brusco
+                    </div>
                   </div>
                 </div>
+                <div className="ml-auto">
+                  <Switch 
+                    id="motion-detection" 
+                    checked={isMotionDetectionEnabled}
+                    onCheckedChange={toggleMotionDetection}
+                    className={isMotionDetectionEnabled ? "bg-green-500" : ""}
+                  />
+                </div>
               </div>
-              <div className="ml-auto">
-                <Switch 
-                  id="motion-detection" 
-                  checked={isMotionDetectionEnabled}
-                  onCheckedChange={toggleMotionDetection}
-                  className={isMotionDetectionEnabled ? "bg-green-500" : ""}
-                />
-              </div>
-            </div>
+            </button>
           </div>
           
           <Separator className="my-4" />
