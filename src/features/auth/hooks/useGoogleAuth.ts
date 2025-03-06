@@ -7,21 +7,19 @@ export const useGoogleAuth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [showGoogleSelector, setShowGoogleSelector] = useState(false);
 
-  const handleGoogleLogin = () => {
-    setShowGoogleSelector(true);
-  };
-
-  const handleGoogleAccountSelect = async (selectedEmail: string) => {
+  const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      // Simulate sign in with the selected Google account
+      // Simulate sign in with Google without account selection
       await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Use a fixed email for demo purposes
+      const userEmail = "usuario@gmail.com";
       localStorage.setItem('isAuthenticated', 'true');
       
       // Extract name from email (simple approach)
-      const userName = selectedEmail.split('@')[0].replace(/\./g, ' ').replace(/(\w)(\w*)/g, 
+      const userName = userEmail.split('@')[0].replace(/\./g, ' ').replace(/(\w)(\w*)/g, 
         (g0, g1, g2) => g1.toUpperCase() + g2);
       
       localStorage.setItem('userName', userName);
@@ -31,7 +29,6 @@ export const useGoogleAuth = () => {
         description: `Bem-vinda, ${userName}!`,
       });
       
-      setShowGoogleSelector(false);
       navigate('/home');
     } catch (error) {
       toast({
@@ -44,15 +41,8 @@ export const useGoogleAuth = () => {
     }
   };
 
-  const cancelGoogleLogin = () => {
-    setShowGoogleSelector(false);
-  };
-
   return {
     isLoading,
-    showGoogleSelector,
-    handleGoogleLogin,
-    handleGoogleAccountSelect,
-    cancelGoogleLogin
+    handleGoogleLogin
   };
 };

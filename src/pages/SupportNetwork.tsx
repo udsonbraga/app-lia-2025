@@ -8,7 +8,7 @@ import LocationCard from "@/components/support-network/LocationCard";
 import RightsInformation from "@/components/support-network/RightsInformation";
 
 // Mock data for the support locations since getSupportLocationsWithMapUrl is missing
-const mockSupportLocations = {
+const mockSupportLocations: Record<Exclude<ActiveTab, "rights">, SupportLocation[]> = {
   police: [
     {
       id: "1",

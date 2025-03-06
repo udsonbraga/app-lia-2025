@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Paperclip, Save, MapPin, Trash2, FileDown } from "lucide-react";
+import { ArrowLeft, Camera, Save, MapPin, Trash2, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -38,7 +39,7 @@ const Diary = () => {
       
       // Create previews for images
       newFiles.forEach(file => {
-        if (file.type.startsWith('image/')) {
+        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
           const url = URL.createObjectURL(file);
           setAttachmentPreviews(prev => [...prev, {file, url}]);
         }
@@ -120,7 +121,7 @@ const Diary = () => {
     }
     
     content.innerHTML = `
-      <div style="padding: 20px; font-family: Arial, sans-serif;">
+      <div style="padding: 20px; font-family: Arial, sans-serif; position: relative;">
         <h1 style="text-align: center; color: #000000; font-size: 28px; font-weight: bold;">Relatório Seguro</h1>
         <p><strong>Data:</strong> ${format(new Date(entry.createdAt), "dd/MM/yyyy 'às' HH:mm")}</p>
         <p><strong>Local:</strong> ${entry.location}</p>
@@ -135,6 +136,10 @@ const Diary = () => {
             ${entry.attachments.map(attachment => `<li>${attachment.name}</li>`).join('')}
           </ul>
         ` : ''}
+        
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; opacity: 0.1; transform: rotate(-30deg); font-size: 80px; color: #FF84C6; font-weight: bold;">
+          SAFE LADY
+        </div>
       </div>
     `;
 
@@ -166,7 +171,7 @@ const Diary = () => {
               <ArrowLeft className="h-6 w-6 text-gray-700" />
             </button>
             <h1 className="text-xl font-semibold">Diário Seguro</h1>
-            <div className="w-8" /> {/* Espaçador para manter o título centralizado */}
+            <div className="w-8" />
           </div>
         </div>
       </div>
@@ -212,14 +217,14 @@ const Diary = () => {
                 onClick={() => document.getElementById('file-input')?.click()}
                 className="flex items-center gap-2"
               >
-                <Paperclip className="h-4 w-4" />
-                Anexar arquivo
+                <Camera className="h-5 w-5" />
+                Capturar ou Anexar
               </Button>
               <input
                 id="file-input"
                 type="file"
                 multiple
-                accept="image/*,.pdf,.doc,.docx,.txt"
+                accept="image/*,video/*,.pdf,.doc,.docx,.txt"
                 className="hidden"
                 onChange={handleAttachment}
               />
@@ -259,9 +264,9 @@ const Diary = () => {
 
           <Button
             onClick={handleSave}
-            className="w-full flex items-center justify-center gap-2"
+            className="w-full flex items-center justify-center gap-2 bg-[#FF84C6] hover:bg-[#ff6cb7] text-white"
           >
-            <Save className="h-4 w-4" />
+            <Save className="h-5 w-5" />
             Salvar
           </Button>
 
