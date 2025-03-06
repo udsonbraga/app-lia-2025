@@ -1,11 +1,16 @@
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 
 export function useMotionDetector() {
   const { toast } = useToast();
+  const [isMotionDetectionEnabled, setIsMotionDetectionEnabled] = useState(() => {
+    return localStorage.getItem("motionDetectionEnabled") === "true";
+  });
 
   const handleEmergencyAlert = useCallback(async () => {
+    if (!isMotionDetectionEnabled) return;
+    
     try {
       // Obter contatos de emergência do localStorage
       const safeContacts = localStorage.getItem("safeContacts");
@@ -35,7 +40,7 @@ export function useMotionDetector() {
     } catch (error) {
       console.error("Erro ao enviar alerta automático:", error);
     }
-  }, [toast]);
+  }, [toast, isMotionDetectionEnabled]);
 
   // Função para obter posição atual
   const getCurrentPosition = (): Promise<GeolocationPosition> => {
@@ -91,7 +96,28 @@ export function useMotionDetector() {
     }
   };
 
+  // Toggle function for motion detection
+  const toggleMotionDetection = () => {
+    const newValue = !isMotionDetectionEnabled;
+    setIsMotionDetectionEnabled(newValue);
+    localStorage.setItem("motionDetectionEnabled", newValue.toString());
+    
+    if (newValue) {
+      toast({
+        title: "Detecção de movimento ativada",
+        description: "O aplicativo vai monitorar movimentos bruscos e enviar alertas."
+      });
+    } else {
+      toast({
+        title: "Detecção de movimento desativada",
+        description: "O monitoramento de movimentos bruscos foi desativado."
+      });
+    }
+  };
+
   useEffect(() => {
+    if (!isMotionDetectionEnabled) return;
+    
     // Motion detection code
     let lastY = 0;
     let lastX = 0;
@@ -139,5 +165,18 @@ export function useMotionDetector() {
     return () => {
       window.removeEventListener('devicemotion', handleMotion);
     };
-  }, [handleEmergencyAlert]);
+  }, [handleEmergencyAlert, isMotionDetectionEnabled]);
+
+  return {
+    isMotionDetectionEnabled,
+    toggleMotionDetection
+  };
+}
+
+// Adicionar TypeScript declarations para o SpeechRecognition
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
 }

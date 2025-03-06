@@ -26,66 +26,86 @@ export const getFilteredLocations = (
 export const policeLocations: SupportLocation[] = [
   {
     id: "police1",
-    name: "19º Distrito Integrado de Polícia - DIP",
+    name: "Delegacia Especializada em Crimes Contra a Mulher (DECCM)",
     type: "police",
-    address: "Av. Coronel Teixeira, 7995 - Santo Agostinho, Manaus - AM, 69036-120",
-    phone: "(92) 3214-7945",
-    latitude: -3.0825,
-    longitude: -60.0453,
-    mapUrl: "https://maps.app.goo.gl/hZ5jKgzjJk1599YF7"
+    address: "Av. Mário Ypiranga, 3395 - Parque Dez de Novembro, Manaus - AM, 69050-030",
+    phone: "(92) 3236-7012",
+    latitude: -3.0979,
+    longitude: -60.0164,
+    mapUrl: "https://maps.app.goo.gl/Bn7Jx7aGE9PQgP1o8"
   },
   {
     id: "police2",
-    name: "6º Distrito Integrado de Polícia - DIP",
+    name: "Delegacia Especializada em Proteção à Criança e ao Adolescente (DEPCA)",
     type: "police",
-    address: "R. Louro Abacate, 25 - Cidade Nova, Manaus - AM, 69098-231",
-    phone: "(92) 3646-5333",
-    latitude: -3.0329,
-    longitude: -59.9883,
-    mapUrl: "https://maps.app.goo.gl/DBLeNSVHRUhJjKsa8"
+    address: "Av. Via Láctea, s/n - Morada do Sol, Aleixo, Manaus - AM, 69060-085",
+    phone: "(92) 3656-2065",
+    latitude: -3.0786,
+    longitude: -60.0134,
+    mapUrl: "https://maps.app.goo.gl/GcENJzQeihwQwJKN9"
   },
   {
     id: "police3",
-    name: "14º Distrito Integrado de Polícia - DIP",
+    name: "1ª Delegacia Especializada em Homicídios e Sequestros (DEHS)",
     type: "police",
-    address: "Av. Brasil, 135 - Compensa, Manaus - AM, 69035-001",
-    phone: "(92) 3625-3055",
-    latitude: -3.1135,
-    longitude: -60.0423,
-    mapUrl: "https://maps.app.goo.gl/jTDf9EaWjSj4wDj67"
+    address: "Av. Autaz Mirim, s/n - Jorge Teixeira, Manaus - AM, 69088-175",
+    phone: "(92) 3667-7777",
+    latitude: -3.0184,
+    longitude: -59.9364,
+    mapUrl: "https://maps.app.goo.gl/ioumtH5jwQNn2E4K9"
   }
 ];
 
 export const hospitalLocations: SupportLocation[] = [
   {
     id: "hospital1",
-    name: "Hospital e Pronto Socorro da Criança - Zona Oeste",
+    name: "UPA 24h Campos Sales",
     type: "hospital",
-    address: "Av. Brasil, s/n - Compensa, Manaus - AM, 69036-110",
-    phone: "(92) 3627-3555",
-    latitude: -3.1135,
-    longitude: -60.0423,
-    mapUrl: "https://maps.app.goo.gl/jTDf9EaWjSj4wDj67"
+    address: "Av. Campos Sales, 1578 - Tarumã, Manaus - AM, 69021-230",
+    phone: "(92) 3214-2264",
+    latitude: -3.0895,
+    longitude: -60.0536,
+    mapUrl: "https://maps.app.goo.gl/PZHfGVn4V7w8jAEE7"
   },
   {
     id: "hospital2",
-    name: "Hospital Universitário Getúlio Vargas - HUGV",
+    name: "UPA 24h José Rodrigues",
     type: "hospital",
-    address: "Av. Apurinã, 4 - Praça 14 de Janeiro, Manaus - AM, 69020-170",
-    phone: "(92) 3305-4700",
-    latitude: -3.1389,
-    longitude: -60.0191,
-    mapUrl: "https://maps.app.goo.gl/DBLeNSVHRUhJjKsa8"
+    address: "Av. Leonardo Malcher, 1500 - Centro, Manaus - AM, 69010-170",
+    phone: "(92) 3182-9000",
+    latitude: -3.1323,
+    longitude: -60.0166,
+    mapUrl: "https://maps.app.goo.gl/nCCWsjTZ9iCPdkYZ9"
   },
   {
     id: "hospital3",
+    name: "UPA 24h Danilo Corrêa",
+    type: "hospital",
+    address: "Av. Noel Nutels, s/n - Cidade Nova, Manaus - AM, 69093-770",
+    phone: "(92) 3182-9050",
+    latitude: -3.0373,
+    longitude: -59.9784,
+    mapUrl: "https://maps.app.goo.gl/mD9qCo4u7Wuw6Tzt8"
+  },
+  {
+    id: "hospital4",
     name: "Hospital e Pronto Socorro 28 de Agosto",
     type: "hospital",
-    address: "R. Recife, 1581 - Adrianópolis, Manaus - AM, 69057-020",
-    phone: "(92) 3212-0800",
-    latitude: -3.1135,
-    longitude: -60.0423,
-    mapUrl: "https://maps.app.goo.gl/jTDf9EaWjSj4wDj67"
+    address: "Av. Mário Ypiranga, 1581 - Adrianópolis, Manaus - AM, 69057-002",
+    phone: "(92) 3643-7100",
+    latitude: -3.1057,
+    longitude: -60.0110,
+    mapUrl: "https://maps.app.goo.gl/q1ZnZdnUJrPX3VDx8"
+  },
+  {
+    id: "hospital5",
+    name: "Hospital e Pronto Socorro Dr. João Lúcio Pereira Machado",
+    type: "hospital",
+    address: "Av. Cosme Ferreira, 3937 - Coroado, Manaus - AM, 69082-230",
+    phone: "(92) 3249-9060",
+    latitude: -3.0809,
+    longitude: -59.9433,
+    mapUrl: "https://maps.app.goo.gl/Yk6i5iNhN7SzRDXK6"
   }
 ];
 
@@ -119,6 +139,26 @@ export const ngoLocations: SupportLocation[] = [
     latitude: -3.0352,
     longitude: -59.9586,
     mapUrl: "https://maps.app.goo.gl/3VLfMURMhDu6iKwR9"
+  },
+  {
+    id: "ngo4",
+    name: "Instituto Maria e João Aleixo (IMJA)",
+    type: "ngo",
+    address: "R. Igarapé de Manaus, 399 - Parque 10 de Novembro, Manaus - AM, 69054-000",
+    phone: "(92) 99267-2078",
+    latitude: -3.0864,
+    longitude: -60.0097,
+    mapUrl: "https://maps.app.goo.gl/3jkH2T5z1Td6JHx48"
+  },
+  {
+    id: "ngo5",
+    name: "Abrigo Feminino Antônia Nascimento Priante",
+    type: "ngo",
+    address: "R. Vale do Jari, s/n - Grande Vitória, Manaus - AM",
+    phone: "(92) 3214-5820",
+    latitude: -3.0457,
+    longitude: -59.9375,
+    mapUrl: "https://maps.app.goo.gl/WCjGmRvALpFE9kFi7"
   }
 ];
 
@@ -127,20 +167,30 @@ export const rightsLocations: SupportLocation[] = [
     id: "rights1",
     name: "Defensoria Pública do Estado do Amazonas - DPEAM",
     type: "ngo",
-    address: "R. Silva Ramos, 271 - Centro, Manaus - AM, 69010-150",
-    phone: "(92) 3633-2377",
-    latitude: -3.1389,
-    longitude: -60.0191,
-    mapUrl: "https://maps.app.goo.gl/DBLeNSVHRUhJjKsa8"
+    address: "R. 24 de Maio, 321 - Centro, Manaus - AM, 69010-080",
+    phone: "(92) 3233-2087",
+    latitude: -3.1336,
+    longitude: -60.0219,
+    mapUrl: "https://maps.app.goo.gl/5yKYxCMtPUSJZkui6"
   },
   {
     id: "rights2",
     name: "Ministério Público do Estado do Amazonas - MPAM",
     type: "ngo",
-    address: "Av. Coronel Teixeira, 7995 - Santo Agostinho, Manaus - AM, 69036-120",
-    phone: "(92) 3627-3555",
-    latitude: -3.1135,
-    longitude: -60.0423,
+    address: "Av. Coronel Teixeira, 7995 - Nova Esperança, Manaus - AM, 69037-473",
+    phone: "(92) 3655-0500",
+    latitude: -3.0825,
+    longitude: -60.0453,
     mapUrl: "https://maps.app.goo.gl/jTDf9EaWjSj4wDj67"
+  },
+  {
+    id: "rights3",
+    name: "Núcleo de Promoção e Defesa dos Direitos da Mulher (NUDEM)",
+    type: "ngo",
+    address: "Av. André Araújo, 679 - Aleixo, Manaus - AM, 69060-000",
+    phone: "(92) 3232-9076",
+    latitude: -3.1045,
+    longitude: -59.9877,
+    mapUrl: "https://maps.app.goo.gl/nCCWsjTZ9iCPdkYZ9"
   },
 ];

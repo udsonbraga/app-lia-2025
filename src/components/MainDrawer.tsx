@@ -3,10 +3,9 @@ import {
   Drawer,
   DrawerContent,
   DrawerHeader,
-  DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Menu, UserCircle, Upload, Trash2, Eye, EyeOff, HelpCircle, LogOut, Palette } from "lucide-react";
+import { Menu, UserCircle, Upload, Trash2, Eye, EyeOff, LogOut, Palette, HelpCircle, Mic, PhoneAlert } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -14,12 +13,14 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 import { useEmergencySoundDetection } from "@/hooks/useEmergencySoundDetection";
+import { useMotionDetector } from "@/hooks/useMotionDetector";
 import { Separator } from "@/components/ui/separator";
 
 export const MainDrawer = () => {
   const navigate = useNavigate();
   const { isDisguised, toggleDisguise } = useDisguiseMode();
   const { isListening, toggleSoundDetection } = useEmergencySoundDetection();
+  const { isMotionDetectionEnabled, toggleMotionDetection } = useMotionDetector();
   
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
     localStorage.getItem("avatarUrl")
@@ -115,49 +116,79 @@ export const MainDrawer = () => {
           </div>
           
           <Separator className="my-2" />
-          
-          <div className="w-full space-y-4 px-4 py-2">
+        </DrawerHeader>
+        
+        <div className="px-4 pb-6">
+          <div className="w-full space-y-4 mb-6">
             {/* Modo disfarce toggle */}
-            <div className="flex justify-between items-center">
-              <div>
-                <Label htmlFor="disguise-mode" className="text-base font-medium flex items-center gap-2">
-                  {isDisguised ? <EyeOff className="h-5 w-5 text-safelady" /> : <Eye className="h-5 w-5 text-safelady" />}
-                  Modo Disfarce
-                </Label>
-                <p className="text-sm text-gray-500 mt-1">
-                  Oculta o app transformando-o em um app de notas pessoais
-                </p>
+            <div className="flex items-center">
+              <div className="flex items-center gap-3">
+                {isDisguised ? 
+                  <EyeOff className="h-5 w-5 text-safelady" /> : 
+                  <Eye className="h-5 w-5 text-safelady" />
+                }
+                <div>
+                  <div className="font-medium text-gray-900">Modo Disfarce</div>
+                  <div className="text-sm text-gray-500">
+                    Oculta o app transformando-o em um app de notas pessoais
+                  </div>
+                </div>
               </div>
-              <Switch 
-                id="disguise-mode" 
-                checked={isDisguised}
-                onCheckedChange={toggleDisguise}
-              />
+              <div className="ml-auto">
+                <Switch 
+                  id="disguise-mode" 
+                  checked={isDisguised}
+                  onCheckedChange={toggleDisguise}
+                  className={isDisguised ? "bg-green-500" : ""}
+                />
+              </div>
             </div>
             
             {/* Detecção de som toggle */}
-            <div className="flex justify-between items-center">
-              <div>
-                <Label htmlFor="sound-detection" className="text-base font-medium">
-                  Detecção de Áudio
-                </Label>
-                <p className="text-sm text-gray-500 mt-1">
-                  Envia alerta automático ao detectar palavras de emergência
-                </p>
+            <div className="flex items-center">
+              <div className="flex items-center gap-3">
+                <Mic className="h-5 w-5 text-blue-600" />
+                <div>
+                  <div className="font-medium text-gray-900">Detecção de Áudio</div>
+                  <div className="text-sm text-gray-500">
+                    Envia alerta automático ao detectar palavras de emergência
+                  </div>
+                </div>
               </div>
-              <Switch 
-                id="sound-detection" 
-                checked={isListening}
-                onCheckedChange={toggleSoundDetection}
-              />
+              <div className="ml-auto">
+                <Switch 
+                  id="sound-detection" 
+                  checked={isListening}
+                  onCheckedChange={toggleSoundDetection}
+                  className={isListening ? "bg-green-500" : ""}
+                />
+              </div>
+            </div>
+            
+            {/* Detecção de movimento toggle */}
+            <div className="flex items-center">
+              <div className="flex items-center gap-3">
+                <PhoneAlert className="h-5 w-5 text-orange-600" />
+                <div>
+                  <div className="font-medium text-gray-900">Detecção de Movimento</div>
+                  <div className="text-sm text-gray-500">
+                    Alerta seus contatos em caso de movimento brusco
+                  </div>
+                </div>
+              </div>
+              <div className="ml-auto">
+                <Switch 
+                  id="motion-detection" 
+                  checked={isMotionDetectionEnabled}
+                  onCheckedChange={toggleMotionDetection}
+                  className={isMotionDetectionEnabled ? "bg-green-500" : ""}
+                />
+              </div>
             </div>
           </div>
           
-          <Separator className="my-2" />
+          <Separator className="my-4" />
           
-          <DrawerTitle>Menu</DrawerTitle>
-        </DrawerHeader>
-        <div className="px-4 pb-6">
           <nav className="space-y-3">
             {menuItems.map((item) => (
               <button
