@@ -1,6 +1,7 @@
 
 import { FinancialForm } from "@/components/FinancialForm";
 import { FinancialNotesList } from "@/components/FinancialNotesList";
+import { FinancialExplanation } from "@/components/FinancialExplanation";
 import { FinancialNote } from "@/types/financial";
 
 interface DisguisedModeProps {
@@ -24,6 +25,7 @@ export function DisguisedMode({
 }: DisguisedModeProps) {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      <FinancialExplanation />
       <FinancialForm 
         onSave={handleSaveNote}
         noteToEdit={noteToEdit}

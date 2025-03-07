@@ -41,7 +41,7 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
           </div>
           
           <h1 className="text-xl font-semibold">
-            {isDisguised ? 'Notas Pessoais' : 'Safe Lady'}
+            {isDisguised ? 'Finanças Pessoais' : 'Safe Lady'}
           </h1>
           
           <div className="flex items-center gap-3">

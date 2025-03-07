@@ -1,42 +1,97 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* Add these CSS variables to support the accessibility features */
+:root {
+  --font-size-multiplier: 100%;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Apply font size multiplier to text elements */
+body {
+  font-size: calc(16px * var(--font-size-multiplier) / 100);
 }
 
-@keyframes logo-spin {
+h1, h2, h3, h4, h5, h6, p, span, a, button, input, textarea, select, label {
+  font-size: calc(1em * var(--font-size-multiplier) / 100);
+}
+
+/* Tailwind Styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS */
+body {
+  font-family: 'Inter', sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+  max-width: 768px;
+}
+
+/* Animations */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: translateY(-10px);
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Disguised Mode Styles */
+body.disguised-mode {
+  background-color: #f0f0f0;
 }
 
-.card {
-  padding: 2em;
+body.disguised-mode #root > div {
+  box-shadow: none;
 }
 
-.read-the-docs {
-  color: #888;
+/* Dark Mode Styles */
+body.dark {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+body.dark .bg-white {
+  background-color: #1e1e1e;
+}
+
+body.dark .text-gray-800 {
+  color: #f0f0f0;
+}
+
+body.dark .text-gray-600 {
+  color: #d4d4d4;
+}
+
+body.dark .hover\:bg-gray-100:hover {
+  background-color: #333;
+}
+
+body.dark .shadow-sm {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+body.dark .border-gray-200 {
+  border-color: #333;
+}
+
+body.dark input,
+body.dark textarea {
+  background-color: #333;
+  color: #fff;
+}
+
+body.dark .ring-gray-100 {
+  --tw-ring-color: #333;
+}
+
+body.dark .text-gray-700 {
+    color: #d4d4d4;
 }

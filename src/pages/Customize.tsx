@@ -18,15 +18,11 @@ const Customize = () => {
     const savedTheme = localStorage.getItem("themeIndex");
     return savedTheme ? parseInt(savedTheme) : 0;
   });
-  const [fontSize, setFontSize] = useState(() => {
-    return localStorage.getItem("fontSize") || "normal";
-  });
 
-  // Aplicar tema e tamanho da fonte ao carregar o componente
+  // Aplicar tema ao carregar o componente
   useEffect(() => {
     applyTheme(selectedTheme);
-    applyFontSize(fontSize);
-  }, [selectedTheme, fontSize]);
+  }, [selectedTheme]);
 
   const applyTheme = (index: number) => {
     const theme = colorThemes[index];
@@ -56,18 +52,6 @@ const Customize = () => {
     localStorage.setItem("themeIndex", index.toString());
   };
 
-  const applyFontSize = (size: string) => {
-    const root = document.documentElement;
-    
-    // Remover todas as classes de tamanho de fonte
-    root.classList.remove("text-small", "text-normal", "text-large");
-    
-    // Adicionar nova classe de tamanho
-    root.classList.add(`text-${size}`);
-    
-    localStorage.setItem("fontSize", size);
-  };
-
   const handleThemeChange = (index: number) => {
     setSelectedTheme(index);
     applyTheme(index);
@@ -75,16 +59,6 @@ const Customize = () => {
     toast({
       title: "Tema atualizado",
       description: `O tema ${colorThemes[index].name} foi aplicado com sucesso.`,
-    });
-  };
-
-  const handleFontSizeChange = (size: string) => {
-    setFontSize(size);
-    applyFontSize(size);
-    
-    toast({
-      title: "Tamanho da fonte atualizado",
-      description: "A nova configuração foi aplicada com sucesso.",
     });
   };
 
@@ -129,31 +103,6 @@ const Customize = () => {
                   </div>
                 </button>
               ))}
-            </div>
-          </div>
-
-          {/* Tamanho da Fonte */}
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">Tamanho da Fonte</h2>
-            <div className="flex flex-wrap gap-3">
-              <Button
-                variant={fontSize === "small" ? "default" : "outline"}
-                onClick={() => handleFontSizeChange("small")}
-              >
-                Pequena
-              </Button>
-              <Button
-                variant={fontSize === "normal" ? "default" : "outline"}
-                onClick={() => handleFontSizeChange("normal")}
-              >
-                Normal
-              </Button>
-              <Button
-                variant={fontSize === "large" ? "default" : "outline"}
-                onClick={() => handleFontSizeChange("large")}
-              >
-                Grande
-              </Button>
             </div>
           </div>
 
