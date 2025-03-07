@@ -45,16 +45,22 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
           </h1>
           
           <div className="flex items-center gap-3">
-            {!isDisguised && (
-              <div className="flex items-center mr-2">
-                <button 
-                  onClick={toggleDisguise}
-                  className="flex items-center gap-2 text-sm px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
-                >
-                  <Eye className="h-5 w-5 text-safelady" />
-                  <span className="hidden sm:inline text-safelady">Modo Disfarce</span>
-                </button>
-              </div>
+            {isDisguised ? (
+              <button 
+                onClick={toggleDisguise}
+                className="flex items-center gap-2 text-sm px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
+              >
+                <EyeOff className="h-5 w-5 text-gray-600" />
+                <span className="hidden sm:inline text-gray-600">Sair</span>
+              </button>
+            ) : (
+              <button 
+                onClick={toggleDisguise}
+                className="flex items-center gap-2 text-sm px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
+              >
+                <Eye className="h-5 w-5 text-safelady" />
+                <span className="hidden sm:inline text-safelady">Modo Disfarce</span>
+              </button>
             )}
             
             {!isDisguised && (

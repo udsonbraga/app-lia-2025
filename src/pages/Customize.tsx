@@ -1,20 +1,14 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { DrawerMenu } from "@/components/DrawerMenu";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft } from "lucide-react";
 
 const colorThemes = [
-  { name: "Rosa (Padrão)", primary: "bg-safelady", secondary: "bg-safelady-light", value: "safelady" },
-  { name: "Roxo", primary: "bg-purple-500", secondary: "bg-purple-100", value: "purple" },
-  { name: "Azul", primary: "bg-blue-500", secondary: "bg-blue-100", value: "blue" },
-  { name: "Verde", primary: "bg-green-500", secondary: "bg-green-100", value: "green" },
-  { name: "Laranja", primary: "bg-orange-500", secondary: "bg-orange-100", value: "orange" },
-  { name: "Vermelho", primary: "bg-red-500", secondary: "bg-red-100", value: "red" },
-  { name: "Amarelo", primary: "bg-yellow-500", secondary: "bg-yellow-100", value: "yellow" },
-  { name: "Ciano", primary: "bg-cyan-500", secondary: "bg-cyan-100", value: "cyan" },
-  { name: "Indigo", primary: "bg-indigo-500", secondary: "bg-indigo-100", value: "indigo" },
+  { name: "Rosa Claro", primary: "bg-safelady", secondary: "bg-safelady-light", value: "safelady" },
+  { name: "Rosa Médio", primary: "bg-rose-500", secondary: "bg-rose-100", value: "rose" },
+  { name: "Rosa Escuro", primary: "bg-pink-600", secondary: "bg-pink-100", value: "pink" },
 ];
 
 const Customize = () => {
@@ -53,22 +47,10 @@ const Customize = () => {
     // Atualizar a cor de fundo do corpo do documento
     if (theme.value === 'safelady') {
       document.body.style.background = 'linear-gradient(to bottom, #FF84C6, #ffffff)';
-    } else if (theme.value === 'purple') {
-      document.body.style.background = 'linear-gradient(to bottom, rgb(139, 92, 246), #ffffff)';
-    } else if (theme.value === 'blue') {
-      document.body.style.background = 'linear-gradient(to bottom, rgb(59, 130, 246), #ffffff)';
-    } else if (theme.value === 'green') {
-      document.body.style.background = 'linear-gradient(to bottom, rgb(34, 197, 94), #ffffff)';
-    } else if (theme.value === 'orange') {
-      document.body.style.background = 'linear-gradient(to bottom, rgb(249, 115, 22), #ffffff)';
-    } else if (theme.value === 'red') {
-      document.body.style.background = 'linear-gradient(to bottom, rgb(239, 68, 68), #ffffff)';
-    } else if (theme.value === 'yellow') {
-      document.body.style.background = 'linear-gradient(to bottom, rgb(234, 179, 8), #ffffff)';
-    } else if (theme.value === 'cyan') {
-      document.body.style.background = 'linear-gradient(to bottom, rgb(6, 182, 212), #ffffff)';
-    } else if (theme.value === 'indigo') {
-      document.body.style.background = 'linear-gradient(to bottom, rgb(79, 70, 229), #ffffff)';
+    } else if (theme.value === 'rose') {
+      document.body.style.background = 'linear-gradient(to bottom, rgb(244, 63, 94), #ffffff)';
+    } else if (theme.value === 'pink') {
+      document.body.style.background = 'linear-gradient(to bottom, rgb(219, 39, 119), #ffffff)';
     }
     
     localStorage.setItem("themeIndex", index.toString());
@@ -116,10 +98,16 @@ const Customize = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-safelady-light to-white">
-      <DrawerMenu />
-      
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-8 text-center">Personalizar</h1>
+        <div className="flex items-center mb-6">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="mr-2 p-2 rounded-full hover:bg-gray-100"
+          >
+            <ArrowLeft className="h-6 w-6 text-gray-700" />
+          </button>
+          <h1 className="text-2xl font-bold">Personalizar</h1>
+        </div>
         
         <div className="space-y-8 max-w-md mx-auto">
           {/* Temas de Cores */}
@@ -171,7 +159,7 @@ const Customize = () => {
 
           <Button
             onClick={handleSaveChanges}
-            className="w-full"
+            className="w-full bg-safelady hover:bg-safelady-dark text-white"
           >
             Salvar Alterações
           </Button>

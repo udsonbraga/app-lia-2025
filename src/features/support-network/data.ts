@@ -1,4 +1,3 @@
-
 import { SupportLocation } from "./types";
 
 export const openMap = (location: SupportLocation) => {
@@ -26,33 +25,43 @@ export const getFilteredLocations = (
 export const policeLocations: SupportLocation[] = [
   {
     id: "police1",
-    name: "Delegacia Especializada em Crimes Contra a Mulher (DECCM)",
+    name: "DECCM - Delegacia Especializada em Crimes Contra a Mulher / Anexo Norte",
     type: "police",
-    address: "Av. Mário Ypiranga, 3395 - Parque Dez de Novembro, Manaus - AM, 69050-030",
+    address: "Av. Nossa Sra. da Conceição, 1059 - Cidade de Deus, Manaus - AM, 69057-520",
     phone: "(92) 3236-7012",
-    latitude: -3.0979,
-    longitude: -60.0164,
-    mapUrl: "https://maps.app.goo.gl/Bn7Jx7aGE9PQgP1o8"
+    latitude: -3.0314,
+    longitude: -59.9628,
+    mapUrl: "https://maps.app.goo.gl/YmfA2Ti1XrBbvNWS8"
   },
   {
     id: "police2",
-    name: "Delegacia Especializada em Proteção à Criança e ao Adolescente (DEPCA)",
+    name: "Delegacia da Mulher",
     type: "police",
-    address: "Av. Via Láctea, s/n - Morada do Sol, Aleixo, Manaus - AM, 69060-085",
-    phone: "(92) 3656-2065",
-    latitude: -3.0786,
-    longitude: -60.0134,
-    mapUrl: "https://maps.app.goo.gl/GcENJzQeihwQwJKN9"
+    address: "Av. Mário Ypiranga, 3395 - Parque Dez de Novembro, Manaus - AM, 69057-002",
+    phone: "(92) 3236-7012",
+    latitude: -3.0979,
+    longitude: -60.0164,
+    mapUrl: "https://maps.app.goo.gl/NqCtUadBYi7vZrwRA"
   },
   {
     id: "police3",
-    name: "1ª Delegacia Especializada em Homicídios e Sequestros (DEHS)",
+    name: "Delegacia da Mulher - Zona Sul",
     type: "police",
-    address: "Av. Autaz Mirim, s/n - Jorge Teixeira, Manaus - AM, 69088-175",
-    phone: "(92) 3667-7777",
-    latitude: -3.0184,
-    longitude: -59.9364,
-    mapUrl: "https://maps.app.goo.gl/ioumtH5jwQNn2E4K9"
+    address: "R. Des. Filismino Soares, 155 - Colônia Oliveira Machado, Manaus - AM, 69070-620",
+    phone: "(92) 3236-7012",
+    latitude: -3.1323,
+    longitude: -59.9984,
+    mapUrl: "https://maps.app.goo.gl/o4g7A5GUmbfGgh656"
+  },
+  {
+    id: "police4",
+    name: "DEPCA - Delegacia Especializada Em Proteção À Criança E Ao Adolescente",
+    type: "police",
+    address: "Av. Via Láctea, Conjunto Morada do Sol, s/n - Aleixo, Manaus - AM, 69044-390",
+    phone: "(92) 3656-2065",
+    latitude: -3.0786,
+    longitude: -60.0134,
+    mapUrl: "https://maps.app.goo.gl/1WzXHsTyAJwTGHpg7"
   }
 ];
 

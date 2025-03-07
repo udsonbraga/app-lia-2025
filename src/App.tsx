@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "@/pages/Index";
@@ -9,7 +8,7 @@ import Customize from "@/pages/Customize";
 import Diary from "@/pages/Diary";
 import SafeContact from "@/pages/SafeContact";
 import SupportNetwork from "@/pages/SupportNetwork";
-import { SplashScreen } from "@/components/SplashScreen";
+import { LoadingScreen } from "./components/LoadingScreen";
 import Help from "@/pages/Help";
 import "./App.css";
 
@@ -23,7 +22,7 @@ function App() {
     <Router>
       <div className="bg-white min-h-screen">
         <Routes>
-          <Route path="/" element={<SplashScreen />} />
+          <Route path="/" element={<LoadingScreen />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route

@@ -20,7 +20,7 @@ const LocationCard = ({ location }: LocationCardProps) => {
         <Button 
           variant="outline" 
           size="sm" 
-          className="flex items-center gap-1 text-red-500 border-red-200"
+          className="flex items-center gap-1 text-safelady border-safelady/20 hover:bg-safelady/10"
           onClick={() => openMap(location)}
         >
           <MapPin className="h-4 w-4" />
