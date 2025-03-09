@@ -1,8 +1,7 @@
 
 import { useEffect, useCallback, useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { getCurrentPosition } from '@/utils/geolocationUtils';
-import { sendTelegramMessage } from '@/utils/telegramUtils';
+import { handleEmergencyAlert } from '@/utils/emergencyUtils';
 
 export function useMotionDetector() {
   const { toast } = useToast();
@@ -10,32 +9,20 @@ export function useMotionDetector() {
     return localStorage.getItem("motionDetectionEnabled") === "true";
   });
 
-  const handleEmergencyAlert = useCallback(async () => {
+  const handleMotionEmergency = useCallback(async () => {
     if (!isMotionDetectionEnabled) return;
     
     try {
-      // Obter localização atual
-      const position = await getCurrentPosition();
-      const { latitude, longitude } = position.coords;
-      const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
-      
-      // Enviar mensagem de emergência para o bot de suporte
-      const emergencyMessage = "EMERGÊNCIA DETECTADA! Movimento brusco identificado.";
-      const success = await sendTelegramMessage(emergencyMessage, locationLink);
-      
-      if (success) {
-        toast({
-          title: "Alerta de emergência enviado",
-          description: "Detectamos movimento brusco. Alerta enviado.",
-        });
-      } else {
-        throw new Error("Falha ao enviar alerta de emergência");
-      }
+      // Usar a função utilitária de emergência que agora usa o chat ID correto
+      await handleEmergencyAlert({ 
+        toast,
+        // Sem audioBlob para alertas de movimento
+      });
     } catch (error) {
-      console.error("Erro ao enviar alerta automático:", error);
+      console.error("Erro ao enviar alerta automático de movimento:", error);
       toast({
         title: "Erro ao enviar alerta",
-        description: "Não foi possível enviar o alerta de emergência.",
+        description: "Não foi possível enviar o alerta de movimento brusco.",
         variant: "destructive"
       });
     }
@@ -91,7 +78,7 @@ export function useMotionDetector() {
         alertCooldown = true;
         
         // Trigger emergency contact
-        handleEmergencyAlert();
+        handleMotionEmergency();
         
         // Reset cooldown após 30 segundos
         setTimeout(() => {
@@ -110,7 +97,7 @@ export function useMotionDetector() {
     return () => {
       window.removeEventListener('devicemotion', handleMotion);
     };
-  }, [handleEmergencyAlert, isMotionDetectionEnabled]);
+  }, [handleMotionEmergency, isMotionDetectionEnabled]);
 
   return {
     isMotionDetectionEnabled,

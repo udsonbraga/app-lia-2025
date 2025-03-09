@@ -12,18 +12,25 @@
  */
 export const sendTelegramMessage = async (
   message: string, 
-  locationLink: string, 
+  locationLink: string = "", 
   audioBlob?: Blob
 ): Promise<boolean> => {
   try {
-    // suport@safelady_bot token - used for ALL communications
+    // Token do bot suport@safelady_bot
     const botToken = "7668166969:AAFnukkbhjDnUgGTC5em6vYk1Ch7bXy-rBQ";
-    const fullMessage = `${message} Localização atual: ${locationLink}`;
+    
+    // O chat ID corrigido para o suport@safelady_bot
+    const chatId = "5557317932"; // ID do chat para o suport@safelady_bot
+    
+    // Preparar a mensagem completa
+    const fullMessage = locationLink 
+      ? `${message} Localização atual: ${locationLink}` 
+      : message;
     
     // Enviar mensagem de texto primeiro
     const textApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
     const textRequestBody = {
-      chat_id: "suport@safelady_bot", // Sending to support bot
+      chat_id: chatId,
       text: fullMessage,
       parse_mode: "HTML"
     };
@@ -37,6 +44,7 @@ export const sendTelegramMessage = async (
     });
     
     if (!textResponse.ok) {
+      console.error("Erro na resposta do Telegram:", await textResponse.text());
       throw new Error(`Erro ao enviar mensagem de texto: ${textResponse.statusText}`);
     }
     
@@ -47,7 +55,7 @@ export const sendTelegramMessage = async (
       try {
         // Criar FormData para enviar o arquivo de áudio
         const formData = new FormData();
-        formData.append('chat_id', "suport@safelady_bot");
+        formData.append('chat_id', chatId);
         formData.append('caption', 'Gravação de áudio da emergência');
         
         // Adicionar arquivo de áudio ao formData
@@ -63,6 +71,7 @@ export const sendTelegramMessage = async (
         });
         
         if (!audioResponse.ok) {
+          console.error("Erro na resposta de áudio do Telegram:", await audioResponse.text());
           throw new Error(`Erro ao enviar áudio: ${audioResponse.statusText}`);
         }
         
@@ -90,10 +99,9 @@ export const sendFeedbackMessage = async (feedbackMessage: string): Promise<bool
     const message = `NOVO FEEDBACK RECEBIDO!\n\nMensagem: ${feedbackMessage}\nData: ${new Date().toLocaleString()}`;
     
     // Enviar o feedback diretamente para o bot de suporte
-    return await sendTelegramMessage(message, "");
+    return await sendTelegramMessage(message);
   } catch (error) {
     console.error('Erro ao enviar feedback para o Telegram:', error);
     return false;
   }
 };
-

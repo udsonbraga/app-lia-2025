@@ -2,8 +2,7 @@
 import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { getCurrentPosition } from '@/utils/geolocationUtils';
-import { sendTelegramMessage } from '@/utils/telegramUtils';
+import { handleEmergencyAlert } from '@/utils/emergencyUtils';
 
 export function EmergencyButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,24 +12,13 @@ export function EmergencyButton() {
     setIsLoading(true);
     
     try {
-      // Obter localização atual
-      const position = await getCurrentPosition();
-      const { latitude, longitude } = position.coords;
-      const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
+      // Usar a função utilitária de emergência que agora usa o chat ID correto
+      await handleEmergencyAlert({ toast });
       
-      // Preparar e enviar mensagem de emergência
-      const emergencyMessage = "EMERGÊNCIA DETECTADA! Botão de emergência acionado.";
-      
-      const success = await sendTelegramMessage(emergencyMessage, locationLink);
-      
-      if (success) {
-        toast({
-          title: "Pedido de ajuda enviado",
-          description: "Mensagem de emergência enviada via Telegram.",
-        });
-      } else {
-        throw new Error("Falha ao enviar alerta de emergência");
-      }
+      toast({
+        title: "Pedido de ajuda enviado",
+        description: "Mensagem de emergência enviada via Telegram.",
+      });
     } catch (error) {
       console.error("Erro ao enviar alerta de emergência:", error);
       toast({

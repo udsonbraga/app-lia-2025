@@ -41,4 +41,3 @@ export const handleEmergencyAlert = async ({ toast, audioBlob }: EmergencyAlertP
     });
   }
 };
-

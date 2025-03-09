@@ -5,7 +5,7 @@ import { EMERGENCY_KEYWORDS } from "@/constants/emergencyKeywords";
 import { handleEmergencyAlert } from "@/utils/emergencyUtils";
 
 /**
- * Hook for handling emergency sound detection functionality
+ * Hook para lidar com a detecção de sons de emergência
  */
 export function useEmergencySoundDetection() {
   const [isListening, setIsListening] = useState(false);
@@ -32,7 +32,7 @@ export function useEmergencySoundDetection() {
       mediaRecorder.start();
       setIsRecording(true);
       
-      // Gravar por no máximo 3 segundos (modificado de 30 para 3 segundos)
+      // Gravar por exatamente 3 segundos
       setTimeout(() => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
           stopRecording();
@@ -71,11 +71,15 @@ export function useEmergencySoundDetection() {
     console.log("Emergência detectada, iniciando gravação");
     await startRecording();
     
-    // Esperar 3 segundos de gravação após a detecção (modificado de 10 para 3 segundos)
+    // Gravar por exatamente 3 segundos, então enviar o alerta
     setTimeout(async () => {
       const audioBlob = await stopRecording();
-      await handleEmergencyAlert({ toast, audioBlob });
-    }, 3000); // 3 segundos
+      if (audioBlob) {
+        await handleEmergencyAlert({ toast, audioBlob });
+      } else {
+        await handleEmergencyAlert({ toast });
+      }
+    }, 3000);
   }, [toast, startRecording, stopRecording]);
 
   useEffect(() => {
