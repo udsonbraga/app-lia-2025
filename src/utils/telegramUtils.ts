@@ -11,7 +11,7 @@
  */
 export const sendTelegramMessage = async (telegramId: string, locationLink: string): Promise<boolean> => {
   try {
-    const botToken = "7583759027:AAEE7KUF9ye6esERLzac-ATth7VOjfvRx8s"; // Token real do bot SafeLady_bot
+    const botToken = "7668166969:AAFnukkbhjDnUgGTC5em6vYk1Ch7bXy-rBQ"; // Updated token
     const message = `EMERGÊNCIA DETECTADA! Som de emergência identificado. Localização atual: ${locationLink}`;
     
     // URL da API do Telegram para enviar mensagem
