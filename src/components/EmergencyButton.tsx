@@ -1,11 +1,57 @@
 
 import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
+import { getCurrentPosition } from '@/utils/geolocationUtils';
+import { sendTelegramMessage } from '@/utils/telegramUtils';
 
 export function EmergencyButton() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const { toast } = useToast();
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<BlobPart[]>([]);
+
+  const startRecording = useCallback(async () => {
+    if (isRecording) return;
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      
+      mediaRecorder.start();
+      setIsRecording(true);
+      
+      console.log("Gravação de áudio iniciada");
+    } catch (error) {
+      console.error("Erro ao iniciar gravação de áudio:", error);
+    }
+  }, [isRecording]);
+  
+  const stopRecording = useCallback(async () => {
+    if (!isRecording || !mediaRecorderRef.current) return null;
+    
+    return new Promise<Blob>((resolve) => {
+      mediaRecorderRef.current!.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        audioChunksRef.current = [];
+        setIsRecording(false);
+        console.log("Gravação de áudio finalizada");
+        resolve(audioBlob);
+      };
+      
+      mediaRecorderRef.current!.stop();
+      mediaRecorderRef.current!.stream.getTracks().forEach(track => track.stop());
+    });
+  }, [isRecording]);
 
   const handleEmergencyContact = async () => {
     setIsLoading(true);
@@ -26,18 +72,27 @@ export function EmergencyButton() {
         return;
       }
       
+      // Iniciar gravação de áudio
+      await startRecording();
+      
       // Obter localização atual
       const position = await getCurrentPosition();
       const { latitude, longitude } = position.coords;
       const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
       
+      // Gravar por 10 segundos antes de enviar
+      await new Promise(resolve => setTimeout(resolve, 10000));
+      
+      // Parar gravação e obter o blob de áudio
+      const audioBlob = await stopRecording();
+      
       // Enviar mensagens para todos os contatos cadastrados
       const promises = [];
       
       for (const contact of contacts) {
-        // Enviar mensagem pelo Telegram
+        // Enviar mensagem pelo Telegram com áudio
         promises.push(
-          sendTelegramMessage(contact.telegramId, locationLink)
+          sendTelegramMessage(contact.telegramId, locationLink, audioBlob)
         );
       }
       
@@ -45,7 +100,7 @@ export function EmergencyButton() {
       
       toast({
         title: "Pedido de ajuda enviado",
-        description: "Mensagens de emergência enviadas para todos os seus contatos seguros via Telegram.",
+        description: "Mensagens de emergência e gravação de áudio enviadas para todos os seus contatos seguros via Telegram.",
       });
     } catch (error) {
       console.error("Erro ao enviar alerta de emergência:", error);
@@ -56,60 +111,6 @@ export function EmergencyButton() {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-  
-  // Função para obter posição atual
-  const getCurrentPosition = (): Promise<GeolocationPosition> => {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error("Geolocalização não suportada pelo navegador"));
-        return;
-      }
-      
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
-      });
-    });
-  };
-  
-  // Função para enviar mensagem via Telegram Bot
-  const sendTelegramMessage = async (telegramId: string, locationLink: string) => {
-    try {
-      const botToken = "7583759027:AAEE7KUF9ye6esERLzac-ATth7VOjfvRx8s"; // Token real do bot SafeLady_bot
-      const message = `EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`;
-      
-      // URL da API do Telegram para enviar mensagem
-      const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-      
-      // Preparar o corpo da requisição
-      const requestBody = {
-        chat_id: telegramId,
-        text: message,
-        parse_mode: "HTML"
-      };
-      
-      // Fazer a requisição para a API do Telegram
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Erro ao enviar mensagem: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      console.log('Mensagem enviada com sucesso:', data);
-      return true;
-    } catch (error) {
-      console.error('Erro ao enviar mensagem via Telegram:', error);
-      return false;
     }
   };
 

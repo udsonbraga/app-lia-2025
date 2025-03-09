@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { EMERGENCY_KEYWORDS } from "@/constants/emergencyKeywords";
 import { handleEmergencyAlert } from "@/utils/emergencyUtils";
@@ -9,11 +9,74 @@ import { handleEmergencyAlert } from "@/utils/emergencyUtils";
  */
 export function useEmergencySoundDetection() {
   const [isListening, setIsListening] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const { toast } = useToast();
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<BlobPart[]>([]);
+
+  const startRecording = useCallback(async () => {
+    if (isRecording) return;
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      
+      mediaRecorder.start();
+      setIsRecording(true);
+      
+      // Gravar por no máximo 30 segundos
+      setTimeout(() => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+          stopRecording();
+        }
+      }, 30000);
+      
+      console.log("Gravação de áudio iniciada");
+    } catch (error) {
+      console.error("Erro ao iniciar gravação de áudio:", error);
+      toast({
+        title: "Erro na gravação",
+        description: "Não foi possível iniciar a gravação de áudio.",
+        variant: "destructive"
+      });
+    }
+  }, [isRecording, toast]);
+  
+  const stopRecording = useCallback(async () => {
+    if (!isRecording || !mediaRecorderRef.current) return null;
+    
+    return new Promise<Blob>((resolve) => {
+      mediaRecorderRef.current!.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        audioChunksRef.current = [];
+        setIsRecording(false);
+        console.log("Gravação de áudio finalizada");
+        resolve(audioBlob);
+      };
+      
+      mediaRecorderRef.current!.stop();
+      mediaRecorderRef.current!.stream.getTracks().forEach(track => track.stop());
+    });
+  }, [isRecording]);
 
   const handleEmergencyDetected = useCallback(async () => {
-    await handleEmergencyAlert({ toast });
-  }, [toast]);
+    console.log("Emergência detectada, iniciando gravação");
+    await startRecording();
+    
+    // Esperar 10 segundos de gravação após a detecção
+    setTimeout(async () => {
+      const audioBlob = await stopRecording();
+      await handleEmergencyAlert({ toast, audioBlob });
+    }, 10000);
+  }, [toast, startRecording, stopRecording]);
 
   useEffect(() => {
     if (!isListening) return;
@@ -80,7 +143,7 @@ export function useEmergencySoundDetection() {
         
         toast({
           title: "Detecção de som ativada",
-          description: "O aplicativo está monitorando sons de emergência.",
+          description: "O aplicativo está monitorando sons de emergência e gravará áudio se detectar uma emergência.",
         });
       } catch (error) {
         console.error("Erro ao iniciar reconhecimento de fala:", error);
@@ -104,8 +167,13 @@ export function useEmergencySoundDetection() {
           console.error("Erro ao parar reconhecimento de fala:", e);
         }
       }
+      
+      // Parar gravação se estiver ocorrendo
+      if (isRecording) {
+        stopRecording();
+      }
     };
-  }, [isListening, handleEmergencyDetected, toast]);
+  }, [isListening, handleEmergencyDetected, toast, isRecording, stopRecording]);
 
   const toggleSoundDetection = () => {
     setIsListening(prevState => !prevState);
@@ -113,6 +181,7 @@ export function useEmergencySoundDetection() {
 
   return {
     isListening,
+    isRecording,
     toggleSoundDetection
   };
 }
