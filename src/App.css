@@ -1,3 +1,4 @@
+
 /* Add these CSS variables to support the accessibility features */
 :root {
   --font-size-multiplier: 100%;
@@ -94,4 +95,25 @@ body.dark .ring-gray-100 {
 
 body.dark .text-gray-700 {
     color: #d4d4d4;
+}
+
+/* New theme colors */
+.bg-theme-primary {
+  background-color: #333333;
+}
+
+.text-theme-primary {
+  color: #333333;
+}
+
+.border-theme-primary {
+  border-color: #333333;
+}
+
+.hover\:bg-theme-primary-dark:hover {
+  background-color: #222222;
+}
+
+.bg-theme-primary-light {
+  background-color: #555555;
 }

@@ -5,8 +5,6 @@ import Index from "@/pages/Index";
 import Register from "@/pages/Register";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
-import Customize from "@/pages/Customize";
-import Accessibility from "@/pages/Accessibility";
 import Diary from "@/pages/Diary";
 import SafeContact from "@/pages/SafeContact";
 import SupportNetwork from "@/pages/SupportNetwork";
@@ -32,22 +30,6 @@ function App() {
             element={
               <PrivateRoute>
                 <Index />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/customize"
-            element={
-              <PrivateRoute>
-                <Customize />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/accessibility"
-            element={
-              <PrivateRoute>
-                <Accessibility />
               </PrivateRoute>
             }
           />

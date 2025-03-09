@@ -1,84 +1,75 @@
 
-import { useNavigate } from "react-router-dom";
+import { useHasSafeContacts } from "@/hooks/useSafeContacts";
+import { Link } from "react-router-dom";
 import { MainDrawer } from "@/components/MainDrawer";
-import { useDisguiseMode } from "@/hooks/useDisguiseMode";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Eye, EyeOff, UserCircle } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Switch } from "@/components/ui/switch";
+import { AlertTriangle, Eye, EyeOff } from "lucide-react";
+import { FeedbackButton } from "@/components/FeedbackButton";
 
 interface HeaderProps {
-  isDisguised: boolean;
-  toggleDisguise: () => void;
+  isDisguised?: boolean;
+  toggleDisguise?: () => void;
 }
 
-export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
-  const navigate = useNavigate();
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string>("");
-
-  useEffect(() => {
-    // Get user avatar and name from localStorage
-    const storedAvatar = localStorage.getItem("avatarUrl");
-    const storedName = localStorage.getItem("userName");
-    
-    if (storedAvatar) {
-      setAvatarUrl(storedAvatar);
-    }
-    
-    if (storedName) {
-      setUserName(storedName);
-    }
-  }, []);
+export function Header({ isDisguised = false, toggleDisguise }: HeaderProps) {
+  const { hasSafeContacts } = useHasSafeContacts();
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-50">
-      <div className="container mx-auto h-full">
-        <div className="flex items-center justify-between h-full px-4">
-          <div className="flex items-center">
-            {/* Only show drawer menu when not in disguise mode */}
-            {!isDisguised && <MainDrawer />}
-          </div>
+    <header className="fixed top-0 left-0 right-0 bg-white z-40 shadow-sm">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center">
+          <MainDrawer />
           
-          <h1 className="text-xl font-semibold">
-            {isDisguised ? 'Finanças Pessoais' : 'Safe Lady'}
-          </h1>
+          {!isDisguised && (
+            <Link to="/home" className="ml-2 font-bold text-neutral-800 text-lg">
+              Safe Lady
+            </Link>
+          )}
           
-          <div className="flex items-center gap-3">
-            {isDisguised ? (
-              <button 
-                onClick={toggleDisguise}
-                className="flex items-center gap-2 text-sm px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
-              >
-                <EyeOff className="h-5 w-5 text-gray-600" />
-                <span className="hidden sm:inline text-gray-600">Sair</span>
-              </button>
-            ) : (
-              <button 
-                onClick={toggleDisguise}
-                className="flex items-center gap-2 text-sm px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
-              >
-                <Eye className="h-5 w-5 text-safelady" />
-                <span className="hidden sm:inline text-safelady">Modo Disfarce</span>
-              </button>
-            )}
-            
-            {!isDisguised && (
-              <div className="flex items-center">
-                {userName && (
-                  <span className="text-sm font-medium mr-2 hidden sm:block">{userName}</span>
-                )}
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={avatarUrl || ""} alt="Avatar" />
-                  <AvatarFallback>
-                    {userName ? userName.charAt(0).toUpperCase() : <UserCircle className="h-8 w-8" />}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-            )}
-          </div>
+          {isDisguised && (
+            <span className="ml-2 font-bold text-neutral-800 text-lg">
+              Finanças Pessoais
+            </span>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-3">
+          {!hasSafeContacts && !isDisguised && (
+            <Link 
+              to="/safe-contact" 
+              className="flex items-center gap-1 bg-amber-100 text-amber-800 px-2 py-1 rounded-md text-xs"
+            >
+              <AlertTriangle className="h-3 w-3" />
+              Configure contatos de segurança
+            </Link>
+          )}
+          
+          <FeedbackButton />
+          
+          {toggleDisguise && (
+            <button
+              onClick={toggleDisguise}
+              className={`
+                flex items-center gap-1 px-3 py-2 rounded-md text-sm
+                ${isDisguised 
+                  ? "bg-neutral-800 text-white hover:bg-neutral-700" 
+                  : "bg-neutral-800 text-white hover:bg-neutral-700"}
+              `}
+            >
+              {isDisguised ? (
+                <>
+                  <EyeOff className="h-4 w-4" />
+                  <span>Modo Normal</span>
+                </>
+              ) : (
+                <>
+                  <Eye className="h-4 w-4" />
+                  <span>Ativar Modo Disfarce</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
-    </div>
+    </header>
   );
 }
