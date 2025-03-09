@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { validateEmail, formatPhone, validatePhone } from "@/features/auth/utils/formValidation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { sendTelegramMessage } from "@/utils/telegramUtils";
 
 interface PasswordRecoveryProps {
   onBack: () => void;
@@ -63,7 +62,6 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
           return;
         }
         
-        // Buscar usuário pelo email
         const user = findUserByEmail(recoveryEmail);
         if (!user) {
           setError("Não encontramos nenhuma conta associada a este email.");
@@ -71,40 +69,14 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
           return;
         }
         
-        // Gerar código de recuperação temporário
-        const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
-        
-        // Armazenar código (em produção isso seria feito com um token no backend)
-        const recoveryData = {
-          code: recoveryCode,
-          email: recoveryEmail,
-          expires: new Date(Date.now() + 15 * 60000).toISOString() // Expira em 15 minutos
-        };
-        localStorage.setItem(`recovery_${recoveryEmail}`, JSON.stringify(recoveryData));
-        
-        // Enviar mensagem para o bot do Telegram com as informações de recuperação
-        const recoveryMessage = `SOLICITAÇÃO DE RECUPERAÇÃO DE SENHA\n\nEmail: ${recoveryEmail}\nCódigo: ${recoveryCode}\nExpiração: ${new Date(Date.now() + 15 * 60000).toLocaleString()}`;
-        await sendTelegramMessage(recoveryMessage, "");
-        
-        // Simular envio de email (em produção, isso seria feito no backend)
-        console.log(`Enviando código ${recoveryCode} para o e-mail: ${recoveryEmail}`);
+        // Simulate sending a recovery email
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         setSuccess(`Email de recuperação enviado para ${recoveryEmail}`);
         toast({
           title: "Email de recuperação enviado",
-          description: `Enviamos um código de recuperação para ${recoveryEmail}. Por favor, verifique sua caixa de entrada e spam.`,
+          description: `Enviamos um link de recuperação para ${recoveryEmail}. Por favor, verifique sua caixa de entrada e spam.`,
         });
-        
-        // Se o usuário também tiver telefone, enviar SMS
-        if (user.phone) {
-          // Simular envio de SMS (em produção, isso seria feito no backend)
-          console.log(`Enviando código ${recoveryCode} também por SMS para ${user.phone}`);
-          
-          toast({
-            title: "SMS de recuperação enviado",
-            description: `Também enviamos um código por SMS para ${user.phone}.`,
-          });
-        }
       } else {
         if (!validatePhone(recoveryPhone)) {
           setError("Por favor, insira um número de telefone válido no formato (00) 00000-0000.");
@@ -112,7 +84,6 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
           return;
         }
         
-        // Buscar usuário pelo telefone
         const user = findUserByPhone(recoveryPhone);
         if (!user) {
           setError("Não encontramos nenhuma conta associada a este número de telefone.");
@@ -120,40 +91,14 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
           return;
         }
         
-        // Gerar código de recuperação temporário
-        const recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
-        
-        // Armazenar código (em produção isso seria feito com um token no backend)
-        const recoveryData = {
-          code: recoveryCode,
-          phone: recoveryPhone,
-          expires: new Date(Date.now() + 15 * 60000).toISOString() // Expira em 15 minutos
-        };
-        localStorage.setItem(`recovery_${recoveryPhone}`, JSON.stringify(recoveryData));
-        
-        // Enviar mensagem para o bot do Telegram com as informações de recuperação
-        const recoveryMessage = `SOLICITAÇÃO DE RECUPERAÇÃO DE SENHA\n\nTelefone: ${recoveryPhone}\nCódigo: ${recoveryCode}\nExpiração: ${new Date(Date.now() + 15 * 60000).toLocaleString()}`;
-        await sendTelegramMessage(recoveryMessage, "");
-        
-        // Simular envio de SMS (em produção, isso seria feito no backend)
-        console.log(`Enviando código ${recoveryCode} para o telefone: ${recoveryPhone}`);
+        // Simulate sending a recovery SMS
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         setSuccess(`SMS de recuperação enviado para ${recoveryPhone}`);
         toast({
           title: "SMS de recuperação enviado",
           description: `Enviamos um código de recuperação para ${recoveryPhone}. Por favor, aguarde o recebimento da mensagem.`,
         });
-        
-        // Se o usuário também tiver email, enviar email
-        if (user.email) {
-          // Simular envio de email (em produção, isso seria feito no backend)
-          console.log(`Enviando código ${recoveryCode} também por email para ${user.email}`);
-          
-          toast({
-            title: "Email de recuperação enviado",
-            description: `Também enviamos um código por email para ${user.email}.`,
-          });
-        }
       }
       
       // Reset form after 3 seconds and redirect back
@@ -163,7 +108,6 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
         onBack();
       }, 3000);
     } catch (error) {
-      console.error("Erro na recuperação de senha:", error);
       setError("Não foi possível processar sua solicitação. Tente novamente mais tarde.");
       toast({
         title: "Erro ao recuperar senha",

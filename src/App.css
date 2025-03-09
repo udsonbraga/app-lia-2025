@@ -2,9 +2,6 @@
 /* Add these CSS variables to support the accessibility features */
 :root {
   --font-size-multiplier: 100%;
-  --safelady-pink: #FF84C6;
-  --safelady-pink-hover: #FF6CB7;
-  --safelady-pink-light: #FFAED9;
 }
 
 /* Apply font size multiplier to text elements */
@@ -124,37 +121,4 @@ body.dark .ring-gray-100 {
 
 body.dark .text-gray-700 {
     color: #d4d4d4;
-}
-
-/* Update safelady theme colors */
-.text-safelady {
-  color: var(--safelady-pink);
-}
-
-.bg-safelady {
-  background-color: var(--safelady-pink);
-}
-
-.bg-safelady-light {
-  background-color: var(--safelady-pink-light);
-}
-
-.hover\:bg-safelady:hover {
-  background-color: var(--safelady-pink);
-}
-
-.hover\:bg-safelady-light:hover {
-  background-color: var(--safelady-pink-light);
-}
-
-.border-safelady {
-  border-color: var(--safelady-pink);
-}
-
-.focus\:ring-safelady:focus {
-  --tw-ring-color: var(--safelady-pink);
-}
-
-.focus\:border-safelady:focus {
-  border-color: var(--safelady-pink);
 }

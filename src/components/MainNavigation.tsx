@@ -1,7 +1,6 @@
 
 import { useNavigate } from "react-router-dom";
-import { Users, BookOpen, Phone, MessageSquare } from "lucide-react";
-import { FeedbackButton } from "./FeedbackButton";
+import { Users, BookOpen, Phone } from "lucide-react";
 
 export function MainNavigation() {
   const navigate = useNavigate();
@@ -37,8 +36,6 @@ export function MainNavigation() {
           <span className="font-medium text-gray-800 text-center">Contato Seguro</span>
         </div>
       </button>
-
-      <FeedbackButton />
     </div>
   );
 }

@@ -1,86 +1,19 @@
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { EMERGENCY_KEYWORDS } from "@/constants/emergencyKeywords";
 import { handleEmergencyAlert } from "@/utils/emergencyUtils";
 
 /**
- * Hook para lidar com a detecção de sons de emergência
+ * Hook for handling emergency sound detection functionality
  */
 export function useEmergencySoundDetection() {
   const [isListening, setIsListening] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
   const { toast } = useToast();
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<BlobPart[]>([]);
-
-  const startRecording = useCallback(async () => {
-    if (isRecording) return;
-    
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-      
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-      
-      mediaRecorder.start();
-      setIsRecording(true);
-      
-      // Gravar por exatamente 3 segundos
-      setTimeout(() => {
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
-          stopRecording();
-        }
-      }, 3000); // 3 segundos de gravação
-      
-      console.log("Gravação de áudio iniciada (3 segundos)");
-    } catch (error) {
-      console.error("Erro ao iniciar gravação de áudio:", error);
-      toast({
-        title: "Erro na gravação",
-        description: "Não foi possível iniciar a gravação de áudio.",
-        variant: "destructive"
-      });
-    }
-  }, [isRecording, toast]);
-  
-  const stopRecording = useCallback(async () => {
-    if (!isRecording || !mediaRecorderRef.current) return null;
-    
-    return new Promise<Blob>((resolve) => {
-      mediaRecorderRef.current!.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        audioChunksRef.current = [];
-        setIsRecording(false);
-        console.log("Gravação de áudio finalizada");
-        resolve(audioBlob);
-      };
-      
-      mediaRecorderRef.current!.stop();
-      mediaRecorderRef.current!.stream.getTracks().forEach(track => track.stop());
-    });
-  }, [isRecording]);
 
   const handleEmergencyDetected = useCallback(async () => {
-    console.log("Emergência detectada, iniciando gravação");
-    await startRecording();
-    
-    // Gravar por exatamente 3 segundos, então enviar o alerta
-    setTimeout(async () => {
-      const audioBlob = await stopRecording();
-      if (audioBlob) {
-        await handleEmergencyAlert({ toast, audioBlob });
-      } else {
-        await handleEmergencyAlert({ toast });
-      }
-    }, 3000);
-  }, [toast, startRecording, stopRecording]);
+    await handleEmergencyAlert({ toast });
+  }, [toast]);
 
   useEffect(() => {
     if (!isListening) return;
@@ -147,7 +80,7 @@ export function useEmergencySoundDetection() {
         
         toast({
           title: "Detecção de som ativada",
-          description: "O aplicativo está monitorando sons de emergência e gravará áudio se detectar uma emergência.",
+          description: "O aplicativo está monitorando sons de emergência.",
         });
       } catch (error) {
         console.error("Erro ao iniciar reconhecimento de fala:", error);
@@ -171,13 +104,8 @@ export function useEmergencySoundDetection() {
           console.error("Erro ao parar reconhecimento de fala:", e);
         }
       }
-      
-      // Parar gravação se estiver ocorrendo
-      if (isRecording) {
-        stopRecording();
-      }
     };
-  }, [isListening, handleEmergencyDetected, toast, isRecording, stopRecording]);
+  }, [isListening, handleEmergencyDetected, toast]);
 
   const toggleSoundDetection = () => {
     setIsListening(prevState => !prevState);
@@ -185,7 +113,6 @@ export function useEmergencySoundDetection() {
 
   return {
     isListening,
-    isRecording,
     toggleSoundDetection
   };
 }

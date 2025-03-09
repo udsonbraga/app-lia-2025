@@ -5,33 +5,42 @@ import { useToast } from "@/hooks/use-toast";
 
 type EmergencyAlertProps = {
   toast: ReturnType<typeof useToast>['toast'];
-  audioBlob?: Blob;
 };
 
 /**
- * Handles sending emergency alerts to the support bot
+ * Handles sending emergency alerts to configured contacts
  */
-export const handleEmergencyAlert = async ({ toast, audioBlob }: EmergencyAlertProps) => {
+export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps) => {
   try {
+    // Obter contatos de emergência do localStorage
+    const safeContacts = localStorage.getItem("safeContacts");
+    const contacts = safeContacts ? JSON.parse(safeContacts) : [];
+    
+    // Verificar se há contatos configurados
+    if (contacts.length === 0) {
+      toast({
+        title: "Contatos não configurados",
+        description: "Por favor, configure pelo menos um contato de confiança nas configurações.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // Obter localização atual
     const position = await getCurrentPosition();
     const { latitude, longitude } = position.coords;
     const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
     
-    // Preparar mensagem de emergência
-    const emergencyMessage = `EMERGÊNCIA DETECTADA! ${audioBlob ? 'Som de emergência identificado.' : 'Botão de emergência acionado.'}`;
-    
-    // Enviar mensagem de emergência para o bot de suporte
-    const success = await sendTelegramMessage(emergencyMessage, locationLink, audioBlob);
-    
-    if (success) {
-      toast({
-        title: "Alerta de emergência enviado",
-        description: `Emergência detectada! Alerta${audioBlob ? " e gravação" : ""} enviado.`,
-      });
-    } else {
-      throw new Error("Falha ao enviar alerta de emergência");
+    // Enviar mensagens para todos os contatos
+    for (const contact of contacts) {
+      // Enviar mensagem pelo Telegram
+      await sendTelegramMessage(contact.telegramId, locationLink);
     }
+    
+    toast({
+      title: "Alerta de emergência enviado",
+      description: "Som de emergência detectado! Alertas enviados via Telegram.",
+    });
   } catch (error) {
     console.error("Erro ao enviar alerta automático:", error);
     toast({
