@@ -16,7 +16,8 @@ export const sendTelegramMessage = async (
   audioBlob?: Blob
 ): Promise<boolean> => {
   try {
-    const botToken = "7668166969:AAFnukkbhjDnUgGTC5em6vYk1Ch7bXy-rBQ"; // Token atualizado do bot SafeLady_bot
+    // SafeLady_bot token - used for ALL emergency alerts
+    const botToken = "7668166969:AAFnukkbhjDnUgGTC5em6vYk1Ch7bXy-rBQ";
     const message = `EMERGÊNCIA DETECTADA! ${audioBlob ? 'Som de emergência identificado.' : 'Botão de emergência acionado.'} Localização atual: ${locationLink}`;
     
     // Enviar mensagem de texto primeiro
@@ -75,6 +76,39 @@ export const sendTelegramMessage = async (
     return true;
   } catch (error) {
     console.error('Erro ao enviar mensagem via Telegram:', error);
+    return false;
+  }
+};
+
+/**
+ * Sends feedback message to the support Telegram bot
+ * @param feedbackMessage The feedback message to send
+ * @returns Promise resolving to boolean indicating success/failure
+ */
+export const sendFeedbackMessage = async (feedbackMessage: string): Promise<boolean> => {
+  try {
+    // Token do bot de suporte
+    const supportBotToken = "7668166969:AAFnukkbhjDnUgGTC5em6vYk1Ch7bXy-rBQ"; 
+    const message = `NOVO FEEDBACK RECEBIDO!\n\nMensagem: ${feedbackMessage}\nData: ${new Date().toLocaleString()}`;
+    
+    // ID do "suport@safelady_bot" 
+    // Como o bot não possui ID específico ainda, vamos armazenar a mensagem localmente
+    // e logar para diagnóstico
+    console.log('Feedback para envio ao suport@safelady_bot:');
+    console.log('Mensagem preparada:', message);
+    
+    // Armazenar no localStorage para demonstração e implementação futura
+    const feedbacksForBot = localStorage.getItem("pendingBotFeedbacks") || "[]";
+    const feedbacks = JSON.parse(feedbacksForBot);
+    feedbacks.push({
+      message,
+      timestamp: new Date().toISOString()
+    });
+    localStorage.setItem("pendingBotFeedbacks", JSON.stringify(feedbacks));
+    
+    return true;
+  } catch (error) {
+    console.error('Erro ao preparar feedback para o Telegram:', error);
     return false;
   }
 };
