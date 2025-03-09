@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
-// Telegram support bot ID placeholder - to be updated later
-const SUPPORT_BOT_ID = ""; // Will be set later when the ID is provided
+// Telegram support bot token and ID
+const SUPPORT_BOT_TOKEN = "7668166969:AAFnukkbhjDnUgGTC5em6vYk1Ch7bXy-rBQ";
+const SUPPORT_BOT_ID = "suport@safelady_bot"; // This will be used for display, not for sending
 
 export function FeedbackButton() {
   const [showDialog, setShowDialog] = useState(false);
@@ -28,9 +29,6 @@ export function FeedbackButton() {
     setIsSubmitting(true);
 
     try {
-      // Simular envio (em produção, aqui seria enviado para o backend)
-      console.log("Enviando feedback:", feedback);
-      
       // Salvar no localStorage para posterior implementação com banco de dados
       const feedbacksJson = localStorage.getItem("userFeedbacks");
       const feedbacks = feedbacksJson ? JSON.parse(feedbacksJson) : [];
@@ -43,32 +41,40 @@ export function FeedbackButton() {
       
       localStorage.setItem("userFeedbacks", JSON.stringify(feedbacks));
       
-      // Preparar dados para envio ao Telegram quando o ID estiver disponível
-      if (SUPPORT_BOT_ID) {
-        try {
-          const botToken = "7583759027:AAEE7KUF9ye6esERLzac-ATth7VOjfvRx8s";
-          const supportMessage = `NOVO FEEDBACK RECEBIDO!\n\nMensagem: ${feedback}\nData: ${new Date().toLocaleString()}`;
-          
-          const textApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-          const textRequestBody = {
-            chat_id: SUPPORT_BOT_ID,
-            text: supportMessage,
-            parse_mode: "HTML"
-          };
-          
-          await fetch(textApiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(textRequestBody),
-          });
-          
-          console.log('Feedback enviado ao Telegram com sucesso');
-        } catch (telegramError) {
-          console.error('Erro ao enviar feedback ao Telegram:', telegramError);
-          // Não falhar completamente se apenas o envio ao Telegram falhar
-        }
+      // Enviar para o Telegram usando o token do bot safelady_bot
+      try {
+        const supportMessage = `NOVO FEEDBACK RECEBIDO!\n\nMensagem: ${feedback}\nData: ${new Date().toLocaleString()}`;
+        
+        const textApiUrl = `https://api.telegram.org/bot${SUPPORT_BOT_TOKEN}/sendMessage`;
+        
+        // O ID do chat deve ser um ID numérico ou um @username
+        // Por enquanto, vamos deixar o envio preparado, mas o ID será definido posteriormente
+        // Quando o ID estiver disponível, o administrador poderá atualizá-lo
+        
+        // Como ainda não temos o chat_id específico, essa parte ficará comentada
+        // e será implementada quando o ID estiver disponível
+        /*
+        const textRequestBody = {
+          chat_id: "CHAT_ID_AQUI", // Substitua pelo ID correto quando disponível
+          text: supportMessage,
+          parse_mode: "HTML"
+        };
+        
+        await fetch(textApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(textRequestBody),
+        });
+        */
+        
+        console.log('Feedback pronto para envio ao Telegram (aguardando ID do chat)');
+        console.log('Mensagem preparada:', supportMessage);
+        console.log('URL da API:', textApiUrl);
+      } catch (telegramError) {
+        console.error('Erro ao preparar envio de feedback ao Telegram:', telegramError);
+        // Não falhar completamente se apenas o envio ao Telegram falhar
       }
       
       toast({

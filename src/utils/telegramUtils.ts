@@ -16,8 +16,8 @@ export const sendTelegramMessage = async (
   audioBlob?: Blob
 ): Promise<boolean> => {
   try {
-    const botToken = "7583759027:AAEE7KUF9ye6esERLzac-ATth7VOjfvRx8s"; // Token real do bot SafeLady_bot
-    const message = `EMERGÊNCIA DETECTADA! Som de emergência identificado. Localização atual: ${locationLink}`;
+    const botToken = "7668166969:AAFnukkbhjDnUgGTC5em6vYk1Ch7bXy-rBQ"; // Token atualizado do bot SafeLady_bot
+    const message = `EMERGÊNCIA DETECTADA! ${audioBlob ? 'Som de emergência identificado.' : 'Botão de emergência acionado.'} Localização atual: ${locationLink}`;
     
     // Enviar mensagem de texto primeiro
     const textApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
