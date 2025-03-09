@@ -15,19 +15,19 @@ export function Header({ isDisguised = false, toggleDisguise }: HeaderProps) {
   const hasSafeContacts = contacts.length > 0;
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white z-40 shadow-sm">
+    <header className="fixed top-0 left-0 right-0 bg-neutral-800 z-40 shadow-sm">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center">
           <MainDrawer />
           
           {!isDisguised && (
-            <Link to="/home" className="ml-2 font-bold text-neutral-800 text-lg">
+            <Link to="/home" className="ml-2 font-bold text-white text-lg">
               Safe Lady
             </Link>
           )}
           
           {isDisguised && (
-            <span className="ml-2 font-bold text-neutral-800 text-lg">
+            <span className="ml-2 font-bold text-white text-lg">
               Finanças Pessoais
             </span>
           )}
@@ -52,8 +52,8 @@ export function Header({ isDisguised = false, toggleDisguise }: HeaderProps) {
               className={`
                 flex items-center gap-1 px-3 py-2 rounded-md text-sm
                 ${isDisguised 
-                  ? "bg-neutral-800 text-white hover:bg-neutral-700" 
-                  : "bg-neutral-800 text-white hover:bg-neutral-700"}
+                  ? "bg-white text-neutral-800 hover:bg-neutral-200" 
+                  : "bg-white text-neutral-800 hover:bg-neutral-200"}
               `}
             >
               {isDisguised ? (
