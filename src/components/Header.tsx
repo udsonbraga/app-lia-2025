@@ -1,5 +1,5 @@
 
-import { useHasSafeContacts } from "@/hooks/useSafeContacts";
+import { useSafeContacts } from "@/hooks/useSafeContacts";
 import { Link } from "react-router-dom";
 import { MainDrawer } from "@/components/MainDrawer";
 import { AlertTriangle, Eye, EyeOff } from "lucide-react";
@@ -11,7 +11,8 @@ interface HeaderProps {
 }
 
 export function Header({ isDisguised = false, toggleDisguise }: HeaderProps) {
-  const { hasSafeContacts } = useHasSafeContacts();
+  const { contacts } = useSafeContacts();
+  const hasSafeContacts = contacts.length > 0;
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-white z-40 shadow-sm">
