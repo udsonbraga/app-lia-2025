@@ -5,7 +5,7 @@ import {
   DrawerHeader,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Menu, UserCircle, Upload, Trash2, Mic, PhoneIncoming, Palette, HelpCircle, LogOut, Moon, Sun, TextCursor } from "lucide-react";
+import { Menu, UserCircle, Upload, Trash2, Mic, PhoneIncoming, HelpCircle, LogOut, Moon, Sun } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -68,18 +68,6 @@ export const MainDrawer = () => {
 
   const menuItems = [
     {
-      title: "Personalizar",
-      path: "/customize",
-      icon: <Palette className="h-5 w-5 text-purple-600" />,
-      description: "Alterar cores e temas"
-    },
-    {
-      title: "Acessibilidade",
-      path: "/accessibility",
-      icon: <TextCursor className="h-5 w-5 text-blue-600" />,
-      description: "Ajustar tamanho do texto"
-    },
-    {
       title: "Ajuda",
       path: "/help",
       icon: <HelpCircle className="h-5 w-5 text-blue-600" />,
@@ -90,7 +78,7 @@ export const MainDrawer = () => {
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
           <Menu className="h-6 w-6 text-gray-700" />
         </button>
       </DrawerTrigger>
@@ -110,7 +98,7 @@ export const MainDrawer = () => {
           )}
           
           <div className="flex gap-2 mb-4">
-            <label htmlFor="avatar-input" className="cursor-pointer flex items-center gap-1 text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded-md text-gray-700">
+            <label htmlFor="avatar-input" className="cursor-pointer flex items-center gap-1 text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded-md text-gray-700 transition-colors duration-200">
               <Upload className="h-3 w-3" />
               Alterar foto
               <input
@@ -125,7 +113,7 @@ export const MainDrawer = () => {
             {avatarUrl && (
               <button 
                 onClick={handleRemoveAvatar}
-                className="flex items-center gap-1 text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded-md text-gray-700"
+                className="flex items-center gap-1 text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded-md text-gray-700 transition-colors duration-200"
               >
                 <Trash2 className="h-3 w-3" />
                 Remover
@@ -219,7 +207,7 @@ export const MainDrawer = () => {
                     navigate(item.path);
                   }
                 }}
-                className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
+                className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors duration-200"
               >
                 <div className="flex items-center gap-3">
                   {item.icon}
@@ -235,7 +223,7 @@ export const MainDrawer = () => {
             
             <button
               onClick={handleLogout}
-              className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors text-red-600"
+              className="w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors duration-200 text-red-600"
             >
               <div className="flex items-center gap-3">
                 <LogOut className="h-5 w-5" />

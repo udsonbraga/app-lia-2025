@@ -5,13 +5,13 @@ import Index from "@/pages/Index";
 import Register from "@/pages/Register";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
-import Customize from "@/pages/Customize";
 import Diary from "@/pages/Diary";
 import SafeContact from "@/pages/SafeContact";
 import SupportNetwork from "@/pages/SupportNetwork";
 import { LoadingScreen } from "./components/LoadingScreen";
 import Help from "@/pages/Help";
 import "./App.css";
+import { useEffect, useState } from "react";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
@@ -19,11 +19,26 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App() {
+  const [showLoading, setShowLoading] = useState(false);
+  
+  useEffect(() => {
+    // Check if this is the first time the app is loaded
+    const hasSeenLoading = localStorage.getItem('hasSeenLoading');
+    if (!hasSeenLoading) {
+      setShowLoading(true);
+      localStorage.setItem('hasSeenLoading', 'true');
+    }
+  }, []);
+
+  if (showLoading) {
+    return <LoadingScreen onComplete={() => setShowLoading(false)} />;
+  }
+
   return (
     <Router>
       <div className="bg-white min-h-screen">
         <Routes>
-          <Route path="/" element={<LoadingScreen />} />
+          <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
@@ -31,14 +46,6 @@ function App() {
             element={
               <PrivateRoute>
                 <Index />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/customize"
-            element={
-              <PrivateRoute>
-                <Customize />
               </PrivateRoute>
             }
           />

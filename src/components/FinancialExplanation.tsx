@@ -25,9 +25,8 @@ export function FinancialExplanation() {
         </Button>
       </div>
       
-      <p className="text-sm text-gray-600 mb-3">
-        Este recurso te ajuda a gerenciar suas finanças pessoais de forma segura e discreta,
-        registrando e acompanhando seus gastos e receitas sem levantar suspeitas.
+      <p className="text-sm text-gray-600">
+        Gerencie suas finanças pessoais de forma segura e discreta.
       </p>
     </Card>
   );

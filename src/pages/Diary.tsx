@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Save, MapPin, Trash2, FileDown } from "lucide-react";
@@ -115,12 +116,12 @@ const Diary = () => {
     if (entry.attachments.some(att => att.url)) {
       imagesHtml = `
         <h2>Imagens</h2>
-        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; margin-bottom: 20px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 15px; margin-bottom: 30px;">
           ${entry.attachments
             .filter(att => att.url)
             .map(att => `
-              <div style="margin-bottom: 10px;">
-                <img src="${att.url}" style="max-width: 300px; max-height: 200px; border: 1px solid #ccc; border-radius: 4px;" />
+              <div style="margin-bottom: 20px; width: 100%;">
+                <img src="${att.url}" style="max-width: 100%; max-height: 400px; border: 1px solid #ccc; border-radius: 4px;" />
                 <p style="margin-top: 5px; font-size: 12px; color: #666;">${att.name}</p>
               </div>
             `).join('')}
@@ -133,8 +134,8 @@ const Diary = () => {
         <h1 style="text-align: center; color: #000000; font-size: 28px; font-weight: bold;">Relatório Seguro</h1>
         <p><strong>Data:</strong> ${format(new Date(entry.createdAt), "dd/MM/yyyy 'às' HH:mm")}</p>
         <p><strong>Local:</strong> ${entry.location}</p>
-        <h2>Descrição da Ocorrência</h2>
-        <p style="white-space: pre-wrap;">${entry.text}</p>
+        <h2><strong>Descrição da Ocorrência:</strong></h2>
+        <p style="white-space: pre-wrap; margin-top: 10px;">${entry.text}</p>
         
         ${imagesHtml}
         

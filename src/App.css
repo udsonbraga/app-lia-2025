@@ -1,3 +1,4 @@
+
 /* Add these CSS variables to support the accessibility features */
 :root {
   --font-size-multiplier: 100%;
@@ -20,7 +21,7 @@ h1, h2, h3, h4, h5, h6, p, span, a, button, input, textarea, select, label {
 /* Custom CSS */
 body {
   font-family: 'Inter', sans-serif;
-  transition: background-color 0.3s, color 0.3s;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .container {
@@ -29,18 +30,44 @@ body {
 
 /* Animations */
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-in-out forwards;
+  animation: fadeIn 0.3s ease-out forwards;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-5px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Improve transitions for better performance */
+a, button {
+  transition: all 0.2s ease-out;
+}
+
+/* Page transitions */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(5px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms, transform 200ms;
+}
+
+.page-transition-exit {
+  opacity: 1;
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 150ms;
 }
 
 /* Disguised Mode Styles */

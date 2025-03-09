@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { Header } from "@/components/Header";
@@ -10,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
+import { Lock } from "lucide-react";
 
 const Index = () => {
   const {
@@ -100,11 +102,14 @@ const Index = () => {
         </div>
       )}
 
-      {/* Exit Disguise Mode Password Dialog */}
+      {/* Exit Disguise Mode Password Dialog - Improved styling */}
       <Dialog open={showExitPasswordPrompt} onOpenChange={setShowExitPasswordPrompt}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-center">Verificação de Senha</DialogTitle>
+          <DialogHeader className="space-y-3">
+            <div className="mx-auto bg-pink-100 w-16 h-16 rounded-full flex items-center justify-center">
+              <Lock className="h-8 w-8 text-[#FF84C6]" />
+            </div>
+            <DialogTitle className="text-center text-xl">Verificação de Senha</DialogTitle>
             <DialogDescription className="text-center">
               Para sair do modo disfarce, digite sua senha.
             </DialogDescription>
@@ -115,17 +120,25 @@ const Index = () => {
               value={exitPassword}
               onChange={(e) => setExitPassword(e.target.value)}
               placeholder="Digite sua senha"
-              className="mb-4"
+              className="mb-4 border-[#FF84C6] focus:ring-[#FF84C6]"
+              autoFocus
             />
           </div>
           <DialogFooter className="flex flex-col sm:flex-row sm:justify-center gap-2">
-            <Button variant="outline" onClick={() => setShowExitPasswordPrompt(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowExitPasswordPrompt(false)}
+              className="border-[#FF84C6] text-[#FF84C6] hover:bg-pink-50 transition-colors duration-200"
+            >
               Cancelar
             </Button>
-            <Button onClick={() => {
-              exitDisguiseMode(exitPassword);
-              setExitPassword("");
-            }}>
+            <Button 
+              onClick={() => {
+                exitDisguiseMode(exitPassword);
+                setExitPassword("");
+              }}
+              className="bg-[#FF84C6] hover:bg-[#FF6CB7] transition-colors duration-200"
+            >
               Confirmar
             </Button>
           </DialogFooter>
