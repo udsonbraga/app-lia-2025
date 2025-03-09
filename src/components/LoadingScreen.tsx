@@ -1,45 +1,43 @@
 
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-interface LoadingScreenProps {
-  onComplete: () => void;
-}
-
-export const LoadingScreen = ({ onComplete }: LoadingScreenProps) => {
+export const LoadingScreen = () => {
+  const navigate = useNavigate();
   const [fadeOut, setFadeOut] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
-    // Simulate loading progress - make it faster
+    // Simulate loading progress
     const interval = setInterval(() => {
       setLoadingProgress((prev) => {
-        const newProgress = prev + 10; // Increase by 10% each time for faster loading
+        const newProgress = prev + 5;
         if (newProgress >= 100) {
           clearInterval(interval);
           // Start fade out when loading is complete
           setTimeout(() => {
             setFadeOut(true);
             setTimeout(() => {
-              onComplete();
-            }, 300); // Reduced from 500ms to 300ms for faster transition
-          }, 200); // Reduced from 300ms to 200ms for faster experience
+              navigate("/login");
+            }, 500);
+          }, 300);
         }
         return newProgress < 100 ? newProgress : 100;
       });
-    }, 70); // Reduced from 100ms to 70ms for faster loading
+    }, 100);
 
     return () => clearInterval(interval);
-  }, [onComplete]);
+  }, [navigate]);
 
   return (
     <div
-      className={`fixed inset-0 flex flex-col items-center justify-center bg-safelady transition-opacity duration-300 ${
+      className={`fixed inset-0 flex flex-col items-center justify-center bg-safelady transition-opacity duration-500 ${
         fadeOut ? "opacity-0" : "opacity-100"
       }`}
     >
-      <div className="w-64 h-64 mb-4">
+      <div className="w-48 h-48 mb-6">
         <img
-          src="/lovable-uploads/6ea1fa8d-6a04-4ff5-b6b9-89a2a7d8e585.png"
+          src="/logo-shield.png"
           alt="Safe Lady Logo"
           className="w-full h-full object-contain"
         />
@@ -47,7 +45,7 @@ export const LoadingScreen = ({ onComplete }: LoadingScreenProps) => {
       <h1 className="text-3xl font-bold text-white mb-4">Safe Lady</h1>
       <div className="w-64 h-2 bg-white/30 rounded-full overflow-hidden">
         <div 
-          className="h-full bg-white rounded-full transition-all duration-200 ease-out"
+          className="h-full bg-white rounded-full transition-all duration-300 ease-in-out"
           style={{ width: `${loadingProgress}%` }}
         ></div>
       </div>

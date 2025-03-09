@@ -98,7 +98,7 @@ const AddContactForm = ({
         <Button variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button onClick={onAddContact} className="bg-safelady hover:bg-safelady-dark">Adicionar Contato</Button>
+        <Button onClick={onAddContact}>Adicionar Contato</Button>
       </div>
     </div>
   );

@@ -89,7 +89,7 @@ const SafeContactPage = () => {
             <Button
               variant="outline"
               onClick={handleNewContactClick}
-              className="w-full flex items-center justify-center gap-2 border-safelady text-safelady hover:bg-safelady/10"
+              className="w-full flex items-center justify-center gap-2"
             >
               <UserPlus className="h-4 w-4" />
               Adicionar Contato de Segurança

@@ -86,7 +86,7 @@ export function FinancialForm({ onSave, noteToEdit, onCancelEdit }: FinancialFor
     return (
       <Button
         onClick={() => setShowForm(true)}
-        className="w-full flex items-center justify-center gap-2 bg-safelady hover:bg-safelady-dark text-white"
+        className="w-full flex items-center justify-center gap-2"
       >
         <Plus className="h-4 w-4" />
         Adicionar Nova Despesa
@@ -163,7 +163,7 @@ export function FinancialForm({ onSave, noteToEdit, onCancelEdit }: FinancialFor
       />
 
       <div className="flex gap-2">
-        <Button onClick={handleSave} className="flex-1 bg-safelady hover:bg-safelady-dark">
+        <Button onClick={handleSave} className="flex-1">
           <Save className="h-4 w-4 mr-2" />
           {noteToEdit ? "Atualizar" : "Salvar"}
         </Button>
