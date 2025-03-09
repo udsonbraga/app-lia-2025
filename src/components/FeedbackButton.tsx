@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
+// Telegram support bot ID placeholder - to be updated later
+const SUPPORT_BOT_ID = ""; // Will be set later when the ID is provided
+
 export function FeedbackButton() {
   const [showDialog, setShowDialog] = useState(false);
   const [feedback, setFeedback] = useState("");
@@ -28,9 +31,6 @@ export function FeedbackButton() {
       // Simular envio (em produção, aqui seria enviado para o backend)
       console.log("Enviando feedback:", feedback);
       
-      // Simular atraso de processamento
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
       // Salvar no localStorage para posterior implementação com banco de dados
       const feedbacksJson = localStorage.getItem("userFeedbacks");
       const feedbacks = feedbacksJson ? JSON.parse(feedbacksJson) : [];
@@ -42,6 +42,34 @@ export function FeedbackButton() {
       });
       
       localStorage.setItem("userFeedbacks", JSON.stringify(feedbacks));
+      
+      // Preparar dados para envio ao Telegram quando o ID estiver disponível
+      if (SUPPORT_BOT_ID) {
+        try {
+          const botToken = "7583759027:AAEE7KUF9ye6esERLzac-ATth7VOjfvRx8s";
+          const supportMessage = `NOVO FEEDBACK RECEBIDO!\n\nMensagem: ${feedback}\nData: ${new Date().toLocaleString()}`;
+          
+          const textApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+          const textRequestBody = {
+            chat_id: SUPPORT_BOT_ID,
+            text: supportMessage,
+            parse_mode: "HTML"
+          };
+          
+          await fetch(textApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(textRequestBody),
+          });
+          
+          console.log('Feedback enviado ao Telegram com sucesso');
+        } catch (telegramError) {
+          console.error('Erro ao enviar feedback ao Telegram:', telegramError);
+          // Não falhar completamente se apenas o envio ao Telegram falhar
+        }
+      }
       
       toast({
         title: "Feedback enviado",

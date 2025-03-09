@@ -62,6 +62,7 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
           return;
         }
         
+        // Buscar usuário pelo email
         const user = findUserByEmail(recoveryEmail);
         if (!user) {
           setError("Não encontramos nenhuma conta associada a este email.");
@@ -69,8 +70,14 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
           return;
         }
         
-        // Simulate sending a recovery email
+        // Em um ambiente real, aqui enviaríamos um e-mail para o usuário
+        // com um link ou código de recuperação.
+        
+        // Simulando o envio de email (em produção, isso seria feito no backend)
         await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        console.log(`Enviando recuperação para o e-mail: ${recoveryEmail}`);
+        console.log(`Dados do usuário encontrado:`, user);
         
         setSuccess(`Email de recuperação enviado para ${recoveryEmail}`);
         toast({
@@ -84,6 +91,7 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
           return;
         }
         
+        // Buscar usuário pelo telefone
         const user = findUserByPhone(recoveryPhone);
         if (!user) {
           setError("Não encontramos nenhuma conta associada a este número de telefone.");
@@ -91,8 +99,14 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
           return;
         }
         
-        // Simulate sending a recovery SMS
+        // Em um ambiente real, aqui enviaríamos um SMS para o usuário
+        // com um código de recuperação
+        
+        // Simulando o envio de SMS (em produção, isso seria feito no backend)
         await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        console.log(`Enviando recuperação para o telefone: ${recoveryPhone}`);
+        console.log(`Dados do usuário encontrado:`, user);
         
         setSuccess(`SMS de recuperação enviado para ${recoveryPhone}`);
         toast({
@@ -108,6 +122,7 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
         onBack();
       }, 3000);
     } catch (error) {
+      console.error("Erro na recuperação de senha:", error);
       setError("Não foi possível processar sua solicitação. Tente novamente mais tarde.");
       toast({
         title: "Erro ao recuperar senha",
