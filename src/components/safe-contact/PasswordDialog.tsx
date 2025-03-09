@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Lock } from "lucide-react";
 
 interface PasswordDialogProps {
   open: boolean;
@@ -28,8 +29,11 @@ const PasswordDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-center">Verificação de Senha</DialogTitle>
+        <DialogHeader className="space-y-3">
+          <div className="mx-auto bg-rose-100 w-16 h-16 rounded-full flex items-center justify-center">
+            <Lock className="h-8 w-8 text-safelady" />
+          </div>
+          <DialogTitle className="text-center text-xl">Verificação de Senha</DialogTitle>
           <DialogDescription className="text-center">
             Para sair do modo disfarce, digite sua senha.
           </DialogDescription>
@@ -40,14 +44,14 @@ const PasswordDialog = ({
             value={password}
             onChange={(e) => onPasswordChange(e.target.value)}
             placeholder="Digite sua senha"
-            className="mb-4"
+            className="mb-4 border-safelady focus:ring-safelady"
           />
         </div>
         <DialogFooter className="flex flex-col sm:flex-row sm:justify-center gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={onSubmit}>
+          <Button onClick={onSubmit} className="bg-safelady hover:bg-safelady-dark">
             Confirmar
           </Button>
         </DialogFooter>

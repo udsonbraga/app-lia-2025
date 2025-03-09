@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Type } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 
 const colorThemes = [
   { name: "Rosa Claro", primary: "bg-safelady", secondary: "bg-safelady-light", value: "safelady" },
@@ -18,11 +19,15 @@ const Customize = () => {
     const savedTheme = localStorage.getItem("themeIndex");
     return savedTheme ? parseInt(savedTheme) : 0;
   });
+  const [fontSize, setFontSize] = useState(() => {
+    return parseInt(localStorage.getItem("fontSize") || "100");
+  });
 
-  // Aplicar tema ao carregar o componente
+  // Aplicar tema e tamanho da fonte ao carregar o componente
   useEffect(() => {
     applyTheme(selectedTheme);
-  }, [selectedTheme]);
+    applyFontSize(fontSize);
+  }, [selectedTheme, fontSize]);
 
   const applyTheme = (index: number) => {
     const theme = colorThemes[index];
@@ -51,6 +56,12 @@ const Customize = () => {
     
     localStorage.setItem("themeIndex", index.toString());
   };
+  
+  const applyFontSize = (size: number) => {
+    const root = document.documentElement;
+    root.style.setProperty('--font-size-multiplier', `${size}%`);
+    localStorage.setItem("fontSize", size.toString());
+  };
 
   const handleThemeChange = (index: number) => {
     setSelectedTheme(index);
@@ -60,6 +71,12 @@ const Customize = () => {
       title: "Tema atualizado",
       description: `O tema ${colorThemes[index].name} foi aplicado com sucesso.`,
     });
+  };
+  
+  const handleFontSizeChange = (value: number[]) => {
+    const newSize = value[0];
+    setFontSize(newSize);
+    applyFontSize(newSize);
   };
 
   const handleSaveChanges = () => {
@@ -103,6 +120,39 @@ const Customize = () => {
                   </div>
                 </button>
               ))}
+            </div>
+          </div>
+          
+          {/* Tamanho da Fonte */}
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <Type className="h-5 w-5 text-safelady" />
+              <h2 className="text-lg font-semibold">Tamanho do Texto</h2>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">Menor</span>
+                  <span className="text-sm text-gray-500">Maior</span>
+                </div>
+                <Slider
+                  value={[fontSize]}
+                  min={80}
+                  max={150}
+                  step={5}
+                  onValueChange={handleFontSizeChange}
+                  className="w-full"
+                />
+              </div>
+              
+              {/* Preview do texto */}
+              <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+                <h3 className="font-medium text-gray-800 mb-1">Visualização:</h3>
+                <p style={{ fontSize: `${fontSize}%` }} className="text-gray-700 transition-all">
+                  Este é um exemplo de texto com o tamanho selecionado.
+                </p>
+              </div>
             </div>
           </div>
 

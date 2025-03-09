@@ -1,11 +1,13 @@
 
 import React, { useState } from "react";
-import { Mail, Phone } from "lucide-react";
+import { Mail, Phone, Check, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
+import { validateEmail, formatPhone, validatePhone } from "@/features/auth/utils/formValidation";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface PasswordRecoveryProps {
   onBack: () => void;
@@ -17,37 +19,96 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [recoveryPhone, setRecoveryPhone] = useState("");
   const [recoveryMethod, setRecoveryMethod] = useState<"email" | "phone">("email");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const findUserByEmail = (email: string) => {
+    try {
+      const storedUsers = localStorage.getItem('users');
+      if (!storedUsers) return null;
+      
+      const users = JSON.parse(storedUsers);
+      return users.find((user: any) => user.email === email);
+    } catch (error) {
+      console.error("Error finding user by email:", error);
+      return null;
+    }
+  };
+  
+  const findUserByPhone = (phone: string) => {
+    try {
+      const storedUsers = localStorage.getItem('users');
+      if (!storedUsers) return null;
+      
+      const users = JSON.parse(storedUsers);
+      return users.find((user: any) => user.phone === phone);
+    } catch (error) {
+      console.error("Error finding user by phone:", error);
+      return null;
+    }
+  };
 
   const handleRecoverySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
+    setSuccess(null);
 
     try {
-      // Simulate sending a recovery email or SMS
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
       if (recoveryMethod === "email") {
-        // In a real app, you would send an actual email here
-        console.log(`Recovery email sent to: ${recoveryEmail}`);
+        if (!validateEmail(recoveryEmail)) {
+          setError("Por favor, insira um endereço de email válido.");
+          setIsLoading(false);
+          return;
+        }
         
+        const user = findUserByEmail(recoveryEmail);
+        if (!user) {
+          setError("Não encontramos nenhuma conta associada a este email.");
+          setIsLoading(false);
+          return;
+        }
+        
+        // Simulate sending a recovery email
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        setSuccess(`Email de recuperação enviado para ${recoveryEmail}`);
         toast({
           title: "Email de recuperação enviado",
           description: `Enviamos um link de recuperação para ${recoveryEmail}. Por favor, verifique sua caixa de entrada e spam.`,
         });
       } else {
-        // In a real app, you would send an actual SMS here
-        console.log(`Recovery SMS sent to: ${recoveryPhone}`);
+        if (!validatePhone(recoveryPhone)) {
+          setError("Por favor, insira um número de telefone válido no formato (00) 00000-0000.");
+          setIsLoading(false);
+          return;
+        }
         
+        const user = findUserByPhone(recoveryPhone);
+        if (!user) {
+          setError("Não encontramos nenhuma conta associada a este número de telefone.");
+          setIsLoading(false);
+          return;
+        }
+        
+        // Simulate sending a recovery SMS
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        setSuccess(`SMS de recuperação enviado para ${recoveryPhone}`);
         toast({
           title: "SMS de recuperação enviado",
           description: `Enviamos um código de recuperação para ${recoveryPhone}. Por favor, aguarde o recebimento da mensagem.`,
         });
       }
       
-      onBack();
-      setRecoveryEmail("");
-      setRecoveryPhone("");
+      // Reset form after 3 seconds and redirect back
+      setTimeout(() => {
+        setRecoveryEmail("");
+        setRecoveryPhone("");
+        onBack();
+      }, 3000);
     } catch (error) {
+      setError("Não foi possível processar sua solicitação. Tente novamente mais tarde.");
       toast({
         title: "Erro ao recuperar senha",
         description: "Não foi possível processar sua solicitação. Tente novamente mais tarde.",
@@ -69,6 +130,22 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
           Voltar
         </button>
       </div>
+      
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erro</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
+      {success && (
+        <Alert className="bg-green-50 text-green-800 border-green-200">
+          <Check className="h-4 w-4 text-green-500" />
+          <AlertTitle>Sucesso</AlertTitle>
+          <AlertDescription>{success}</AlertDescription>
+        </Alert>
+      )}
       
       <Tabs defaultValue="email" onValueChange={(value) => setRecoveryMethod(value as "email" | "phone")}>
         <TabsList className="grid w-full grid-cols-2">
@@ -112,7 +189,7 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
                 id="recovery-phone"
                 type="tel"
                 value={recoveryPhone}
-                onChange={(e) => setRecoveryPhone(e.target.value)}
+                onChange={(e) => setRecoveryPhone(formatPhone(e.target.value))}
                 placeholder="(00) 00000-0000"
                 required
                 className="mt-1"
