@@ -1,3 +1,4 @@
+
 import { MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -5,10 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { sendFeedbackMessage } from "@/utils/telegramUtils";
-
-// Telegram support bot token and ID
-const SUPPORT_BOT_TOKEN = "7668166969:AAFnukkbhjDnUgGTC5em6vYk1Ch7bXy-rBQ";
-const SUPPORT_BOT_ID = "suport@safelady_bot"; // This will be used for display, not for sending
 
 export function FeedbackButton() {
   const [showDialog, setShowDialog] = useState(false);
@@ -41,7 +38,7 @@ export function FeedbackButton() {
       
       localStorage.setItem("userFeedbacks", JSON.stringify(feedbacks));
       
-      // Enviar o feedback para o bot de suporte usando a nova função utilitária
+      // Enviar o feedback para o bot de suporte
       await sendFeedbackMessage(feedback);
       
       toast({
@@ -71,7 +68,7 @@ export function FeedbackButton() {
         className="px-4 py-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center w-full"
       >
         <div className="flex items-center gap-3 mx-auto">
-          <MessageSquare className="h-6 w-6 text-safelady" />
+          <MessageSquare className="h-6 w-6 text-[#FF84C6]" />
           <span className="font-medium text-gray-800 text-center">Enviar Feedback</span>
         </div>
       </button>

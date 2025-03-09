@@ -32,14 +32,14 @@ export function useEmergencySoundDetection() {
       mediaRecorder.start();
       setIsRecording(true);
       
-      // Gravar por no máximo 30 segundos
+      // Gravar por no máximo 3 segundos (modificado de 30 para 3 segundos)
       setTimeout(() => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
           stopRecording();
         }
-      }, 30000);
+      }, 3000); // 3 segundos de gravação
       
-      console.log("Gravação de áudio iniciada");
+      console.log("Gravação de áudio iniciada (3 segundos)");
     } catch (error) {
       console.error("Erro ao iniciar gravação de áudio:", error);
       toast({
@@ -71,11 +71,11 @@ export function useEmergencySoundDetection() {
     console.log("Emergência detectada, iniciando gravação");
     await startRecording();
     
-    // Esperar 10 segundos de gravação após a detecção
+    // Esperar 3 segundos de gravação após a detecção (modificado de 10 para 3 segundos)
     setTimeout(async () => {
       const audioBlob = await stopRecording();
       await handleEmergencyAlert({ toast, audioBlob });
-    }, 10000);
+    }, 3000); // 3 segundos
   }, [toast, startRecording, stopRecording]);
 
   useEffect(() => {

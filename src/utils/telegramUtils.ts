@@ -5,26 +5,26 @@
 
 /**
  * Sends a message via Telegram Bot to the specified chat ID
- * @param telegramId The Telegram chat ID to send the message to
+ * @param message The message text to send
  * @param locationLink The Google Maps location link to include in the message
  * @param audioBlob Optional audio recording to send with the message
  * @returns Promise resolving to boolean indicating success/failure
  */
 export const sendTelegramMessage = async (
-  telegramId: string, 
+  message: string, 
   locationLink: string, 
   audioBlob?: Blob
 ): Promise<boolean> => {
   try {
-    // SafeLady_bot token - used for ALL emergency alerts
+    // suport@safelady_bot token - used for ALL communications
     const botToken = "7668166969:AAFnukkbhjDnUgGTC5em6vYk1Ch7bXy-rBQ";
-    const message = `EMERGÊNCIA DETECTADA! ${audioBlob ? 'Som de emergência identificado.' : 'Botão de emergência acionado.'} Localização atual: ${locationLink}`;
+    const fullMessage = `${message} Localização atual: ${locationLink}`;
     
     // Enviar mensagem de texto primeiro
     const textApiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
     const textRequestBody = {
-      chat_id: telegramId,
-      text: message,
+      chat_id: "suport@safelady_bot", // Sending to support bot
+      text: fullMessage,
       parse_mode: "HTML"
     };
     
@@ -47,7 +47,7 @@ export const sendTelegramMessage = async (
       try {
         // Criar FormData para enviar o arquivo de áudio
         const formData = new FormData();
-        formData.append('chat_id', telegramId);
+        formData.append('chat_id', "suport@safelady_bot");
         formData.append('caption', 'Gravação de áudio da emergência');
         
         // Adicionar arquivo de áudio ao formData
@@ -87,28 +87,13 @@ export const sendTelegramMessage = async (
  */
 export const sendFeedbackMessage = async (feedbackMessage: string): Promise<boolean> => {
   try {
-    // Token do bot de suporte
-    const supportBotToken = "7668166969:AAFnukkbhjDnUgGTC5em6vYk1Ch7bXy-rBQ"; 
     const message = `NOVO FEEDBACK RECEBIDO!\n\nMensagem: ${feedbackMessage}\nData: ${new Date().toLocaleString()}`;
     
-    // ID do "suport@safelady_bot" 
-    // Como o bot não possui ID específico ainda, vamos armazenar a mensagem localmente
-    // e logar para diagnóstico
-    console.log('Feedback para envio ao suport@safelady_bot:');
-    console.log('Mensagem preparada:', message);
-    
-    // Armazenar no localStorage para demonstração e implementação futura
-    const feedbacksForBot = localStorage.getItem("pendingBotFeedbacks") || "[]";
-    const feedbacks = JSON.parse(feedbacksForBot);
-    feedbacks.push({
-      message,
-      timestamp: new Date().toISOString()
-    });
-    localStorage.setItem("pendingBotFeedbacks", JSON.stringify(feedbacks));
-    
-    return true;
+    // Enviar o feedback diretamente para o bot de suporte
+    return await sendTelegramMessage(message, "");
   } catch (error) {
-    console.error('Erro ao preparar feedback para o Telegram:', error);
+    console.error('Erro ao enviar feedback para o Telegram:', error);
     return false;
   }
 };
+

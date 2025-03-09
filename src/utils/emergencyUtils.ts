@@ -9,39 +9,29 @@ type EmergencyAlertProps = {
 };
 
 /**
- * Handles sending emergency alerts to configured contacts
+ * Handles sending emergency alerts to the support bot
  */
 export const handleEmergencyAlert = async ({ toast, audioBlob }: EmergencyAlertProps) => {
   try {
-    // Obter contatos de emergência do localStorage
-    const safeContacts = localStorage.getItem("safeContacts");
-    const contacts = safeContacts ? JSON.parse(safeContacts) : [];
-    
-    // Verificar se há contatos configurados
-    if (contacts.length === 0) {
-      toast({
-        title: "Contatos não configurados",
-        description: "Por favor, configure pelo menos um contato de confiança nas configurações.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     // Obter localização atual
     const position = await getCurrentPosition();
     const { latitude, longitude } = position.coords;
     const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
     
-    // Enviar mensagens para todos os contatos
-    for (const contact of contacts) {
-      // Enviar mensagem pelo Telegram com áudio se disponível
-      await sendTelegramMessage(contact.telegramId, locationLink, audioBlob);
-    }
+    // Preparar mensagem de emergência
+    const emergencyMessage = `EMERGÊNCIA DETECTADA! ${audioBlob ? 'Som de emergência identificado.' : 'Botão de emergência acionado.'}`;
     
-    toast({
-      title: "Alerta de emergência enviado",
-      description: `Som de emergência detectado! Alertas${audioBlob ? " e gravação" : ""} enviados via Telegram.`,
-    });
+    // Enviar mensagem de emergência para o bot de suporte
+    const success = await sendTelegramMessage(emergencyMessage, locationLink, audioBlob);
+    
+    if (success) {
+      toast({
+        title: "Alerta de emergência enviado",
+        description: `Emergência detectada! Alerta${audioBlob ? " e gravação" : ""} enviado.`,
+      });
+    } else {
+      throw new Error("Falha ao enviar alerta de emergência");
+    }
   } catch (error) {
     console.error("Erro ao enviar alerta automático:", error);
     toast({
@@ -51,3 +41,4 @@ export const handleEmergencyAlert = async ({ toast, audioBlob }: EmergencyAlertP
     });
   }
 };
+

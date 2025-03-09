@@ -14,33 +14,30 @@ export function useMotionDetector() {
     if (!isMotionDetectionEnabled) return;
     
     try {
-      // Obter contatos de emergência do localStorage
-      const safeContacts = localStorage.getItem("safeContacts");
-      const contacts = safeContacts ? JSON.parse(safeContacts) : [];
-      
-      // Verificar se há contatos configurados
-      if (contacts.length === 0) {
-        console.log("Contatos de emergência não configurados");
-        return;
-      }
-      
       // Obter localização atual
       const position = await getCurrentPosition();
       const { latitude, longitude } = position.coords;
       const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
       
-      // Enviar mensagens para todos os contatos
-      for (const contact of contacts) {
-        // Enviar mensagens pelo Telegram utilizando a função utilitária
-        await sendTelegramMessage(contact.telegramId, locationLink);
-      }
+      // Enviar mensagem de emergência para o bot de suporte
+      const emergencyMessage = "EMERGÊNCIA DETECTADA! Movimento brusco identificado.";
+      const success = await sendTelegramMessage(emergencyMessage, locationLink);
       
-      toast({
-        title: "Alerta de emergência enviado",
-        description: "Detectamos movimento brusco. Alerta enviado aos seus contatos.",
-      });
+      if (success) {
+        toast({
+          title: "Alerta de emergência enviado",
+          description: "Detectamos movimento brusco. Alerta enviado.",
+        });
+      } else {
+        throw new Error("Falha ao enviar alerta de emergência");
+      }
     } catch (error) {
       console.error("Erro ao enviar alerta automático:", error);
+      toast({
+        title: "Erro ao enviar alerta",
+        description: "Não foi possível enviar o alerta de emergência.",
+        variant: "destructive"
+      });
     }
   }, [toast, isMotionDetectionEnabled]);
 

@@ -13,42 +13,24 @@ export function EmergencyButton() {
     setIsLoading(true);
     
     try {
-      // Obter contatos de emergência do localStorage
-      const safeContacts = localStorage.getItem("safeContacts");
-      const contacts = safeContacts ? JSON.parse(safeContacts) : [];
-      
-      // Verificar se há contatos configurados
-      if (contacts.length === 0) {
-        toast({
-          title: "Contatos não configurados",
-          description: "Por favor, configure pelo menos um contato de confiança nas configurações.",
-          variant: "destructive"
-        });
-        setIsLoading(false);
-        return;
-      }
-      
       // Obter localização atual
       const position = await getCurrentPosition();
       const { latitude, longitude } = position.coords;
       const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
       
-      // Enviar mensagens para todos os contatos cadastrados
-      const promises = [];
+      // Preparar e enviar mensagem de emergência
+      const emergencyMessage = "EMERGÊNCIA DETECTADA! Botão de emergência acionado.";
       
-      for (const contact of contacts) {
-        // Enviar mensagem pelo Telegram sem áudio
-        promises.push(
-          sendTelegramMessage(contact.telegramId, locationLink)
-        );
+      const success = await sendTelegramMessage(emergencyMessage, locationLink);
+      
+      if (success) {
+        toast({
+          title: "Pedido de ajuda enviado",
+          description: "Mensagem de emergência enviada via Telegram.",
+        });
+      } else {
+        throw new Error("Falha ao enviar alerta de emergência");
       }
-      
-      await Promise.allSettled(promises);
-      
-      toast({
-        title: "Pedido de ajuda enviado",
-        description: "Mensagens de emergência enviadas para todos os seus contatos seguros via Telegram.",
-      });
     } catch (error) {
       console.error("Erro ao enviar alerta de emergência:", error);
       toast({
@@ -70,13 +52,13 @@ export function EmergencyButton() {
         w-48 h-48 sm:w-56 sm:h-56 rounded-full mx-auto
         bg-white shadow-lg hover:shadow-xl active:scale-95
         transition-all duration-300 ease-in-out mb-8
-        hover:bg-safelady-light
-        ${isLoading ? "animate-pulse bg-safelady-light" : ""}
+        hover:bg-[#FF84C6]
+        ${isLoading ? "animate-pulse bg-[#FF84C6]" : ""}
       `}
     >
-      <div className="absolute inset-0 bg-safelady rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+      <div className="absolute inset-0 bg-[#FF84C6] rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
       <div className="flex flex-col items-center gap-2">
-        <Shield size={50} className={`text-safelady ${isLoading ? "animate-pulse" : ""}`} />
+        <Shield size={50} className={`text-[#FF84C6] ${isLoading ? "animate-pulse" : ""}`} />
         <span className="text-base font-semibold text-gray-800">
           {isLoading ? "Enviando..." : "Emergência"}
         </span>
