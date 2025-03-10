@@ -1,25 +1,19 @@
 
 import React, { useState } from "react";
-import { Mail, Phone, KeyRound, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
 import { validateEmail } from "@/features/auth/utils/formValidation";
-
-interface PasswordRecoveryProps {
-  onBack: () => void;
-}
-
-type RecoveryStep = 'input' | 'otp' | 'newPassword' | 'success';
+import { RecoveryStep, RecoveryMethod, PasswordRecoveryProps } from "./password-recovery/types";
+import { RecoveryMethodInput } from "./password-recovery/RecoveryMethodInput";
+import { OtpVerification } from "./password-recovery/OtpVerification";
+import { NewPasswordForm } from "./password-recovery/NewPasswordForm";
+import { SuccessMessage } from "./password-recovery/SuccessMessage";
 
 export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [recoveryPhone, setRecoveryPhone] = useState("");
-  const [recoveryMethod, setRecoveryMethod] = useState<"email" | "phone">("email");
+  const [recoveryMethod, setRecoveryMethod] = useState<RecoveryMethod>("email");
   const [step, setStep] = useState<RecoveryStep>("input");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -129,131 +123,45 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
     switch (step) {
       case "input":
         return (
-          <Tabs defaultValue="email" onValueChange={(value) => setRecoveryMethod(value as "email" | "phone")}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="email" className="flex items-center gap-2">
-                <Mail className="h-4 w-4" /> Email
-              </TabsTrigger>
-              <TabsTrigger value="phone" className="flex items-center gap-2">
-                <Phone className="h-4 w-4" /> Telefone
-              </TabsTrigger>
-            </TabsList>
-            
-            <form onSubmit={handleSendOTP} className="space-y-4 mt-4">
-              <TabsContent value="email">
-                <div>
-                  <Label htmlFor="recovery-email">Email</Label>
-                  <Input
-                    id="recovery-email"
-                    type="email"
-                    value={recoveryEmail}
-                    onChange={(e) => setRecoveryEmail(e.target.value)}
-                    placeholder="seu@email.com"
-                  />
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="phone">
-                <div>
-                  <Label htmlFor="recovery-phone">Telefone</Label>
-                  <Input
-                    id="recovery-phone"
-                    type="tel"
-                    value={recoveryPhone}
-                    onChange={(e) => setRecoveryPhone(e.target.value)}
-                    placeholder="(00) 00000-0000"
-                  />
-                </div>
-              </TabsContent>
-
-              <Button
-                type="submit"
-                className="w-full bg-safelady hover:bg-safelady/90"
-                disabled={isLoading}
-              >
-                {isLoading ? "Enviando..." : "Enviar código"}
-              </Button>
-            </form>
-          </Tabs>
+          <RecoveryMethodInput
+            recoveryEmail={recoveryEmail}
+            setRecoveryEmail={setRecoveryEmail}
+            recoveryPhone={recoveryPhone}
+            setRecoveryPhone={setRecoveryPhone}
+            recoveryMethod={recoveryMethod}
+            setRecoveryMethod={setRecoveryMethod}
+            isLoading={isLoading}
+            onSubmit={handleSendOTP}
+          />
         );
 
       case "otp":
         return (
-          <form onSubmit={handleVerifyOTP} className="space-y-4">
-            <div>
-              <Label htmlFor="otp">Código de verificação</Label>
-              <Input
-                id="otp"
-                type="text"
-                maxLength={6}
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                placeholder="000000"
-                className="text-center text-2xl tracking-widest"
-              />
-              <p className="text-sm text-gray-500 mt-2">
-                Digite o código de 6 dígitos enviado para {" "}
-                {recoveryMethod === "email" ? recoveryEmail : recoveryPhone}
-              </p>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-safelady hover:bg-safelady/90"
-              disabled={isLoading}
-            >
-              {isLoading ? "Verificando..." : "Verificar código"}
-            </Button>
-          </form>
+          <OtpVerification
+            otp={otp}
+            setOtp={setOtp}
+            isLoading={isLoading}
+            onSubmit={handleVerifyOTP}
+            recoveryMethod={recoveryMethod}
+            recoveryEmail={recoveryEmail}
+            recoveryPhone={recoveryPhone}
+          />
         );
 
       case "newPassword":
         return (
-          <form onSubmit={handleResetPassword} className="space-y-4">
-            <div>
-              <Label htmlFor="new-password">Nova senha</Label>
-              <Input
-                id="new-password"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Digite sua nova senha"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="confirm-password">Confirme a nova senha</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Digite novamente sua nova senha"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-safelady hover:bg-safelady/90"
-              disabled={isLoading}
-            >
-              {isLoading ? "Alterando..." : "Alterar senha"}
-            </Button>
-          </form>
+          <NewPasswordForm
+            newPassword={newPassword}
+            setNewPassword={setNewPassword}
+            confirmPassword={confirmPassword}
+            setConfirmPassword={setConfirmPassword}
+            isLoading={isLoading}
+            onSubmit={handleResetPassword}
+          />
         );
 
       case "success":
-        return (
-          <div className="text-center space-y-4">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-              <Check className="w-6 h-6 text-green-600" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900">Senha alterada com sucesso!</h3>
-            <p className="text-sm text-gray-500">
-              Você será redirecionado para a tela de login em instantes...
-            </p>
-          </div>
-        );
+        return <SuccessMessage />;
     }
   };
 
