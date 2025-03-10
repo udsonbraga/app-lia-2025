@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Shield } from "lucide-react";
 
 interface LoginLayoutProps {
   children: React.ReactNode;
@@ -11,7 +10,11 @@ export const LoginLayout = ({ children }: LoginLayoutProps) => {
     <div className="min-h-screen bg-gradient-to-b from-[#FF84C6] to-white flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <Shield className="h-16 w-16 text-[#FEF7CD] drop-shadow-md" />
+          <img 
+            src="/lovable-uploads/0d65b2be-45e2-4d35-ae90-6efa24396f55.png" 
+            alt="Safe Lady Logo" 
+            className="h-24 w-24 object-contain" 
+          />
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
           Safe Lady

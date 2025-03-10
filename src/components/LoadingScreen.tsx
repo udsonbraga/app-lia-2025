@@ -8,13 +8,11 @@ export const LoadingScreen = () => {
   const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
-    // Simulate loading progress
     const interval = setInterval(() => {
       setLoadingProgress((prev) => {
         const newProgress = prev + 5;
         if (newProgress >= 100) {
           clearInterval(interval);
-          // Start fade out when loading is complete
           setTimeout(() => {
             setFadeOut(true);
             setTimeout(() => {
@@ -31,15 +29,15 @@ export const LoadingScreen = () => {
 
   return (
     <div
-      className={`fixed inset-0 flex flex-col items-center justify-center bg-safelady transition-opacity duration-500 ${
+      className={`fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-[#FF84C6] to-white transition-opacity duration-500 ${
         fadeOut ? "opacity-0" : "opacity-100"
       }`}
     >
       <div className="w-48 h-48 mb-6">
         <img
-          src="/logo-shield.png"
+          src="/lovable-uploads/0d65b2be-45e2-4d35-ae90-6efa24396f55.png"
           alt="Safe Lady Logo"
-          className="w-full h-full object-contain"
+          className="w-full h-full object-contain animate-pulse"
         />
       </div>
       <h1 className="text-3xl font-bold text-white mb-4">Safe Lady</h1>
