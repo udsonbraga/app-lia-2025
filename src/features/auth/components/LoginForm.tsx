@@ -3,7 +3,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { PasswordRecovery } from "./PasswordRecovery";
+import { Mail, Lock } from "lucide-react";
 
 export const LoginForm = () => {
   const navigate = useNavigate();
@@ -69,66 +71,71 @@ export const LoginForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          Email
-        </label>
-        <div className="mt-1">
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#FF84C6] focus:border-[#FF84C6]"
-          />
+      <div className="space-y-4">
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Email
+          </label>
+          <div className="mt-1 relative">
+            <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="pl-10"
+              placeholder="seu@email.com"
+            />
+          </div>
         </div>
-      </div>
 
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          Senha
-        </label>
-        <div className="mt-1">
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#FF84C6] focus:border-[#FF84C6]"
-          />
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            Senha
+          </label>
+          <div className="mt-1 relative">
+            <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="pl-10"
+              placeholder="••••••••"
+            />
+          </div>
         </div>
       </div>
 
       <div className="flex items-center justify-end">
-        <div className="text-sm">
-          <button
-            type="button"
-            onClick={() => setShowRecovery(true)}
-            className="font-medium text-[#FF84C6] hover:text-[#FF5AA9]"
-          >
-            Esqueci minha senha
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setShowRecovery(true)}
+          className="text-sm font-medium text-safelady hover:text-safelady/90"
+        >
+          Esqueci minha senha
+        </button>
       </div>
 
       <div className="space-y-4">
         <Button
           type="submit"
-          className="w-full bg-[#FF84C6] hover:bg-[#FF5AA9] transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full bg-safelady hover:bg-safelady/90 transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
           disabled={isLoading}
         >
           {isLoading ? "Entrando..." : "Entrar"}
         </Button>
         
         <Button
+          type="button"
           variant="outline"
-          className="w-full transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] bg-[#D6BCFA] hover:bg-[#C4B5FD] text-purple-800 border-purple-300"
+          className="w-full border-safelady text-safelady hover:bg-safelady/10"
           onClick={() => navigate("/register")}
         >
           Criar nova conta
