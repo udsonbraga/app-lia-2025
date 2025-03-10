@@ -5,7 +5,7 @@ import {
   DrawerHeader,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Menu, UserCircle, Upload, Trash2, Mic, PhoneIncoming, HelpCircle, LogOut, Moon, Sun } from "lucide-react";
+import { Menu, UserCircle, Upload, Trash2, Mic, PhoneIncoming, Palette, HelpCircle, LogOut, Moon, Sun, TextCursor } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,7 +13,6 @@ import { Switch } from "@/components/ui/switch";
 import { useEmergencySoundDetection } from "@/hooks/useEmergencySoundDetection";
 import { useMotionDetector } from "@/hooks/useMotionDetector";
 import { Separator } from "@/components/ui/separator";
-import { FeedbackButton } from "@/components/FeedbackButton";
 
 export const MainDrawer = () => {
   const navigate = useNavigate();
@@ -68,6 +67,18 @@ export const MainDrawer = () => {
   };
 
   const menuItems = [
+    {
+      title: "Personalizar",
+      path: "/customize",
+      icon: <Palette className="h-5 w-5 text-purple-600" />,
+      description: "Alterar cores e temas"
+    },
+    {
+      title: "Acessibilidade",
+      path: "/accessibility",
+      icon: <TextCursor className="h-5 w-5 text-blue-600" />,
+      description: "Ajustar tamanho do texto"
+    },
     {
       title: "Ajuda",
       path: "/help",
@@ -146,7 +157,7 @@ export const MainDrawer = () => {
                     id="dark-mode" 
                     checked={isDarkMode}
                     onCheckedChange={toggleDarkMode}
-                    className={isDarkMode ? "bg-neutral-800" : ""}
+                    className={isDarkMode ? "bg-green-500" : ""}
                   />
                 </div>
               </div>
@@ -168,7 +179,7 @@ export const MainDrawer = () => {
                     id="sound-detection" 
                     checked={isListening}
                     onCheckedChange={toggleSoundDetection}
-                    className={isListening ? "bg-neutral-800" : ""}
+                    className={isListening ? "bg-green-500" : ""}
                   />
                 </div>
               </div>
@@ -190,7 +201,7 @@ export const MainDrawer = () => {
                     id="motion-detection" 
                     checked={isMotionDetectionEnabled}
                     onCheckedChange={toggleMotionDetection}
-                    className={isMotionDetectionEnabled ? "bg-neutral-800" : ""}
+                    className={isMotionDetectionEnabled ? "bg-green-500" : ""}
                   />
                 </div>
               </div>
@@ -198,10 +209,6 @@ export const MainDrawer = () => {
           </div>
           
           <Separator className="my-4" />
-          
-          <div className="flex justify-center mb-4">
-            <FeedbackButton />
-          </div>
           
           <nav className="space-y-3">
             {menuItems.map((item) => (

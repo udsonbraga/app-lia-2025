@@ -1,167 +1,60 @@
 
 import React, { useState } from "react";
+import { Mail, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { validateEmail } from "@/features/auth/utils/formValidation";
-import { RecoveryStep, RecoveryMethod, PasswordRecoveryProps } from "./password-recovery/types";
-import { RecoveryMethodInput } from "./password-recovery/RecoveryMethodInput";
-import { OtpVerification } from "./password-recovery/OtpVerification";
-import { NewPasswordForm } from "./password-recovery/NewPasswordForm";
-import { SuccessMessage } from "./password-recovery/SuccessMessage";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+
+interface PasswordRecoveryProps {
+  onBack: () => void;
+}
 
 export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [recoveryPhone, setRecoveryPhone] = useState("");
-  const [recoveryMethod, setRecoveryMethod] = useState<RecoveryMethod>("email");
-  const [step, setStep] = useState<RecoveryStep>("input");
-  const [otp, setOtp] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [recoveryMethod, setRecoveryMethod] = useState<"email" | "phone">("email");
 
-  const handleSendOTP = async (e: React.FormEvent) => {
+  const handleRecoverySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (recoveryMethod === "email" && !validateEmail(recoveryEmail)) {
-      toast({
-        title: "E-mail inválido",
-        description: "Por favor, insira um e-mail válido.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
+
     try {
-      // Simulate API call
+      // Simulate sending a recovery email or SMS
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      toast({
-        title: "Código enviado!",
-        description: `Enviamos um código de recuperação para ${recoveryMethod === "email" ? recoveryEmail : recoveryPhone}`,
-      });
+      if (recoveryMethod === "email") {
+        // In a real app, you would send an actual email here
+        console.log(`Recovery email sent to: ${recoveryEmail}`);
+        
+        toast({
+          title: "Email de recuperação enviado",
+          description: `Enviamos um link de recuperação para ${recoveryEmail}. Por favor, verifique sua caixa de entrada e spam.`,
+        });
+      } else {
+        // In a real app, you would send an actual SMS here
+        console.log(`Recovery SMS sent to: ${recoveryPhone}`);
+        
+        toast({
+          title: "SMS de recuperação enviado",
+          description: `Enviamos um código de recuperação para ${recoveryPhone}. Por favor, aguarde o recebimento da mensagem.`,
+        });
+      }
       
-      setStep("otp");
+      onBack();
+      setRecoveryEmail("");
+      setRecoveryPhone("");
     } catch (error) {
       toast({
-        title: "Erro ao enviar código",
-        description: "Não foi possível enviar o código de recuperação. Tente novamente.",
+        title: "Erro ao recuperar senha",
+        description: "Não foi possível processar sua solicitação. Tente novamente mais tarde.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (otp.length !== 6) {
-      toast({
-        title: "Código inválido",
-        description: "O código deve conter 6 dígitos.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setStep("newPassword");
-    } catch (error) {
-      toast({
-        title: "Código inválido",
-        description: "O código informado não é válido. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (newPassword.length < 6) {
-      toast({
-        title: "Senha muito curta",
-        description: "A senha deve ter pelo menos 6 caracteres.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: "Senhas diferentes",
-        description: "As senhas não coincidem.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setStep("success");
-      
-      setTimeout(() => {
-        onBack();
-      }, 2000);
-    } catch (error) {
-      toast({
-        title: "Erro ao alterar senha",
-        description: "Não foi possível alterar sua senha. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const renderStep = () => {
-    switch (step) {
-      case "input":
-        return (
-          <RecoveryMethodInput
-            recoveryEmail={recoveryEmail}
-            setRecoveryEmail={setRecoveryEmail}
-            recoveryPhone={recoveryPhone}
-            setRecoveryPhone={setRecoveryPhone}
-            recoveryMethod={recoveryMethod}
-            setRecoveryMethod={setRecoveryMethod}
-            isLoading={isLoading}
-            onSubmit={handleSendOTP}
-          />
-        );
-
-      case "otp":
-        return (
-          <OtpVerification
-            otp={otp}
-            setOtp={setOtp}
-            isLoading={isLoading}
-            onSubmit={handleVerifyOTP}
-            recoveryMethod={recoveryMethod}
-            recoveryEmail={recoveryEmail}
-            recoveryPhone={recoveryPhone}
-          />
-        );
-
-      case "newPassword":
-        return (
-          <NewPasswordForm
-            newPassword={newPassword}
-            setNewPassword={setNewPassword}
-            confirmPassword={confirmPassword}
-            setConfirmPassword={setConfirmPassword}
-            isLoading={isLoading}
-            onSubmit={handleResetPassword}
-          />
-        );
-
-      case "success":
-        return <SuccessMessage />;
     }
   };
 
@@ -169,17 +62,72 @@ export const PasswordRecovery = ({ onBack }: PasswordRecoveryProps) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium text-gray-900">Recuperar Senha</h3>
-        {step === "input" && (
-          <button 
-            onClick={onBack}
-            className="text-sm text-safelady hover:text-safelady/90"
-          >
-            Voltar
-          </button>
-        )}
+        <button 
+          onClick={onBack}
+          className="text-sm text-gray-500 hover:text-gray-700"
+        >
+          Voltar
+        </button>
       </div>
       
-      {renderStep()}
+      <Tabs defaultValue="email" onValueChange={(value) => setRecoveryMethod(value as "email" | "phone")}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="email" className="flex items-center gap-2">
+            <Mail className="h-4 w-4" /> Email
+          </TabsTrigger>
+          <TabsTrigger value="phone" className="flex items-center gap-2">
+            <Phone className="h-4 w-4" /> Telefone
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="email">
+          <form onSubmit={handleRecoverySubmit} className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="recovery-email">Email</Label>
+              <Input
+                id="recovery-email"
+                type="email"
+                value={recoveryEmail}
+                onChange={(e) => setRecoveryEmail(e.target.value)}
+                placeholder="seu@email.com"
+                required
+                className="mt-1"
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-[#FF84C6] hover:bg-[#FF5AA9]"
+              disabled={isLoading}
+            >
+              {isLoading ? "Enviando..." : "Recuperar senha"}
+            </Button>
+          </form>
+        </TabsContent>
+        
+        <TabsContent value="phone">
+          <form onSubmit={handleRecoverySubmit} className="space-y-4 mt-4">
+            <div>
+              <Label htmlFor="recovery-phone">Telefone</Label>
+              <Input
+                id="recovery-phone"
+                type="tel"
+                value={recoveryPhone}
+                onChange={(e) => setRecoveryPhone(e.target.value)}
+                placeholder="(00) 00000-0000"
+                required
+                className="mt-1"
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full bg-[#FF84C6] hover:bg-[#FF5AA9]"
+              disabled={isLoading}
+            >
+              {isLoading ? "Enviando..." : "Recuperar senha"}
+            </Button>
+          </form>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

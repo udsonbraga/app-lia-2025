@@ -4,13 +4,13 @@
 @tailwind utilities;
 
 :root {
-  --primary-color: var(--neutral);
-  --primary-light: var(--neutral-light);
+  --primary-color: var(--safelady);
+  --primary-light: var(--safelady-light);
   
   /* Color variables */
-  --neutral: #333333;
-  --neutral-light: #555555;
-  --neutral-dark: #222222;
+  --safelady: #FF84C6;
+  --safelady-light: #FFAED9;
+  --safelady-dark: #FF5AA9;
   
   --rose-500: rgb(244, 63, 94);
   --rose-100: rgb(255, 240, 245);
@@ -40,6 +40,56 @@
   --indigo-100: rgb(224, 231, 255);
 }
 
+/* Font size classes */
+html.text-small {
+  font-size: 14px;
+}
+
+html.text-normal {
+  font-size: 16px;
+}
+
+html.text-large {
+  font-size: 18px;
+}
+
+/* Theme classes */
+html.theme-safelady .text-primary {
+  color: var(--safelady);
+}
+
+html.theme-blue .text-primary {
+  color: var(--blue-500);
+}
+
+html.theme-green .text-primary {
+  color: var(--green-500);
+}
+
+html.theme-purple .text-primary {
+  color: var(--purple-500);
+}
+
+html.theme-orange .text-primary {
+  color: var(--orange-500);
+}
+
+html.theme-red .text-primary {
+  color: var(--red-500);
+}
+
+html.theme-yellow .text-primary {
+  color: var(--yellow-500);
+}
+
+html.theme-cyan .text-primary {
+  color: var(--cyan-500);
+}
+
+html.theme-indigo .text-primary {
+  color: var(--indigo-500);
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -48,7 +98,7 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 0 0% 20%; /* Neutral dark gray */
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
