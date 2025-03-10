@@ -1,5 +1,5 @@
 
-import { useSafeContacts } from "@/hooks/useSafeContacts";
+import { useHasSafeContacts } from "@/hooks/useSafeContacts";
 import { Link } from "react-router-dom";
 import { MainDrawer } from "@/components/MainDrawer";
 import { AlertTriangle, Eye, EyeOff } from "lucide-react";
@@ -11,23 +11,22 @@ interface HeaderProps {
 }
 
 export function Header({ isDisguised = false, toggleDisguise }: HeaderProps) {
-  const { contacts } = useSafeContacts();
-  const hasSafeContacts = contacts.length > 0;
+  const { hasSafeContacts } = useHasSafeContacts();
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-neutral-800 z-40 shadow-sm">
+    <header className="fixed top-0 left-0 right-0 bg-white z-40 shadow-sm">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center">
           <MainDrawer />
           
           {!isDisguised && (
-            <Link to="/home" className="ml-2 font-bold text-white text-lg">
+            <Link to="/home" className="ml-2 font-bold text-neutral-800 text-lg">
               Safe Lady
             </Link>
           )}
           
           {isDisguised && (
-            <span className="ml-2 font-bold text-white text-lg">
+            <span className="ml-2 font-bold text-neutral-800 text-lg">
               Finanças Pessoais
             </span>
           )}
@@ -52,8 +51,8 @@ export function Header({ isDisguised = false, toggleDisguise }: HeaderProps) {
               className={`
                 flex items-center gap-1 px-3 py-2 rounded-md text-sm
                 ${isDisguised 
-                  ? "bg-white text-neutral-800 hover:bg-neutral-200" 
-                  : "bg-white text-neutral-800 hover:bg-neutral-200"}
+                  ? "bg-neutral-800 text-white hover:bg-neutral-700" 
+                  : "bg-neutral-800 text-white hover:bg-neutral-700"}
               `}
             >
               {isDisguised ? (
