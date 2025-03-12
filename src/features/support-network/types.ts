@@ -1,23 +1,13 @@
 
-export type ActiveTab = "police" | "hospitals" | "ngos" | "rights";
-
-export interface SupportLocation {
-  id: string;
-  name: string;
-  type: "police" | "hospital" | "ngo";
-  address: string;
-  phone: string;
-  latitude: number;
-  longitude: number;
-  mapUrl: string;  // Changed from optional to required
-}
-
 export interface SafeContact {
   id: string;
   name: string;
   phone: string;
   telegramId: string;
   relationship: string;
+  twilioAccountSid?: string;
+  twilioAuthToken?: string;
+  twilioWhatsappNumber?: string;
 }
 
 export interface UserPremiumStatus {

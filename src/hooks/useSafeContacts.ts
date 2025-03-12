@@ -21,6 +21,9 @@ export const useSafeContacts = () => {
     phone: "",
     telegramId: "",
     relationship: "",
+    twilioAccountSid: "",
+    twilioAuthToken: "",
+    twilioWhatsappNumber: "",
   });
 
   const [isAdding, setIsAdding] = useState(false);
@@ -35,10 +38,10 @@ export const useSafeContacts = () => {
   }, [premiumStatus]);
 
   const handleAddContact = () => {
-    if (!newContact.name || !newContact.phone || !newContact.telegramId || !newContact.relationship) {
+    if (!newContact.name || !newContact.phone || !newContact.relationship) {
       toast({
         title: "Campos obrigatórios",
-        description: "Preencha todos os campos para adicionar um contato.",
+        description: "Preencha pelo menos o nome, telefone e parentesco para adicionar um contato.",
         variant: "destructive",
       });
       return;
@@ -55,7 +58,15 @@ export const useSafeContacts = () => {
     };
 
     setContacts([...contacts, newContactWithId]);
-    setNewContact({ name: "", phone: "", telegramId: "", relationship: "" });
+    setNewContact({ 
+      name: "", 
+      phone: "", 
+      telegramId: "", 
+      relationship: "",
+      twilioAccountSid: "",
+      twilioAuthToken: "",
+      twilioWhatsappNumber: "", 
+    });
     setIsAdding(false);
 
     toast({

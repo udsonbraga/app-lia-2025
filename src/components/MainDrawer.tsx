@@ -5,7 +5,7 @@ import {
   DrawerHeader,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Menu, UserCircle, Upload, Trash2, Mic, PhoneIncoming, Palette, HelpCircle, LogOut, Moon, Sun, TextCursor } from "lucide-react";
+import { Menu, UserCircle, Upload, Trash2, Mic, PhoneIncoming, HelpCircle, LogOut, Moon, Sun } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -67,18 +67,6 @@ export const MainDrawer = () => {
   };
 
   const menuItems = [
-    {
-      title: "Personalizar",
-      path: "/customize",
-      icon: <Palette className="h-5 w-5 text-purple-600" />,
-      description: "Alterar cores e temas"
-    },
-    {
-      title: "Acessibilidade",
-      path: "/accessibility",
-      icon: <TextCursor className="h-5 w-5 text-blue-600" />,
-      description: "Ajustar tamanho do texto"
-    },
     {
       title: "Ajuda",
       path: "/help",

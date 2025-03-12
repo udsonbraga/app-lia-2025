@@ -3,6 +3,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SafeContact } from "@/features/support-network/types";
+import { Separator } from "@/components/ui/separator";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
 
 interface AddContactFormProps {
   newContact: Omit<SafeContact, "id">;
@@ -17,6 +21,8 @@ const AddContactForm = ({
   onAddContact,
   onCancel,
 }: AddContactFormProps) => {
+  const [isWhatsappOpen, setIsWhatsappOpen] = useState(false);
+
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, "");
     if (numbers.length <= 11) {
@@ -94,11 +100,88 @@ const AddContactForm = ({
           </SelectContent>
         </Select>
       </div>
+
+      <Separator className="my-2" />
+
+      <Collapsible
+        open={isWhatsappOpen}
+        onOpenChange={setIsWhatsappOpen}
+        className="w-full"
+      >
+        <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium text-gray-700 hover:text-gray-900">
+          <span>Configuração do WhatsApp (Twilio)</span>
+          {isWhatsappOpen ? (
+            <ChevronUp className="h-4 w-4 text-gray-500" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-gray-500" />
+          )}
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-3 mt-3">
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">
+              Twilio Account SID
+            </label>
+            <Input
+              placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              value={newContact.twilioAccountSid}
+              onChange={(e) =>
+                onNewContactChange({
+                  ...newContact,
+                  twilioAccountSid: e.target.value,
+                })
+              }
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Identificação da conta no Twilio
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">
+              Twilio Auth Token
+            </label>
+            <Input
+              placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              type="password"
+              value={newContact.twilioAuthToken}
+              onChange={(e) =>
+                onNewContactChange({
+                  ...newContact,
+                  twilioAuthToken: e.target.value,
+                })
+              }
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Chave de autenticação para uso da API
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">
+              Twilio WhatsApp Number
+            </label>
+            <Input
+              placeholder="whatsapp:+1xxxxxxxxxx"
+              value={newContact.twilioWhatsappNumber}
+              onChange={(e) =>
+                onNewContactChange({
+                  ...newContact,
+                  twilioWhatsappNumber: e.target.value,
+                })
+              }
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Número aprovado pelo WhatsApp para envio (formato: whatsapp:+1xxxxxxxxxx)
+            </p>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
       <div className="flex gap-2 pt-2">
         <Button variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button onClick={onAddContact}>Adicionar Contato</Button>
+        <Button onClick={onAddContact} className="bg-[#FF84C6] hover:bg-[#FF5AA9] text-white">
+          Adicionar Contato
+        </Button>
       </div>
     </div>
   );

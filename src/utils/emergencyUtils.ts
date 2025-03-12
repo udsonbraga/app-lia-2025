@@ -31,15 +31,34 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps) => {
     const { latitude, longitude } = position.coords;
     const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
     
-    // Enviar mensagens para todos os contatos
+    // Enviar mensagens para todos os contatos cadastrados
+    const promises = [];
+    
     for (const contact of contacts) {
       // Enviar mensagem pelo Telegram
-      await sendTelegramMessage(contact.telegramId, locationLink);
+      promises.push(
+        sendTelegramMessage(contact.telegramId, locationLink)
+      );
+      
+      // Enviar mensagem pelo WhatsApp se as credenciais Twilio estiverem configuradas
+      if (contact.twilioAccountSid && contact.twilioAuthToken && contact.twilioWhatsappNumber) {
+        promises.push(
+          sendWhatsAppMessage(
+            contact.twilioAccountSid,
+            contact.twilioAuthToken,
+            contact.twilioWhatsappNumber,
+            contact.phone,
+            locationLink
+          )
+        );
+      }
     }
+    
+    await Promise.allSettled(promises);
     
     toast({
       title: "Alerta de emergência enviado",
-      description: "Som de emergência detectado! Alertas enviados via Telegram.",
+      description: "Som de emergência detectado! Alertas enviados via Telegram e WhatsApp.",
     });
   } catch (error) {
     console.error("Erro ao enviar alerta automático:", error);
@@ -48,5 +67,68 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps) => {
       description: "Não foi possível enviar o alerta de emergência. Tente novamente.",
       variant: "destructive"
     });
+  }
+};
+
+// Função para enviar mensagem via WhatsApp (Twilio)
+export const sendWhatsAppMessage = async (
+  accountSid: string, 
+  authToken: string, 
+  fromNumber: string, 
+  toNumber: string, 
+  locationLink: string
+) => {
+  try {
+    // Formatando o número de telefone para o formato E.164
+    let formattedNumber = toNumber.replace(/\D/g, "");
+    if (formattedNumber.startsWith("0")) {
+      formattedNumber = formattedNumber.substring(1);
+    }
+    if (!formattedNumber.startsWith("+")) {
+      formattedNumber = `+55${formattedNumber}`;
+    }
+    
+    // Garantir que o número de destino esteja no formato WhatsApp
+    const toWhatsApp = formattedNumber.startsWith("whatsapp:") 
+      ? formattedNumber 
+      : `whatsapp:${formattedNumber}`;
+    
+    // Mensagem a ser enviada
+    const message = `EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`;
+
+    // Twilio API endpoint para mensagens
+    const twilioApiUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+    
+    // Credenciais em Base64 para autenticação
+    const credentials = btoa(`${accountSid}:${authToken}`);
+    
+    // Preparar FormData para a requisição
+    const formData = new URLSearchParams();
+    formData.append('From', fromNumber);
+    formData.append('To', toWhatsApp);
+    formData.append('Body', message);
+    
+    // Fazer a requisição para a API do Twilio
+    const response = await fetch(twilioApiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${credentials}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData.toString(),
+    });
+    
+    const responseData = await response.json();
+    
+    if (response.ok) {
+      console.log('Mensagem WhatsApp enviada com sucesso:', responseData);
+      return true;
+    } else {
+      console.error('Erro ao enviar WhatsApp:', responseData);
+      return false;
+    }
+  } catch (error) {
+    console.error('Erro ao enviar mensagem via WhatsApp:', error);
+    return false;
   }
 };

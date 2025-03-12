@@ -33,14 +33,14 @@ export const LoadingScreen = () => {
         fadeOut ? "opacity-0" : "opacity-100"
       }`}
     >
-      <div className="w-64 h-64 mb-6">
+      <div className="w-72 h-72 sm:w-80 sm:h-80 mb-6">
         <img
           src="/lovable-uploads/0d65b2be-45e2-4d35-ae90-6efa24396f55.png"
           alt="Safe Lady Logo"
           className="w-full h-full object-contain animate-pulse"
         />
       </div>
-      <h1 className="text-3xl font-bold text-white mb-4 drop-shadow-md">Safe Lady</h1>
+      <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-md">Safe Lady</h1>
       <div className="w-64 h-2 bg-white/30 rounded-full overflow-hidden">
         <div 
           className="h-full bg-white rounded-full transition-all duration-300 ease-in-out"
