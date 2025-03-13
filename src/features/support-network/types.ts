@@ -27,4 +27,6 @@ export interface SupportLocation {
   description?: string;
   latitude?: number;
   longitude?: number;
+  mapUrl?: string;
+  type?: string;
 }

@@ -1,13 +1,14 @@
 
-import { User, Phone, MessageSquare, Trash2, Shield } from "lucide-react";
+import { User, Phone, MessageSquare, Trash2, Shield, Pencil } from "lucide-react";
 import { SafeContact } from "@/features/support-network/types";
 
 interface ContactListProps {
   contacts: SafeContact[];
   onRemoveContact: (id: string) => void;
+  onEditContact?: (contact: SafeContact) => void;
 }
 
-const ContactList = ({ contacts, onRemoveContact }: ContactListProps) => {
+const ContactList = ({ contacts, onRemoveContact, onEditContact }: ContactListProps) => {
   if (contacts.length === 0) {
     return (
       <div className="text-center py-8 mb-4">
@@ -51,12 +52,24 @@ const ContactList = ({ contacts, onRemoveContact }: ContactListProps) => {
               <span className="text-gray-500">Parentesco:</span> {contact.relationship}
             </p>
           </div>
-          <button
-            onClick={() => onRemoveContact(contact.id)}
-            className="p-1 hover:bg-red-50 rounded-full"
-          >
-            <Trash2 className="h-5 w-5 text-red-500" />
-          </button>
+          <div className="flex gap-2">
+            {onEditContact && (
+              <button
+                onClick={() => onEditContact(contact)}
+                className="p-1 hover:bg-blue-50 rounded-full"
+                aria-label="Editar contato"
+              >
+                <Pencil className="h-5 w-5 text-blue-500" />
+              </button>
+            )}
+            <button
+              onClick={() => onRemoveContact(contact.id)}
+              className="p-1 hover:bg-red-50 rounded-full"
+              aria-label="Remover contato"
+            >
+              <Trash2 className="h-5 w-5 text-red-500" />
+            </button>
+          </div>
         </div>
       ))}
     </div>

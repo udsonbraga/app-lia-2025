@@ -27,6 +27,8 @@ export const useSafeContacts = () => {
   });
 
   const [isAdding, setIsAdding] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingContactId, setEditingContactId] = useState<string | null>(null);
   const [showPremiumDialog, setShowPremiumDialog] = useState(false);
 
   useEffect(() => {
@@ -47,17 +49,42 @@ export const useSafeContacts = () => {
       return;
     }
 
-    if (contacts.length >= premiumStatus.maxContacts) {
-      setShowPremiumDialog(true);
-      return;
+    if (isEditing && editingContactId) {
+      // Update existing contact
+      setContacts(contacts.map((contact) => 
+        contact.id === editingContactId 
+          ? { ...newContact, id: editingContactId } 
+          : contact
+      ));
+      
+      setIsEditing(false);
+      setEditingContactId(null);
+      
+      toast({
+        title: "Contato atualizado",
+        description: "Contato de segurança atualizado com sucesso.",
+      });
+    } else {
+      // Add new contact
+      if (contacts.length >= premiumStatus.maxContacts) {
+        setShowPremiumDialog(true);
+        return;
+      }
+
+      const newContactWithId = {
+        ...newContact,
+        id: Date.now().toString(),
+      };
+
+      setContacts([...contacts, newContactWithId]);
+      
+      toast({
+        title: "Contato adicionado",
+        description: "Contato de segurança adicionado com sucesso.",
+      });
     }
 
-    const newContactWithId = {
-      ...newContact,
-      id: Date.now().toString(),
-    };
-
-    setContacts([...contacts, newContactWithId]);
+    // Reset form
     setNewContact({ 
       name: "", 
       phone: "", 
@@ -68,11 +95,21 @@ export const useSafeContacts = () => {
       twilioWhatsappNumber: "", 
     });
     setIsAdding(false);
+  };
 
-    toast({
-      title: "Contato adicionado",
-      description: "Contato de segurança adicionado com sucesso.",
+  const handleEditContact = (contact: SafeContact) => {
+    setNewContact({
+      name: contact.name,
+      phone: contact.phone,
+      telegramId: contact.telegramId,
+      relationship: contact.relationship,
+      twilioAccountSid: contact.twilioAccountSid || "",
+      twilioAuthToken: contact.twilioAuthToken || "",
+      twilioWhatsappNumber: contact.twilioWhatsappNumber || "",
     });
+    setEditingContactId(contact.id);
+    setIsEditing(true);
+    setIsAdding(true);
   };
 
   const handleRemoveContact = (id: string) => {
@@ -107,6 +144,7 @@ export const useSafeContacts = () => {
     premiumStatus,
     newContact,
     isAdding,
+    isEditing,
     showPremiumDialog,
     setNewContact,
     setIsAdding,
@@ -114,6 +152,7 @@ export const useSafeContacts = () => {
     handleAddContact,
     handleRemoveContact,
     handleNewContactClick,
+    handleEditContact,
     upgradeToPremium,
   };
 };
