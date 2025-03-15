@@ -135,19 +135,24 @@ export function EmergencyButton() {
     locationLink: string
   ) => {
     try {
-      // Formatando o número de telefone para o formato E.164
-      let formattedNumber = toNumber.replace(/\D/g, "");
-      if (formattedNumber.startsWith("0")) {
-        formattedNumber = formattedNumber.substring(1);
+      // Formatando o número de telefone de destino para o formato E.164
+      let formattedToNumber = toNumber.replace(/\D/g, "");
+      if (formattedToNumber.startsWith("0")) {
+        formattedToNumber = formattedToNumber.substring(1);
       }
-      if (!formattedNumber.startsWith("+")) {
-        formattedNumber = `+55${formattedNumber}`;
+      if (!formattedToNumber.startsWith("+")) {
+        formattedToNumber = `+55${formattedToNumber}`;
       }
       
-      // Garantir que o número de destino esteja no formato WhatsApp
-      const toWhatsApp = formattedNumber.startsWith("whatsapp:") 
-        ? formattedNumber 
-        : `whatsapp:${formattedNumber}`;
+      // Garante que o número de origem esteja no formato correto para WhatsApp
+      const fromWhatsApp = fromNumber.startsWith("whatsapp:") 
+        ? fromNumber 
+        : `whatsapp:${fromNumber}`;
+      
+      // Garante que o número de destino esteja no formato correto para WhatsApp
+      const toWhatsApp = formattedToNumber.startsWith("whatsapp:") 
+        ? formattedToNumber 
+        : `whatsapp:${formattedToNumber}`;
       
       // Mensagem a ser enviada
       const message = `EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`;
@@ -160,7 +165,7 @@ export function EmergencyButton() {
       
       // Preparar FormData para a requisição
       const formData = new URLSearchParams();
-      formData.append('From', fromNumber);
+      formData.append('From', fromWhatsApp);
       formData.append('To', toWhatsApp);
       formData.append('Body', message);
       

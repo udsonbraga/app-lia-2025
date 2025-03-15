@@ -34,6 +34,16 @@ const AddContactForm = ({
     return value;
   };
 
+  // Preencher com os dados da Twilio fornecidos pelo usuário
+  const handlePrefillTwilioData = () => {
+    onNewContactChange({
+      ...newContact,
+      twilioAccountSid: "ACa442b3fbd9216a4ba74662505c414e2b",
+      twilioAuthToken: "a9cfb35d626f6eb0ac331d2740aa211f",
+      twilioWhatsappNumber: "whatsapp:+18312176749"
+    });
+  };
+
   return (
     <Card className="mb-4 border border-gray-200 shadow-sm">
       <CardHeader className="p-4 bg-gray-50 rounded-t-lg">
@@ -130,6 +140,16 @@ const AddContactForm = ({
             )}
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-3 p-4 bg-gray-50/50">
+            <div className="flex justify-end">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handlePrefillTwilioData}
+                className="text-xs bg-safelady-light text-safelady hover:bg-safelady hover:text-white transition-colors"
+              >
+                Preencher dados Twilio
+              </Button>
+            </div>
             <div>
               <label className="block text-sm text-gray-600 mb-1">
                 Twilio Account SID
@@ -145,7 +165,7 @@ const AddContactForm = ({
                 }
               />
               <p className="text-xs text-gray-500 mt-1">
-                Identificação da conta no Twilio
+                Exemplo: ACa442b3fbd9216a4ba74662505c414e2b
               </p>
             </div>
             <div>
@@ -164,7 +184,7 @@ const AddContactForm = ({
                 }
               />
               <p className="text-xs text-gray-500 mt-1">
-                Chave de autenticação para uso da API
+                Exemplo: a9cfb35d626f6eb0ac331d2740aa211f
               </p>
             </div>
             <div>
@@ -182,7 +202,7 @@ const AddContactForm = ({
                 }
               />
               <p className="text-xs text-gray-500 mt-1">
-                Número aprovado pelo WhatsApp para envio (formato: whatsapp:+1xxxxxxxxxx)
+                Exemplo: whatsapp:+18312176749 (inclua o prefixo "whatsapp:")
               </p>
             </div>
           </CollapsibleContent>
