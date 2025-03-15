@@ -85,7 +85,7 @@ export const sendWhatsAppMessage = async (
       formattedToNumber = formattedToNumber.substring(1);
     }
     if (!formattedToNumber.startsWith("+")) {
-      formattedToNumber = `+55${formattedToNumber}`;
+      formattedToNumber = `+${formattedToNumber}`;
     }
     
     // Garante que o número de origem esteja no formato correto para WhatsApp
@@ -94,9 +94,7 @@ export const sendWhatsAppMessage = async (
       : `whatsapp:${fromNumber}`;
     
     // Garante que o número de destino esteja no formato correto para WhatsApp
-    const toWhatsApp = formattedToNumber.startsWith("whatsapp:") 
-      ? formattedToNumber 
-      : `whatsapp:${formattedToNumber}`;
+    const toWhatsApp = `whatsapp:${formattedToNumber}`;
     
     // Mensagem a ser enviada
     const message = `EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`;

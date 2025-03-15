@@ -40,7 +40,7 @@ const AddContactForm = ({
       ...newContact,
       twilioAccountSid: "ACa442b3fbd9216a4ba74662505c414e2b",
       twilioAuthToken: "a9cfb35d626f6eb0ac331d2740aa211f",
-      twilioWhatsappNumber: "whatsapp:+18312176749"
+      twilioWhatsappNumber: "+18312176749"
     });
   };
 
@@ -192,7 +192,7 @@ const AddContactForm = ({
                 Twilio WhatsApp Number
               </label>
               <Input
-                placeholder="whatsapp:+1xxxxxxxxxx"
+                placeholder="+1xxxxxxxxxx"
                 value={newContact.twilioWhatsappNumber}
                 onChange={(e) =>
                   onNewContactChange({
@@ -202,7 +202,7 @@ const AddContactForm = ({
                 }
               />
               <p className="text-xs text-gray-500 mt-1">
-                Exemplo: whatsapp:+18312176749 (inclua o prefixo "whatsapp:")
+                Exemplo: +18312176749 (informe apenas o número, o prefixo "whatsapp:" será adicionado automaticamente)
               </p>
             </div>
           </CollapsibleContent>

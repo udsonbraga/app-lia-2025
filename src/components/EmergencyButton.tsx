@@ -2,6 +2,9 @@
 import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { handleEmergencyAlert } from "@/utils/emergencyUtils";
+import { getCurrentPosition } from "@/utils/geolocationUtils";
+import { sendTelegramMessage } from "@/utils/telegramUtils";
 
 export function EmergencyButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -11,55 +14,7 @@ export function EmergencyButton() {
     setIsLoading(true);
     
     try {
-      // Obter contatos de emergência do localStorage
-      const safeContacts = localStorage.getItem("safeContacts");
-      const contacts = safeContacts ? JSON.parse(safeContacts) : [];
-      
-      // Verificar se há contatos configurados
-      if (contacts.length === 0) {
-        toast({
-          title: "Contatos não configurados",
-          description: "Por favor, configure pelo menos um contato de confiança nas configurações.",
-          variant: "destructive"
-        });
-        setIsLoading(false);
-        return;
-      }
-      
-      // Obter localização atual
-      const position = await getCurrentPosition();
-      const { latitude, longitude } = position.coords;
-      const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
-      
-      // Enviar mensagens para todos os contatos cadastrados
-      const promises = [];
-      
-      for (const contact of contacts) {
-        // Enviar mensagem pelo Telegram
-        promises.push(
-          sendTelegramMessage(contact.telegramId, locationLink)
-        );
-        
-        // Enviar mensagem pelo WhatsApp se as credenciais Twilio estiverem configuradas
-        if (contact.twilioAccountSid && contact.twilioAuthToken && contact.twilioWhatsappNumber) {
-          promises.push(
-            sendWhatsAppMessage(
-              contact.twilioAccountSid,
-              contact.twilioAuthToken,
-              contact.twilioWhatsappNumber,
-              contact.phone,
-              locationLink
-            )
-          );
-        }
-      }
-      
-      await Promise.allSettled(promises);
-      
-      toast({
-        title: "Pedido de ajuda enviado",
-        description: "Mensagens de emergência enviadas para seus contatos seguros via Telegram e WhatsApp.",
-      });
+      await handleEmergencyAlert({ toast });
     } catch (error) {
       console.error("Erro ao enviar alerta de emergência:", error);
       toast({
@@ -69,128 +24,6 @@ export function EmergencyButton() {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-  
-  // Função para obter posição atual
-  const getCurrentPosition = (): Promise<GeolocationPosition> => {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error("Geolocalização não suportada pelo navegador"));
-        return;
-      }
-      
-      navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
-      });
-    });
-  };
-  
-  // Função para enviar mensagem via Telegram Bot
-  const sendTelegramMessage = async (telegramId: string, locationLink: string) => {
-    try {
-      const botToken = "7668166969:AAFnukkbhjDnUgGTC5em6vYk1Ch7bXy-rBQ"; // Updated token
-      const message = `EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`;
-      
-      // URL da API do Telegram para enviar mensagem
-      const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-      
-      // Preparar o corpo da requisição
-      const requestBody = {
-        chat_id: telegramId,
-        text: message,
-        parse_mode: "HTML"
-      };
-      
-      // Fazer a requisição para a API do Telegram
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Erro ao enviar mensagem: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      console.log('Mensagem Telegram enviada com sucesso:', data);
-      return true;
-    } catch (error) {
-      console.error('Erro ao enviar mensagem via Telegram:', error);
-      return false;
-    }
-  };
-
-  // Função para enviar mensagem via WhatsApp (Twilio)
-  const sendWhatsAppMessage = async (
-    accountSid: string, 
-    authToken: string, 
-    fromNumber: string, 
-    toNumber: string, 
-    locationLink: string
-  ) => {
-    try {
-      // Formatando o número de telefone de destino para o formato E.164
-      let formattedToNumber = toNumber.replace(/\D/g, "");
-      if (formattedToNumber.startsWith("0")) {
-        formattedToNumber = formattedToNumber.substring(1);
-      }
-      if (!formattedToNumber.startsWith("+")) {
-        formattedToNumber = `+55${formattedToNumber}`;
-      }
-      
-      // Garante que o número de origem esteja no formato correto para WhatsApp
-      const fromWhatsApp = fromNumber.startsWith("whatsapp:") 
-        ? fromNumber 
-        : `whatsapp:${fromNumber}`;
-      
-      // Garante que o número de destino esteja no formato correto para WhatsApp
-      const toWhatsApp = formattedToNumber.startsWith("whatsapp:") 
-        ? formattedToNumber 
-        : `whatsapp:${formattedToNumber}`;
-      
-      // Mensagem a ser enviada
-      const message = `EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`;
-
-      // Twilio API endpoint para mensagens
-      const twilioApiUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
-      
-      // Credenciais em Base64 para autenticação
-      const credentials = btoa(`${accountSid}:${authToken}`);
-      
-      // Preparar FormData para a requisição
-      const formData = new URLSearchParams();
-      formData.append('From', fromWhatsApp);
-      formData.append('To', toWhatsApp);
-      formData.append('Body', message);
-      
-      // Fazer a requisição para a API do Twilio
-      const response = await fetch(twilioApiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${credentials}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData.toString(),
-      });
-      
-      const responseData = await response.json();
-      
-      if (response.ok) {
-        console.log('Mensagem WhatsApp enviada com sucesso:', responseData);
-        return true;
-      } else {
-        console.error('Erro ao enviar WhatsApp:', responseData);
-        return false;
-      }
-    } catch (error) {
-      console.error('Erro ao enviar mensagem via WhatsApp:', error);
-      return false;
     }
   };
 
