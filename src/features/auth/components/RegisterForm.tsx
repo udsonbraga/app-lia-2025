@@ -52,13 +52,19 @@ export function RegisterForm() {
     setIsLoading(true);
     
     try {
-      // Check if user already exists
-      const storedUsers = localStorage.getItem('users');
-      const users = storedUsers ? JSON.parse(storedUsers) : [];
+      // Check if user already exists in Supabase
+      const { data: existingUsers, error: checkError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', formData.email)
+        .limit(1);
       
-      const userExists = users.some((user: any) => user.email === formData.email);
+      if (checkError) {
+        console.error('Erro ao verificar usuário existente:', checkError);
+        throw new Error('Erro ao verificar usuário');
+      }
       
-      if (userExists) {
+      if (existingUsers && existingUsers.length > 0) {
         toast({
           title: "Email já cadastrado",
           description: "Já existe uma conta com este email. Tente fazer login.",
@@ -71,18 +77,15 @@ export function RegisterForm() {
       // Generate a random UUID for the user
       const userId = crypto.randomUUID();
       
-      // Add the new user to localStorage
+      // Add the new user to localStorage (backup)
+      const storedUsers = localStorage.getItem('users');
+      const users = storedUsers ? JSON.parse(storedUsers) : [];
       const newUser = {...formData, id: userId};
       users.push(newUser);
       localStorage.setItem('users', JSON.stringify(users));
       
-      // Set the user as authenticated and store name and ID
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('userName', formData.name);
-      localStorage.setItem('userId', userId);
-      
-      // Also save the user to Supabase
-      const { data, error } = await supabase
+      // Save the user to Supabase
+      const { data: supabaseUser, error: insertError } = await supabase
         .from('users')
         .insert([
           { 
@@ -94,22 +97,27 @@ export function RegisterForm() {
         ])
         .select();
       
-      if (error) {
-        console.error('Erro ao salvar usuário no Supabase:', error);
+      if (insertError) {
+        console.error('Erro ao salvar usuário no Supabase:', insertError);
         toast({
           title: "Usuário salvo localmente",
-          description: "Não foi possível salvar no banco de dados remoto, mas você pode continuar usando o aplicativo.",
+          description: "Houve um problema ao salvar no banco de dados, mas você pode continuar usando o aplicativo.",
+          variant: "destructive",
         });
       } else {
-        console.log('Usuário salvo no Supabase com sucesso:', data);
+        console.log('Usuário salvo no Supabase com sucesso:', supabaseUser);
         toast({
           title: "Cadastro realizado com sucesso!",
           description: "Bem-vinda ao SafeLady.",
         });
       }
       
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Set the user as authenticated and store name and ID
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userName', formData.name);
+      localStorage.setItem('userId', userId);
       
+      await new Promise(resolve => setTimeout(resolve, 1000));
       navigate("/home");
     } catch (error) {
       console.error('Erro durante o cadastro:', error);
@@ -237,4 +245,3 @@ export function RegisterForm() {
     </div>
   );
 };
-

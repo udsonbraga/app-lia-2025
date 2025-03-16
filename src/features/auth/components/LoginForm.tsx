@@ -19,14 +19,18 @@ export const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      // First check if user exists in Supabase
+      // Try to find user in Supabase first
       const { data: supabaseUsers, error: supabaseError } = await supabase
         .from('users')
         .select('*')
         .eq('email', email)
-        .single();
+        .maybeSingle();
       
-      // Also check local storage
+      if (supabaseError) {
+        console.error('Erro ao buscar usuário no Supabase:', supabaseError);
+      }
+      
+      // Check local storage as fallback
       const storedUsers = localStorage.getItem('users');
       const users = storedUsers ? JSON.parse(storedUsers) : [];
       
@@ -35,14 +39,16 @@ export const LoginForm = () => {
       );
 
       // If user is found in Supabase, prioritize that
-      if (supabaseUsers && !supabaseError) {
+      if (supabaseUsers) {
         console.log('Usuário encontrado no Supabase:', supabaseUsers);
-        // Check if password matches (in a real app, we'd use proper auth)
+        
+        // For simplicity, we're still checking the password against localStorage or allowing test user
+        // In a real app, this would be handled by Supabase Auth
         const matchingLocalUser = users.find((user: any) => 
           user.email === email && user.password === password
         );
 
-        if (matchingLocalUser || email === "usuario@teste.com" && password === "senha123") {
+        if (matchingLocalUser || (email === "usuario@teste.com" && password === "senha123")) {
           localStorage.setItem('isAuthenticated', 'true');
           localStorage.setItem('userName', supabaseUsers.name || 'Usuário');
           localStorage.setItem('userId', supabaseUsers.id);
@@ -64,6 +70,27 @@ export const LoginForm = () => {
         localStorage.setItem('userName', foundUser.name);
         localStorage.setItem('userId', foundUser.id || 'local-user-id');
         
+        // Also sync this user to Supabase if not already there
+        if (!supabaseUsers) {
+          const { data, error } = await supabase
+            .from('users')
+            .upsert([
+              { 
+                id: foundUser.id || crypto.randomUUID(),
+                name: foundUser.name,
+                email: foundUser.email,
+                phone: foundUser.phone
+              }
+            ])
+            .select();
+            
+          if (error) {
+            console.error('Erro ao sincronizar usuário local com Supabase:', error);
+          } else {
+            console.log('Usuário sincronizado com Supabase:', data);
+          }
+        }
+        
         toast({
           title: "Login efetuado com sucesso",
           description: `Bem-vinda de volta, ${foundUser.name}!`,
@@ -71,7 +98,7 @@ export const LoginForm = () => {
         
         navigate('/home');
       } else if (email === "usuario@teste.com" && password === "senha123") {
-        // Fallback test user
+        // Test user login
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         // Generate a test user ID if it doesn't exist
@@ -82,7 +109,7 @@ export const LoginForm = () => {
         localStorage.setItem('userId', testUserId);
         
         // If test user doesn't exist in Supabase, create it
-        if (supabaseError || !supabaseUsers) {
+        if (!supabaseUsers) {
           const { data, error } = await supabase
             .from('users')
             .upsert([

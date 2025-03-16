@@ -11,9 +11,25 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-// Função de utilidade para testar conexão e verificar dados
+// Improved function for testing connection and verifying data
 export const testSupabaseConnection = async () => {
   try {
+    // First, let's check if we can establish a basic connection
+    const { data: connectionData, error: connectionError } = await supabase
+      .from('users')
+      .select('count')
+      .single();
+      
+    if (connectionError) {
+      console.error('Erro na conexão com Supabase:', connectionError);
+      return { 
+        success: false, 
+        error: connectionError,
+        message: 'Não foi possível conectar ao banco de dados.'
+      };
+    }
+    
+    // Now try to get some data
     const { data, error } = await supabase
       .from('financial_notes')
       .select('*')
@@ -21,20 +37,34 @@ export const testSupabaseConnection = async () => {
     
     if (error) {
       console.error('Erro ao buscar dados:', error);
-      return { success: false, error };
+      return { 
+        success: false, 
+        error,
+        message: 'Conexão estabelecida, mas não foi possível buscar dados.'
+      };
     }
     
-    console.log('Dados recuperados com sucesso:', data);
-    return { success: true, data };
+    console.log('Conexão e dados recuperados com sucesso:', data);
+    return { 
+      success: true, 
+      data,
+      message: 'Conexão estabelecida e dados recuperados com sucesso.' 
+    };
   } catch (error) {
-    console.error('Erro na conexão com Supabase:', error);
-    return { success: false, error };
+    console.error('Erro inesperado na conexão com Supabase:', error);
+    return { 
+      success: false, 
+      error,
+      message: 'Erro inesperado ao tentar conectar ao banco de dados.'
+    };
   }
 };
 
 // Função para testar inserção de dados
-export const testSupabaseInsert = async (tabela: 'financial_notes' | 'safe_contacts', dados: any) => {
+export const testSupabaseInsert = async (tabela: 'financial_notes' | 'safe_contacts' | 'users', dados: any) => {
   try {
+    console.log(`Tentando inserir dados em ${tabela}:`, dados);
+    
     const { data, error } = await supabase
       .from(tabela)
       .insert(dados)
@@ -53,9 +83,11 @@ export const testSupabaseInsert = async (tabela: 'financial_notes' | 'safe_conta
   }
 };
 
-// Função para verificar usuários no banco de dados
+// Função para verificar usuários no banco de dados com melhor tratamento de erros
 export const checkUsersInSupabase = async () => {
   try {
+    console.log('Iniciando verificação de usuários no Supabase...');
+    
     const { data, error } = await supabase
       .from('users')
       .select('*')
@@ -63,13 +95,34 @@ export const checkUsersInSupabase = async () => {
     
     if (error) {
       console.error('Erro ao buscar usuários:', error);
-      return { success: false, error };
+      return { 
+        success: false, 
+        error,
+        message: 'Não foi possível buscar usuários do banco de dados.' 
+      };
     }
     
-    console.log('Usuários recuperados com sucesso:', data);
-    return { success: true, data };
+    if (!data || data.length === 0) {
+      console.log('Nenhum usuário encontrado no banco de dados.');
+      return { 
+        success: true, 
+        data: [], 
+        message: 'Nenhum usuário encontrado no banco de dados.'
+      };
+    }
+    
+    console.log(`Encontrados ${data.length} usuários no banco de dados:`, data);
+    return { 
+      success: true, 
+      data,
+      message: `Encontrados ${data.length} usuários no banco de dados.`
+    };
   } catch (error) {
-    console.error('Erro ao buscar usuários:', error);
-    return { success: false, error };
+    console.error('Erro inesperado ao buscar usuários:', error);
+    return { 
+      success: false, 
+      error,
+      message: 'Erro inesperado ao tentar buscar usuários.'
+    };
   }
 };
