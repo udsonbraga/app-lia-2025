@@ -10,6 +10,8 @@ import SafeContact from "@/pages/SafeContact";
 import SupportNetwork from "@/pages/SupportNetwork";
 import { LoadingScreen } from "./components/LoadingScreen";
 import Help from "@/pages/Help";
+import { useEffect } from "react";
+import { checkUsersInSupabase } from "@/integrations/supabase/client";
 import "./App.css";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -18,6 +20,19 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App() {
+  useEffect(() => {
+    // Verificar se há usuários no banco ao iniciar o app
+    const checkUsers = async () => {
+      console.log("Verificando usuários no Supabase...");
+      const result = await checkUsersInSupabase();
+      if (result.success) {
+        console.log(`Foram encontrados ${result.data.length} usuários no banco.`);
+      }
+    };
+    
+    checkUsers();
+  }, []);
+
   return (
     <Router>
       <div className="bg-white min-h-screen">

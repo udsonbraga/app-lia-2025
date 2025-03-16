@@ -52,3 +52,24 @@ export const testSupabaseInsert = async (tabela: 'financial_notes' | 'safe_conta
     return { success: false, error };
   }
 };
+
+// Função para verificar usuários no banco de dados
+export const checkUsersInSupabase = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .limit(10);
+    
+    if (error) {
+      console.error('Erro ao buscar usuários:', error);
+      return { success: false, error };
+    }
+    
+    console.log('Usuários recuperados com sucesso:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Erro ao buscar usuários:', error);
+    return { success: false, error };
+  }
+};
