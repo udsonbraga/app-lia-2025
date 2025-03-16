@@ -2,9 +2,9 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Essas URLs e chaves devem ser substituídas por suas credenciais reais do Supabase
-// Você pode obtê-las no painel de controle do seu projeto Supabase
-const supabaseUrl = 'https://sua-url-do-projeto.supabase.co';
-const supabaseAnonKey = 'sua-chave-anon-key';
+// Você pode obtê-las no painel de controlo do seu projeto Supabase
+const supabaseUrl = 'https://xegkqqtphhhhhelhxbgl.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlZ2txcXRwaGhoaGhlbGh4YmdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNDg4MTIsImV4cCI6MjA1NzcyNDgxMn0.nZuijowIj85GLYmQIWMc-hjJbfd-q-bxeXzkkzk5hH0\n';
 
 // Crie e exporte o cliente Supabase
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
