@@ -10,8 +10,9 @@ import SafeContact from "@/pages/SafeContact";
 import SupportNetwork from "@/pages/SupportNetwork";
 import { LoadingScreen } from "./components/LoadingScreen";
 import Help from "@/pages/Help";
+import FinancialManagement from "@/pages/FinancialManagement";
 import { useEffect } from "react";
-import { checkUsersInSupabase } from "@/integrations/supabase/client";
+import { checkUsersInSupabase, supabase } from "@/integrations/supabase/client";
 import "./App.css";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -24,9 +25,26 @@ function App() {
     // Verificar se há usuários no banco ao iniciar o app
     const checkUsers = async () => {
       console.log("Verificando usuários no Supabase...");
-      const result = await checkUsersInSupabase();
-      if (result.success) {
-        console.log(`Foram encontrados ${result.data.length} usuários no banco.`);
+      
+      try {
+        // Test direct connection to Supabase
+        const { data: connectionTest, error: connectionError } = await supabase.from('users').select('count').single();
+        
+        if (connectionError) {
+          console.error('Erro na conexão básica com Supabase:', connectionError);
+        } else {
+          console.log('Conexão básica com Supabase funcionando:', connectionTest);
+        }
+        
+        // Now check users with our function
+        const result = await checkUsersInSupabase();
+        if (result.success) {
+          console.log(`Foram encontrados ${result.data.length} usuários no banco:`, result.data);
+        } else {
+          console.error('Erro ao verificar usuários:', result.error);
+        }
+      } catch (error) {
+        console.error('Erro inesperado ao verificar usuários:', error);
       }
     };
     
@@ -69,6 +87,14 @@ function App() {
             element={
               <PrivateRoute>
                 <SupportNetwork />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/financial-management"
+            element={
+              <PrivateRoute>
+                <FinancialManagement />
               </PrivateRoute>
             }
           />

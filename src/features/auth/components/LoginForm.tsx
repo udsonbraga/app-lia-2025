@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { PasswordRecovery } from "./PasswordRecovery";
+import { supabase } from "@/integrations/supabase/client";
 
 export const LoginForm = () => {
   const navigate = useNavigate();
@@ -18,18 +19,50 @@ export const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      // Check for stored users
+      // First check if user exists in Supabase
+      const { data: supabaseUsers, error: supabaseError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .single();
+      
+      // Also check local storage
       const storedUsers = localStorage.getItem('users');
       const users = storedUsers ? JSON.parse(storedUsers) : [];
       
       const foundUser = users.find((user: any) => 
         user.email === email && user.password === password
       );
+
+      // If user is found in Supabase, prioritize that
+      if (supabaseUsers && !supabaseError) {
+        console.log('Usuário encontrado no Supabase:', supabaseUsers);
+        // Check if password matches (in a real app, we'd use proper auth)
+        const matchingLocalUser = users.find((user: any) => 
+          user.email === email && user.password === password
+        );
+
+        if (matchingLocalUser || email === "usuario@teste.com" && password === "senha123") {
+          localStorage.setItem('isAuthenticated', 'true');
+          localStorage.setItem('userName', supabaseUsers.name || 'Usuário');
+          localStorage.setItem('userId', supabaseUsers.id);
+          
+          toast({
+            title: "Login efetuado com sucesso",
+            description: `Bem-vinda de volta, ${supabaseUsers.name || 'Usuário'}!`,
+          });
+          
+          navigate('/home');
+          return;
+        }
+      }
       
+      // Fallback to local login if not found in Supabase
       if (foundUser) {
         await new Promise(resolve => setTimeout(resolve, 1000));
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('userName', foundUser.name);
+        localStorage.setItem('userId', foundUser.id || 'local-user-id');
         
         toast({
           title: "Login efetuado com sucesso",
@@ -40,8 +73,33 @@ export const LoginForm = () => {
       } else if (email === "usuario@teste.com" && password === "senha123") {
         // Fallback test user
         await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Generate a test user ID if it doesn't exist
+        const testUserId = 'test-user-id';
+        
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('userName', 'Usuária Teste');
+        localStorage.setItem('userId', testUserId);
+        
+        // If test user doesn't exist in Supabase, create it
+        if (supabaseError || !supabaseUsers) {
+          const { data, error } = await supabase
+            .from('users')
+            .upsert([
+              { 
+                id: testUserId,
+                name: 'Usuária Teste',
+                email: 'usuario@teste.com'
+              }
+            ])
+            .select();
+            
+          if (error) {
+            console.error('Erro ao salvar usuário de teste no Supabase:', error);
+          } else {
+            console.log('Usuário de teste salvo/atualizado no Supabase:', data);
+          }
+        }
         
         toast({
           title: "Login efetuado com sucesso",
@@ -53,6 +111,7 @@ export const LoginForm = () => {
         throw new Error("Credenciais inválidas");
       }
     } catch (error) {
+      console.error('Erro durante login:', error);
       toast({
         title: "Erro ao fazer login",
         description: "Usuário não cadastrado ou senha incorreta",

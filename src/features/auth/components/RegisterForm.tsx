@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { validateForm, formatPhone } from "@/features/auth/utils/formValidation";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FormData {
   name: string;
@@ -67,24 +68,51 @@ export function RegisterForm() {
         return;
       }
       
-      // Add the new user
-      const newUser = {...formData};
+      // Generate a random UUID for the user
+      const userId = crypto.randomUUID();
+      
+      // Add the new user to localStorage
+      const newUser = {...formData, id: userId};
       users.push(newUser);
       localStorage.setItem('users', JSON.stringify(users));
       
-      // Set the user as authenticated and store name
+      // Set the user as authenticated and store name and ID
       localStorage.setItem('isAuthenticated', 'true');
       localStorage.setItem('userName', formData.name);
+      localStorage.setItem('userId', userId);
       
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Also save the user to Supabase
+      const { data, error } = await supabase
+        .from('users')
+        .insert([
+          { 
+            id: userId,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone
+          }
+        ])
+        .select();
       
-      toast({
-        title: "Cadastro realizado com sucesso!",
-        description: "Bem-vinda ao SafeLady.",
-      });
+      if (error) {
+        console.error('Erro ao salvar usuário no Supabase:', error);
+        toast({
+          title: "Usuário salvo localmente",
+          description: "Não foi possível salvar no banco de dados remoto, mas você pode continuar usando o aplicativo.",
+        });
+      } else {
+        console.log('Usuário salvo no Supabase com sucesso:', data);
+        toast({
+          title: "Cadastro realizado com sucesso!",
+          description: "Bem-vinda ao SafeLady.",
+        });
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       navigate("/home");
     } catch (error) {
+      console.error('Erro durante o cadastro:', error);
       toast({
         title: "Erro ao realizar cadastro",
         description: "Por favor, tente novamente mais tarde.",
@@ -209,3 +237,4 @@ export function RegisterForm() {
     </div>
   );
 };
+
