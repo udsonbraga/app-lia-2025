@@ -77,22 +77,40 @@ export const sendWhatsAppMessage = async (
   templateParams?: Record<string, string>
 ) => {
   try {
-    // Formatando o número de telefone de destino para o formato E.164
+    // Extrair o número puro de um formato como (+55) 92 85231-265
     let formattedToNumber = toNumber.replace(/\D/g, "");
-    if (formattedToNumber.startsWith("0")) {
-      formattedToNumber = formattedToNumber.substring(1);
+    
+    // Se o número tiver o formato internacional com parênteses (+XX)
+    if (toNumber.includes('(+')) {
+      const countryCodeMatch = toNumber.match(/\(\+(\d+)\)/);
+      if (countryCodeMatch && countryCodeMatch[1]) {
+        // Garantir que o código do país está no início do número
+        if (!formattedToNumber.startsWith(countryCodeMatch[1])) {
+          formattedToNumber = countryCodeMatch[1] + formattedToNumber;
+        }
+      }
     }
+    
+    // Remover código do país duplicado se existir
+    const countryCodeRegex = /^(\d{2})\1/;
+    if (countryCodeRegex.test(formattedToNumber)) {
+      formattedToNumber = formattedToNumber.replace(countryCodeRegex, '$1');
+    }
+    
+    // Adicionar o prefixo + se não existir
     if (!formattedToNumber.startsWith("+")) {
       formattedToNumber = `+${formattedToNumber}`;
     }
     
-    // Garante que o número de origem esteja no formato correto para WhatsApp
+    // Garantir que o número de origem esteja no formato correto para WhatsApp
     const fromWhatsApp = fromNumber.startsWith("whatsapp:") 
       ? fromNumber 
       : `whatsapp:${fromNumber}`;
     
-    // Garante que o número de destino esteja no formato correto para WhatsApp
+    // Garantir que o número de destino esteja no formato correto para WhatsApp
     const toWhatsApp = `whatsapp:${formattedToNumber}`;
+    
+    console.log("Enviando WhatsApp para:", toWhatsApp);
     
     // Twilio API endpoint para mensagens
     const twilioApiUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
