@@ -76,7 +76,9 @@ export const sendWhatsAppMessage = async (
   authToken: string, 
   fromNumber: string, 
   toNumber: string, 
-  locationLink: string
+  locationLink: string,
+  templateId?: string,
+  templateParams?: Record<string, string>
 ) => {
   try {
     // Formatando o número de telefone de destino para o formato E.164
@@ -96,9 +98,6 @@ export const sendWhatsAppMessage = async (
     // Garante que o número de destino esteja no formato correto para WhatsApp
     const toWhatsApp = `whatsapp:${formattedToNumber}`;
     
-    // Mensagem a ser enviada
-    const message = `EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`;
-
     // Twilio API endpoint para mensagens
     const twilioApiUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
     
@@ -109,7 +108,20 @@ export const sendWhatsAppMessage = async (
     const formData = new URLSearchParams();
     formData.append('From', fromWhatsApp);
     formData.append('To', toWhatsApp);
-    formData.append('Body', message);
+    
+    // Se tiver um template ID, usa o template, senão usa mensagem customizada
+    if (templateId) {
+      formData.append('ContentSid', templateId);
+      
+      // Adiciona parâmetros do template se fornecidos
+      if (templateParams) {
+        formData.append('ContentVariables', JSON.stringify(templateParams));
+      }
+    } else {
+      // Mensagem padrão a ser enviada se não houver template
+      const message = `EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`;
+      formData.append('Body', message);
+    }
     
     // Fazer a requisição para a API do Twilio
     const response = await fetch(twilioApiUrl, {

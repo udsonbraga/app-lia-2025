@@ -14,7 +14,39 @@ export function EmergencyButton() {
     setIsLoading(true);
     
     try {
+      // Usar o sistema padrão de alerta de emergência
       await handleEmergencyAlert({ toast });
+      
+      // Exemplo de como enviar para um número específico com template (opcional)
+      // Se quiser testar com o número fornecido, descomentar este código:
+      /*
+      try {
+        const position = await getCurrentPosition();
+        const { latitude, longitude } = position.coords;
+        const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
+        
+        // Dados específicos do exemplo fornecido
+        const accountSid = "ACa442b3fbd9216a4ba74662505c414e2b";
+        const authToken = "a9cfb35d626f6eb0ac331d2740aa211f"; // Substitua pelo token real
+        const twilioWhatsappNumber = "+14155238886";
+        const destinationNumber = "+559285231265";
+        const templateId = "HXb5b62575e6e4ff6129ad7c8efe1f983e";
+        const templateParams = { "1": "12/1", "2": "3pm" };
+        
+        await sendWhatsAppMessage(
+          accountSid,
+          authToken,
+          twilioWhatsappNumber,
+          destinationNumber,
+          locationLink,
+          templateId,
+          templateParams
+        );
+      } catch (err) {
+        console.error("Erro ao enviar WhatsApp com template:", err);
+      }
+      */
+      
     } catch (error) {
       console.error("Erro ao enviar alerta de emergência:", error);
       toast({
