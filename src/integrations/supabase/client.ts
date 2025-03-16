@@ -14,6 +14,8 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 // Improved function for testing connection and verifying data
 export const testSupabaseConnection = async () => {
   try {
+    console.log('Testando conexão com Supabase...');
+    
     // First, let's check if we can establish a basic connection
     const { data: connectionData, error: connectionError } = await supabase
       .from('users')
@@ -28,6 +30,8 @@ export const testSupabaseConnection = async () => {
         message: 'Não foi possível conectar ao banco de dados.'
       };
     }
+    
+    console.log('Conexão básica bem-sucedida:', connectionData);
     
     // Now try to get some data
     const { data, error } = await supabase
@@ -124,5 +128,66 @@ export const checkUsersInSupabase = async () => {
       error,
       message: 'Erro inesperado ao tentar buscar usuários.'
     };
+  }
+};
+
+// Nova função para inserir usuário garantindo consistência entre valores
+export const createUserInSupabase = async (userData: {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+}) => {
+  try {
+    console.log('Criando usuário no Supabase:', userData);
+    
+    // Garantir que todos os campos obrigatórios estão presentes
+    if (!userData.id || !userData.email || !userData.name) {
+      throw new Error('Dados de usuário incompletos: id, email e name são obrigatórios');
+    }
+    
+    // Tentar inserir o usuário no Supabase
+    const { data, error } = await supabase
+      .from('users')
+      .upsert([userData], { 
+        onConflict: 'id',  // Se o usuário já existir, atualize
+        ignoreDuplicates: false
+      })
+      .select();
+    
+    if (error) {
+      console.error('Erro ao criar usuário no Supabase:', error);
+      return { success: false, error };
+    }
+    
+    console.log('Usuário criado com sucesso no Supabase:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Erro inesperado ao criar usuário:', error);
+    return { success: false, error };
+  }
+};
+
+// Nova função para buscar usuário por email
+export const getUserByEmail = async (email: string) => {
+  try {
+    console.log('Buscando usuário por email:', email);
+    
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Erro ao buscar usuário por email:', error);
+      return { success: false, error };
+    }
+    
+    console.log('Resultado da busca por email:', data ? 'Usuário encontrado' : 'Usuário não encontrado');
+    return { success: true, data };
+  } catch (error) {
+    console.error('Erro inesperado ao buscar usuário por email:', error);
+    return { success: false, error };
   }
 };

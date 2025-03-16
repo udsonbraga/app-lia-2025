@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield, ExternalLink } from "lucide-react";
@@ -7,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { validateForm, formatPhone } from "@/features/auth/utils/formValidation";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, createUserInSupabase } from "@/integrations/supabase/client";
 
 interface FormData {
   name: string;
@@ -52,7 +51,7 @@ export function RegisterForm() {
     setIsLoading(true);
     
     try {
-      // Check if user already exists in Supabase
+      // Verificar se o usuário já existe no Supabase
       const { data: existingUsers, error: checkError } = await supabase
         .from('users')
         .select('*')
@@ -74,31 +73,26 @@ export function RegisterForm() {
         return;
       }
       
-      // Generate a random UUID for the user
+      // Gerar um UUID para o usuário
       const userId = crypto.randomUUID();
       
-      // Add the new user to localStorage (backup)
+      // Salvar o usuário no localStorage (backup)
       const storedUsers = localStorage.getItem('users');
       const users = storedUsers ? JSON.parse(storedUsers) : [];
       const newUser = {...formData, id: userId};
       users.push(newUser);
       localStorage.setItem('users', JSON.stringify(users));
       
-      // Save the user to Supabase
-      const { data: supabaseUser, error: insertError } = await supabase
-        .from('users')
-        .insert([
-          { 
-            id: userId,
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone
-          }
-        ])
-        .select();
+      // Salvar o usuário no Supabase usando a nova função
+      const { success, data: supabaseUser, error: supabaseError } = await createUserInSupabase({
+        id: userId,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone
+      });
       
-      if (insertError) {
-        console.error('Erro ao salvar usuário no Supabase:', insertError);
+      if (!success) {
+        console.error('Falha ao salvar usuário no Supabase:', supabaseError);
         toast({
           title: "Usuário salvo localmente",
           description: "Houve um problema ao salvar no banco de dados, mas você pode continuar usando o aplicativo.",
@@ -112,7 +106,7 @@ export function RegisterForm() {
         });
       }
       
-      // Set the user as authenticated and store name and ID
+      // Definir o usuário como autenticado e armazenar nome e ID
       localStorage.setItem('isAuthenticated', 'true');
       localStorage.setItem('userName', formData.name);
       localStorage.setItem('userId', userId);
