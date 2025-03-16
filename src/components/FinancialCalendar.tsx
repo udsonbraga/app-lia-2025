@@ -4,7 +4,6 @@ import { useState } from "react";
 import { FinancialNote } from "@/types/financial";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { DayContent } from "react-day-picker";
 import { CalendarDays } from "lucide-react";
 
 interface FinancialCalendarProps {
