@@ -41,7 +41,7 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps) => {
       );
       
       // Enviar mensagem pelo WhatsApp se as credenciais Twilio estiverem configuradas
-      if (contact.twilioAccountSid && contact.twilioAuthToken && contact.twilioWhatsappNumber) {
+      if (contact.twilioAccountSid && contact.twilioAuthToken && contact.twilioWhatsappNumber && contact.phone) {
         promises.push(
           sendWhatsAppMessage(
             contact.twilioAccountSid,
@@ -58,15 +58,11 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps) => {
     
     toast({
       title: "Alerta de emergência enviado",
-      description: "Som de emergência detectado! Alertas enviados via Telegram e WhatsApp.",
+      description: "Alertas enviados via Telegram e WhatsApp para seus contatos de segurança.",
     });
   } catch (error) {
     console.error("Erro ao enviar alerta automático:", error);
-    toast({
-      title: "Erro ao enviar alerta",
-      description: "Não foi possível enviar o alerta de emergência. Tente novamente.",
-      variant: "destructive"
-    });
+    throw error; // Propagar o erro para ser tratado pelo componente
   }
 };
 
