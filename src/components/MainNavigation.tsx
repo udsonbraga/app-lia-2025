@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, BookOpen, Phone, MessageSquare } from "lucide-react";
+import { Users, BookOpen, Phone, MessageSquare, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -88,6 +88,16 @@ export function MainNavigation() {
         <div className="flex items-center gap-3 mx-auto">
           <Phone className="h-6 w-6 text-[#FF84C6]" />
           <span className="font-medium text-gray-800 text-center">Contato Seguro</span>
+        </div>
+      </button>
+
+      <button
+        onClick={() => navigate("/lady-ai")}
+        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center"
+      >
+        <div className="flex items-center gap-3 mx-auto">
+          <Bot className="h-6 w-6 text-[#FF84C6]" />
+          <span className="font-medium text-gray-800 text-center">LadyIA Assistente</span>
         </div>
       </button>
 

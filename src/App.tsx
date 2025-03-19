@@ -11,6 +11,7 @@ import SupportNetwork from "@/pages/SupportNetwork";
 import { LoadingScreen } from "./components/LoadingScreen";
 import Help from "@/pages/Help";
 import FinancialManagement from "@/pages/FinancialManagement";
+import { LadyAI } from "./components/LadyAI";
 import { useEffect } from "react";
 import { checkUsersInSupabase, supabase } from "@/integrations/supabase/client";
 import "./App.css";
@@ -103,6 +104,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Help />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/lady-ai"
+            element={
+              <PrivateRoute>
+                <LadyAI />
               </PrivateRoute>
             }
           />
