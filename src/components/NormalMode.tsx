@@ -1,6 +1,6 @@
 
 import { EmergencyButton } from "@/components/EmergencyButton";
-import { MainNavigation } from "@/components/MainNavigation";
+import { MainNavigation } from "@/components/main-navigation/MainNavigation";
 import { DisguisePasswordPrompt } from "@/components/DisguisePasswordPrompt";
 
 interface NormalModeProps {

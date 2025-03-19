@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
+import { AIChatbotPopup } from "@/components/AIChatbotPopup";
 
 const Index = () => {
   const {
@@ -96,9 +97,12 @@ const Index = () => {
       </div>
       
       {!isDisguised && (
-        <div className="fixed bottom-0 left-0 right-0 bg-black text-white py-1 text-xs text-center">
-          © 2025 SafeLady. Todos os direitos reservados.
-        </div>
+        <>
+          <AIChatbotPopup />
+          <div className="fixed bottom-0 left-0 right-0 bg-black text-white py-1 text-xs text-center">
+            © 2025 SafeLady. Todos os direitos reservados.
+          </div>
+        </>
       )}
 
       {/* Exit Disguise Mode Password Dialog */}

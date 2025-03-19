@@ -121,14 +121,14 @@ export function AIChatbotPopup() {
         <PopoverTrigger asChild>
           <Toggle 
             pressed={open} 
-            className={`w-12 h-12 rounded-full shadow-md ${open ? 'bg-safelady text-white' : 'bg-white text-safelady'}`}
+            className={`w-14 h-14 rounded-full shadow-lg ${open ? 'bg-pink-400 text-white' : 'bg-white text-pink-400'}`}
           >
-            <Bot className="h-5 w-5" />
+            <Bot className="h-6 w-6" />
           </Toggle>
         </PopoverTrigger>
-        <PopoverContent className="w-80 p-0 max-h-96 overflow-hidden flex flex-col" sideOffset={5}>
+        <PopoverContent className="w-96 p-0 max-h-[450px] overflow-hidden flex flex-col" sideOffset={5}>
           {/* Header */}
-          <div className="bg-safelady text-white p-3 flex justify-between items-center">
+          <div className="bg-pink-400 text-white p-3 flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5" />
               <span className="font-semibold">Assistente Safe Lady</span>
@@ -136,7 +136,7 @@ export function AIChatbotPopup() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-8 w-8 text-white hover:bg-safelady-dark rounded-full p-1" 
+              className="h-8 w-8 text-white hover:bg-pink-500 rounded-full p-1" 
               onClick={() => setOpen(false)}
             >
               <X className="h-4 w-4" />
@@ -144,7 +144,7 @@ export function AIChatbotPopup() {
           </div>
           
           {/* Chat messages */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-3 max-h-64">
+          <div className="flex-1 overflow-y-auto p-3 space-y-3 max-h-80">
             {messages.map((msg, idx) => (
               <div 
                 key={idx} 
@@ -153,7 +153,7 @@ export function AIChatbotPopup() {
                 <div className={`
                   max-w-[80%] rounded-lg p-2 text-sm
                   ${msg.isUser 
-                    ? 'bg-safelady text-white' 
+                    ? 'bg-pink-400 text-white' 
                     : 'bg-gray-100 text-gray-800'
                   }
                 `}>
@@ -165,9 +165,9 @@ export function AIChatbotPopup() {
               <div className="flex justify-start">
                 <div className="bg-gray-100 rounded-lg p-2">
                   <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:200ms]" />
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:400ms]" />
+                    <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" />
+                    <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce [animation-delay:200ms]" />
+                    <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce [animation-delay:400ms]" />
                   </div>
                 </div>
               </div>
@@ -186,7 +186,7 @@ export function AIChatbotPopup() {
             />
             <Button 
               onClick={handleSendMessage} 
-              className="h-10 bg-safelady hover:bg-safelady-dark"
+              className="h-10 bg-pink-400 hover:bg-pink-500"
               disabled={inputMessage.trim() === ''}
             >
               <Send className="h-4 w-4" />
