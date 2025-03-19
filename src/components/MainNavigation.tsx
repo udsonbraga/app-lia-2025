@@ -1,11 +1,12 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, Users, BookOpen, Phone, MessageSquare, Bot, AlertTriangle } from "lucide-react";
+import { Users, BookOpen, Phone, MessageSquare, Bot, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 
@@ -109,9 +110,9 @@ export function MainNavigation() {
       {navigationButtons.map((button) => (
         <Card
           key={button.id}
-          className={`relative overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-all duration-300 ease-in-out
-            ${hoveredButton === button.id ? "scale-[1.02]" : ""}
-            rounded-full h-16 sm:h-18`}
+          className={`relative overflow-hidden transition-all duration-300 cursor-pointer shadow-md hover:shadow-lg ${
+            hoveredButton === button.id ? "scale-[1.02]" : ""
+          }`}
           onMouseEnter={() => setHoveredButton(button.id)}
           onMouseLeave={() => setHoveredButton(null)}
           onClick={() => {
@@ -126,27 +127,25 @@ export function MainNavigation() {
           <div className={`absolute inset-0 ${button.color} opacity-90`}></div>
           
           {/* Button content with improved layout */}
-          <div className="relative z-10 p-4 h-full flex items-center justify-between">
+          <div className="relative z-10 p-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               {/* Icon with circular background */}
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-white/30 backdrop-blur-sm text-white">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/30 backdrop-blur-sm text-white">
                 {button.icon}
               </div>
               
               {/* Text content */}
               <div className="text-left">
                 <h3 className="font-bold text-white text-lg">{button.title}</h3>
-                <p className="text-white/80 text-xs hidden md:block">{button.description}</p>
+                <p className="text-white/80 text-sm">{button.description}</p>
               </div>
             </div>
             
-            {/* Alert icon on the right side */}
-            <div className={`flex items-center justify-center w-8 h-8 mr-2 rounded-full ${
-              hoveredButton === button.id ? "bg-white/20 backdrop-blur-sm" : "bg-transparent"
-            } transition-all duration-300`}>
-              <AlertTriangle className={`h-4 w-4 text-white transition-opacity duration-300 ${
-                hoveredButton === button.id ? "opacity-100" : "opacity-0"
-              }`} />
+            {/* Arrow icon that appears on hover */}
+            <div className={`transition-all duration-300 ${
+              hoveredButton === button.id ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
+            }`}>
+              <ArrowRight className="h-5 w-5 text-white" />
             </div>
           </div>
         </Card>
