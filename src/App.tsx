@@ -107,14 +107,6 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route
-            path="/lady-ai"
-            element={
-              <PrivateRoute>
-                <LadyAI />
-              </PrivateRoute>
-            }
-          />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />

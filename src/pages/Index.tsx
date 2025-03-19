@@ -11,7 +11,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
-import { AIChatbotPopup } from "@/components/AIChatbotPopup";
 
 const Index = () => {
   const {
@@ -101,9 +100,6 @@ const Index = () => {
           © 2025 SafeLady. Todos os direitos reservados.
         </div>
       )}
-
-      {/* AI Chatbot Popup - Only show in normal mode */}
-      {!isDisguised && <AIChatbotPopup />}
 
       {/* Exit Disguise Mode Password Dialog */}
       <Dialog open={showExitPasswordPrompt} onOpenChange={setShowExitPasswordPrompt}>

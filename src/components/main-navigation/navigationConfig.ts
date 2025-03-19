@@ -1,5 +1,5 @@
 
-import { Users, BookOpen, Phone, MessageSquare, Bot } from "lucide-react";
+import { Users, BookOpen, Phone, MessageSquare } from "lucide-react";
 import { ReactNode } from "react";
 
 export interface NavigationButton {
@@ -33,13 +33,6 @@ export const getNavigationButtons = (): NavigationButton[] => [
     description: "Mantenha contatos importantes acessíveis",
     icon: <Phone className="h-5 w-5" />,
     route: "/safe-contact"
-  },
-  {
-    id: "lady-ai",
-    title: "LadyIA Assistente",
-    description: "Sua assistente virtual para informações e ajuda",
-    icon: <Bot className="h-5 w-5" />,
-    route: "/lady-ai"
   },
   {
     id: "feedback",
