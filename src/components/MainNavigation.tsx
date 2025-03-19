@@ -1,13 +1,14 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, BookOpen, Phone, MessageSquare, Bot } from "lucide-react";
+import { Users, BookOpen, Phone, MessageSquare, Bot, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Card } from "@/components/ui/card";
 
 export function MainNavigation() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export function MainNavigation() {
   const [feedbackType, setFeedbackType] = useState("sugestão");
   const [feedbackContent, setFeedbackContent] = useState("");
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [hoveredButton, setHoveredButton] = useState<string | null>(null);
 
   const handleSubmitFeedback = async () => {
     if (!feedbackContent.trim()) {
@@ -59,57 +61,95 @@ export function MainNavigation() {
     }
   };
 
+  // Define navigation buttons with their properties
+  const navigationButtons = [
+    {
+      id: "support-network",
+      title: "Rede de Apoio",
+      description: "Encontre apoio e recursos para ajudá-la",
+      icon: <Users className="h-6 w-6" />,
+      color: "bg-gradient-to-r from-purple-500 to-pink-500",
+      route: "/support-network"
+    },
+    {
+      id: "diary",
+      title: "Diário Seguro",
+      description: "Registre seus pensamentos com privacidade",
+      icon: <BookOpen className="h-6 w-6" />,
+      color: "bg-gradient-to-r from-blue-400 to-cyan-400",
+      route: "/diary"
+    },
+    {
+      id: "safe-contact",
+      title: "Contato Seguro",
+      description: "Mantenha contatos importantes acessíveis",
+      icon: <Phone className="h-6 w-6" />,
+      color: "bg-gradient-to-r from-green-400 to-teal-400",
+      route: "/safe-contact"
+    },
+    {
+      id: "lady-ai",
+      title: "LadyIA Assistente",
+      description: "Sua assistente virtual para informações e ajuda",
+      icon: <Bot className="h-6 w-6" />,
+      color: "bg-gradient-to-r from-amber-400 to-orange-400",
+      route: "/lady-ai"
+    },
+    {
+      id: "feedback",
+      title: "Feedback",
+      description: "Ajude-nos a melhorar nosso app",
+      icon: <MessageSquare className="h-6 w-6" />,
+      color: "bg-gradient-to-r from-rose-400 to-red-400",
+      route: null
+    }
+  ];
+
   return (
     <div className="flex flex-col space-y-4">
-      <button
-        onClick={() => navigate("/support-network")}
-        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center"
-      >
-        <div className="flex items-center gap-3 mx-auto">
-          <Users className="h-6 w-6 text-[#FF84C6]" />
-          <span className="font-medium text-gray-800 text-center">Rede de Apoio</span>
-        </div>
-      </button>
-
-      <button
-        onClick={() => navigate("/diary")}
-        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center"
-      >
-        <div className="flex items-center gap-3 mx-auto">
-          <BookOpen className="h-6 w-6 text-[#FF84C6]" />
-          <span className="font-medium text-gray-800 text-center">Diário Seguro</span>
-        </div>
-      </button>
-
-      <button
-        onClick={() => navigate("/safe-contact")}
-        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center"
-      >
-        <div className="flex items-center gap-3 mx-auto">
-          <Phone className="h-6 w-6 text-[#FF84C6]" />
-          <span className="font-medium text-gray-800 text-center">Contato Seguro</span>
-        </div>
-      </button>
-
-      <button
-        onClick={() => navigate("/lady-ai")}
-        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center"
-      >
-        <div className="flex items-center gap-3 mx-auto">
-          <Bot className="h-6 w-6 text-[#FF84C6]" />
-          <span className="font-medium text-gray-800 text-center">LadyIA Assistente</span>
-        </div>
-      </button>
-
-      <button
-        onClick={() => setFeedbackOpen(true)}
-        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center"
-      >
-        <div className="flex items-center gap-3 mx-auto">
-          <MessageSquare className="h-6 w-6 text-[#FF84C6]" />
-          <span className="font-medium text-gray-800 text-center">Feedback</span>
-        </div>
-      </button>
+      {navigationButtons.map((button) => (
+        <Card
+          key={button.id}
+          className={`relative overflow-hidden transition-all duration-300 cursor-pointer shadow-md hover:shadow-lg ${
+            hoveredButton === button.id ? "scale-[1.02]" : ""
+          }`}
+          onMouseEnter={() => setHoveredButton(button.id)}
+          onMouseLeave={() => setHoveredButton(null)}
+          onClick={() => {
+            if (button.id === "feedback") {
+              setFeedbackOpen(true);
+            } else if (button.route) {
+              navigate(button.route);
+            }
+          }}
+        >
+          {/* Animated gradient background */}
+          <div className={`absolute inset-0 ${button.color} opacity-90`}></div>
+          
+          {/* Button content with improved layout */}
+          <div className="relative z-10 p-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {/* Icon with circular background */}
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white/30 backdrop-blur-sm text-white">
+                {button.icon}
+              </div>
+              
+              {/* Text content */}
+              <div className="text-left">
+                <h3 className="font-bold text-white text-lg">{button.title}</h3>
+                <p className="text-white/80 text-sm">{button.description}</p>
+              </div>
+            </div>
+            
+            {/* Arrow icon that appears on hover */}
+            <div className={`transition-all duration-300 ${
+              hoveredButton === button.id ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
+            }`}>
+              <ArrowRight className="h-5 w-5 text-white" />
+            </div>
+          </div>
+        </Card>
+      ))}
 
       {/* Feedback Dialog */}
       <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
