@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "@/pages/Index";
@@ -11,7 +10,6 @@ import SupportNetwork from "@/pages/SupportNetwork";
 import { LoadingScreen } from "./components/LoadingScreen";
 import Help from "@/pages/Help";
 import FinancialManagement from "@/pages/FinancialManagement";
-import { LadyAI } from "./components/LadyAI";
 import { useEffect } from "react";
 import { checkUsersInSupabase, supabase } from "@/integrations/supabase/client";
 import "./App.css";
@@ -23,12 +21,10 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   useEffect(() => {
-    // Verificar se há usuários no banco ao iniciar o app
     const checkUsers = async () => {
       console.log("Verificando usuários no Supabase...");
       
       try {
-        // Test direct connection to Supabase
         const { data: connectionTest, error: connectionError } = await supabase.from('users').select('count').single();
         
         if (connectionError) {
@@ -37,7 +33,6 @@ function App() {
           console.log('Conexão básica com Supabase funcionando:', connectionTest);
         }
         
-        // Now check users with our function
         const result = await checkUsersInSupabase();
         if (result.success) {
           console.log(`Foram encontrados ${result.data.length} usuários no banco:`, result.data);
