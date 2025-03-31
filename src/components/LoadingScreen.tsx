@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield } from "lucide-react";
 
@@ -8,21 +8,8 @@ export const LoadingScreen = () => {
   const [fadeOut, setFadeOut] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showWelcome, setShowWelcome] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Criar elemento de áudio e configurar
-    audioRef.current = new Audio("/lovable-uploads/opening-sound.mp3");
-    audioRef.current.volume = 0.5;
-    
-    // Reproduzir o som com um pequeno atraso para garantir que a página foi carregada
-    const soundTimeout = setTimeout(() => {
-      audioRef.current?.play().catch(err => {
-        // Tratamento de erro silencioso - muitos navegadores bloqueiam reprodução automática
-        console.log("Reprodução automática bloqueada:", err);
-      });
-    }, 300);
-
     // Initial animation delay
     setTimeout(() => {
       setShowWelcome(true);
@@ -44,15 +31,7 @@ export const LoadingScreen = () => {
       });
     }, 100);
 
-    return () => {
-      clearInterval(interval);
-      clearTimeout(soundTimeout);
-      // Limpar referência de áudio ao desmontar
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
+    return () => clearInterval(interval);
   }, [navigate]);
 
   return (
@@ -92,18 +71,6 @@ export const LoadingScreen = () => {
       <div className={`mt-12 text-white/80 text-sm text-center max-w-xs transition-all duration-500 delay-1000 ${showWelcome && loadingProgress > 30 ? "opacity-100" : "opacity-0"}`}>
         Sua segurança é nossa prioridade
       </div>
-
-      {/* Elemento de áudio com controles escondidos (apenas para desenvolvimento) */}
-      {process.env.NODE_ENV === 'development' && (
-        <audio 
-          ref={audioRef}
-          className="hidden"
-          controls
-        >
-          <source src="/lovable-uploads/opening-sound.mp3" type="audio/mp3" />
-          Seu navegador não suporta o elemento de áudio.
-        </audio>
-      )}
     </div>
   );
 };
