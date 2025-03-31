@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield } from "lucide-react";
 
@@ -8,8 +8,17 @@ export const LoadingScreen = () => {
   const [fadeOut, setFadeOut] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showWelcome, setShowWelcome] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    // Iniciar a reprodução de áudio
+    if (audioRef.current) {
+      audioRef.current.volume = 0.5; // Ajuste o volume conforme necessário
+      audioRef.current.play().catch(error => {
+        console.log("Erro ao reproduzir áudio:", error);
+      });
+    }
+
     // Initial animation delay
     setTimeout(() => {
       setShowWelcome(true);
@@ -31,7 +40,14 @@ export const LoadingScreen = () => {
       });
     }, 100);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      // Parar a reprodução de áudio quando o componente for desmontado
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    };
   }, [navigate]);
 
   return (
@@ -40,6 +56,9 @@ export const LoadingScreen = () => {
         fadeOut ? "opacity-0" : "opacity-100"
       }`}
     >
+      {/* Elemento de áudio - coloque seu arquivo de áudio no diretório public */}
+      <audio ref={audioRef} src="/loading-sound.mp3" preload="auto" />
+      
       <div className="w-72 h-72 sm:w-80 sm:h-80 mb-6 relative overflow-hidden">
         <div className={`absolute inset-0 flex items-center justify-center transition-all duration-1000 ${showWelcome ? "scale-100 opacity-100" : "scale-75 opacity-0"}`}>
           <img
