@@ -1,10 +1,11 @@
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SafeContact } from "@/features/support-network/types";
 import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp, Save, User, Phone, MessageCircle, Users, ShieldCheck, Globe } from "lucide-react";
+import { ChevronDown, ChevronUp, Save, User, Phone, MessageCircle, Users, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -24,24 +25,16 @@ const AddContactForm = ({
   isEditing = false,
 }: AddContactFormProps) => {
   const [isWhatsappOpen, setIsWhatsappOpen] = useState(false);
-  const [countryCode, setCountryCode] = useState("55"); // Brasil como padrão
 
-  const formatInternationalPhone = (value: string) => {
+  const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, "");
-    
-    if (numbers.startsWith(countryCode)) {
-      const localNumber = numbers.substring(countryCode.length);
-      if (localNumber.length <= 11) {
-        return `(+${countryCode}) ${localNumber.replace(/(\d{2})(\d{5})(\d{4})/, "$1 $2-$3")}`;
-      }
-    } 
-    else if (numbers.length <= 11) {
-      return `(+${countryCode}) ${numbers.replace(/(\d{2})(\d{5})(\d{4})/, "$1 $2-$3")}`;
+    if (numbers.length <= 11) {
+      return numbers.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
     }
-    
     return value;
   };
 
+  // Preencher com os dados da Twilio fornecidos pelo usuário
   const handlePrefillTwilioData = () => {
     onNewContactChange({
       ...newContact,
@@ -72,38 +65,19 @@ const AddContactForm = ({
             />
           </div>
           
-          <div className="space-y-2">
-            <label className="text-sm text-gray-600">Telefone (formato internacional)</label>
-            <div className="flex gap-2 items-center">
-              <div className="relative flex-shrink-0 w-24">
-                <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="55"
-                  value={countryCode}
-                  onChange={(e) => setCountryCode(e.target.value.replace(/\D/g, ""))}
-                  className="pl-10"
-                  maxLength={3}
-                />
-              </div>
-              <div className="relative flex-grow">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="11 99999-9999"
-                  value={newContact.phone.replace(/^\(\+\d+\)\s/, "")}
-                  onChange={(e) => {
-                    const formattedPhone = formatInternationalPhone(e.target.value);
-                    onNewContactChange({
-                      ...newContact,
-                      phone: formattedPhone,
-                    });
-                  }}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500">
-              Formato: (+55) 92 85231-265
-            </p>
+          <div className="relative">
+            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="(00) 00000-0000"
+              value={newContact.phone}
+              onChange={(e) =>
+                onNewContactChange({
+                  ...newContact,
+                  phone: formatPhone(e.target.value),
+                })
+              }
+              className="pl-10"
+            />
           </div>
           
           <div className="relative">
