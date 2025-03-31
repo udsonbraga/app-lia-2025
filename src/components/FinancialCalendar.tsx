@@ -4,7 +4,6 @@ import { useState } from "react";
 import { FinancialNote } from "@/types/financial";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { DayContent } from "react-day-picker";
 import { CalendarDays } from "lucide-react";
 
 interface FinancialCalendarProps {
@@ -14,7 +13,7 @@ interface FinancialCalendarProps {
 export function FinancialCalendar({ notes }: FinancialCalendarProps) {
   const [date, setDate] = useState<Date | undefined>(new Date());
 
-  const getDayContent = ({ date: day }: { date: Date }) => {
+  const getDayContent = (day: Date) => {
     const dayNotes = notes.filter(
       note => format(new Date(note.dueDate), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
     );
@@ -45,9 +44,9 @@ export function FinancialCalendar({ notes }: FinancialCalendarProps) {
         selected={date}
         onSelect={setDate}
         locale={ptBR}
-        className="rounded-md border shadow"
+        className="rounded-md border shadow pointer-events-auto"
         components={{
-          DayContent: getDayContent
+          DayContent: ({ date: day }) => getDayContent(day)
         }}
       />
     </div>
