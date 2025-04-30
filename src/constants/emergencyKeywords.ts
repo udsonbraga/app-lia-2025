@@ -12,12 +12,5 @@ export const EMERGENCY_KEYWORDS = [
   "stop", 
   "para", 
   "não", 
-  "abuso",
-  "violência",
-  "violencia",
-  "agressão",
-  "agressao",
-  "perigo",
-  "ameaça",
-  "ameaca"
+  "abuso"
 ];

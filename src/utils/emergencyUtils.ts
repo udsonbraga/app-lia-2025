@@ -41,7 +41,7 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps) => {
       );
       
       // Enviar mensagem pelo WhatsApp se as credenciais Twilio estiverem configuradas
-      if (contact.twilioAccountSid && contact.twilioAuthToken && contact.twilioWhatsappNumber && contact.phone) {
+      if (contact.twilioAccountSid && contact.twilioAuthToken && contact.twilioWhatsappNumber) {
         promises.push(
           sendWhatsAppMessage(
             contact.twilioAccountSid,
@@ -58,11 +58,15 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps) => {
     
     toast({
       title: "Alerta de emergência enviado",
-      description: "Alertas enviados via Telegram e WhatsApp para seus contatos de segurança.",
+      description: "Som de emergência detectado! Alertas enviados via Telegram e WhatsApp.",
     });
   } catch (error) {
     console.error("Erro ao enviar alerta automático:", error);
-    throw error; // Propagar o erro para ser tratado pelo componente
+    toast({
+      title: "Erro ao enviar alerta",
+      description: "Não foi possível enviar o alerta de emergência. Tente novamente.",
+      variant: "destructive"
+    });
   }
 };
 
@@ -72,46 +76,29 @@ export const sendWhatsAppMessage = async (
   authToken: string, 
   fromNumber: string, 
   toNumber: string, 
-  locationLink: string,
-  templateId?: string,
-  templateParams?: Record<string, string>
+  locationLink: string
 ) => {
   try {
-    // Extrair o número puro de um formato como (+55) 92 85231-265
+    // Formatando o número de telefone de destino para o formato E.164
     let formattedToNumber = toNumber.replace(/\D/g, "");
-    
-    // Se o número tiver o formato internacional com parênteses (+XX)
-    if (toNumber.includes('(+')) {
-      const countryCodeMatch = toNumber.match(/\(\+(\d+)\)/);
-      if (countryCodeMatch && countryCodeMatch[1]) {
-        // Garantir que o código do país está no início do número
-        if (!formattedToNumber.startsWith(countryCodeMatch[1])) {
-          formattedToNumber = countryCodeMatch[1] + formattedToNumber;
-        }
-      }
+    if (formattedToNumber.startsWith("0")) {
+      formattedToNumber = formattedToNumber.substring(1);
     }
-    
-    // Remover código do país duplicado se existir
-    const countryCodeRegex = /^(\d{2})\1/;
-    if (countryCodeRegex.test(formattedToNumber)) {
-      formattedToNumber = formattedToNumber.replace(countryCodeRegex, '$1');
-    }
-    
-    // Adicionar o prefixo + se não existir
     if (!formattedToNumber.startsWith("+")) {
       formattedToNumber = `+${formattedToNumber}`;
     }
     
-    // Garantir que o número de origem esteja no formato correto para WhatsApp
+    // Garante que o número de origem esteja no formato correto para WhatsApp
     const fromWhatsApp = fromNumber.startsWith("whatsapp:") 
       ? fromNumber 
       : `whatsapp:${fromNumber}`;
     
-    // Garantir que o número de destino esteja no formato correto para WhatsApp
+    // Garante que o número de destino esteja no formato correto para WhatsApp
     const toWhatsApp = `whatsapp:${formattedToNumber}`;
     
-    console.log("Enviando WhatsApp para:", toWhatsApp);
-    
+    // Mensagem a ser enviada
+    const message = `EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`;
+
     // Twilio API endpoint para mensagens
     const twilioApiUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
     
@@ -122,20 +109,7 @@ export const sendWhatsAppMessage = async (
     const formData = new URLSearchParams();
     formData.append('From', fromWhatsApp);
     formData.append('To', toWhatsApp);
-    
-    // Se tiver um template ID, usa o template, senão usa mensagem customizada
-    if (templateId) {
-      formData.append('ContentSid', templateId);
-      
-      // Adiciona parâmetros do template se fornecidos
-      if (templateParams) {
-        formData.append('ContentVariables', JSON.stringify(templateParams));
-      }
-    } else {
-      // Mensagem padrão a ser enviada se não houver template
-      const message = `EMERGÊNCIA: Preciso de ajuda urgente! Minha localização atual: ${locationLink}`;
-      formData.append('Body', message);
-    }
+    formData.append('Body', message);
     
     // Fazer a requisição para a API do Twilio
     const response = await fetch(twilioApiUrl, {
