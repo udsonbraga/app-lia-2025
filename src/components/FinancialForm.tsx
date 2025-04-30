@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Save } from "lucide-react";
+import { Plus, Save, Database } from "lucide-react";
 import { FinancialNote, FinancialCategory } from "@/types/financial";
 import { useToast } from "@/hooks/use-toast";
 
@@ -9,6 +8,7 @@ interface FinancialFormProps {
   onSave: (note: FinancialNote) => void;
   noteToEdit?: FinancialNote | null;
   onCancelEdit?: () => void;
+  onCheckDatabase?: () => void;
 }
 
 const CATEGORIES: FinancialCategory[] = [
@@ -19,7 +19,7 @@ const CATEGORIES: FinancialCategory[] = [
   "Outros"
 ];
 
-export function FinancialForm({ onSave, noteToEdit, onCancelEdit }: FinancialFormProps) {
+export function FinancialForm({ onSave, noteToEdit, onCancelEdit, onCheckDatabase }: FinancialFormProps) {
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
@@ -84,13 +84,26 @@ export function FinancialForm({ onSave, noteToEdit, onCancelEdit }: FinancialFor
 
   if (!showForm && !noteToEdit) {
     return (
-      <Button
-        onClick={() => setShowForm(true)}
-        className="w-full flex items-center justify-center gap-2"
-      >
-        <Plus className="h-4 w-4" />
-        Adicionar Nova Despesa
-      </Button>
+      <div className="space-y-4">
+        <Button
+          onClick={() => setShowForm(true)}
+          className="w-full flex items-center justify-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Adicionar Nova Despesa
+        </Button>
+        
+        {onCheckDatabase && (
+          <Button
+            onClick={onCheckDatabase}
+            variant="outline"
+            className="w-full flex items-center justify-center gap-2 mt-2 text-blue-600 border-blue-300"
+          >
+            <Database className="h-4 w-4" />
+            Verificar Dados no Banco
+          </Button>
+        )}
+      </div>
     );
   }
 

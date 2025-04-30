@@ -3,8 +3,6 @@ import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { handleEmergencyAlert } from "@/utils/emergencyUtils";
-import { getCurrentPosition } from "@/utils/geolocationUtils";
-import { sendTelegramMessage } from "@/utils/telegramUtils";
 
 export function EmergencyButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,6 +12,7 @@ export function EmergencyButton() {
     setIsLoading(true);
     
     try {
+      // Usar o sistema de alerta de emergência que utiliza os dados salvos pelo usuário
       await handleEmergencyAlert({ toast });
     } catch (error) {
       console.error("Erro ao enviar alerta de emergência:", error);
@@ -33,7 +32,7 @@ export function EmergencyButton() {
       disabled={isLoading}
       className={`
         relative group flex items-center justify-center gap-3
-        w-48 h-48 sm:w-56 sm:h-56 rounded-full mx-auto
+        w-44 h-44 sm:w-48 sm:h-48 rounded-full mx-auto
         bg-white shadow-lg hover:shadow-xl active:scale-95
         transition-all duration-300 ease-in-out mb-8
         hover:bg-safelady-light
@@ -42,7 +41,7 @@ export function EmergencyButton() {
     >
       <div className="absolute inset-0 bg-safelady rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
       <div className="flex flex-col items-center gap-2">
-        <Shield size={50} className={`text-safelady ${isLoading ? "animate-pulse" : ""}`} />
+        <Shield size={48} className={`text-safelady ${isLoading ? "animate-pulse" : ""}`} />
         <span className="text-base font-semibold text-gray-800">
           {isLoading ? "Enviando..." : "Emergência"}
         </span>
