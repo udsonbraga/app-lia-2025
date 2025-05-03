@@ -72,6 +72,11 @@ export const useDiaryEntries = () => {
     }
   };
 
+  // Wrapper function to expose the uploadImage function with progress tracking
+  const uploadImageWithProgress = (file: File, userId?: string, onProgress?: (progress: number) => void) => {
+    return uploadOperations.uploadImage(file, userId, onProgress);
+  };
+
   useEffect(() => {
     fetchEntries();
   }, []);
@@ -81,7 +86,7 @@ export const useDiaryEntries = () => {
     isLoading,
     addEntry,
     removeEntry,
-    uploadImage: uploadOperations.uploadImage,
+    uploadImage: uploadImageWithProgress,
     hasLocalEntries,
     refreshEntries: fetchEntries
   };

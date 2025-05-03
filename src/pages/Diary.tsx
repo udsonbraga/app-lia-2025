@@ -12,6 +12,7 @@ const Diary = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [userName, setUserName] = useState<string>("");
+  const [formSubmitting, setFormSubmitting] = useState(false);
   
   const {
     entries,
@@ -38,9 +39,20 @@ const Diary = () => {
   }, [user]);
 
   const handleSave = async (entry: { text: string; location: string; attachments: File[] }) => {
+    setFormSubmitting(true);
     try {
       // Fazer upload das imagens primeiro
-      const uploadedAttachments = await processAttachments(entry.attachments, uploadImage, user?.id);
+      const uploadedAttachments = await processAttachments(
+        entry.attachments, 
+        uploadImage,
+        user?.id,
+        (totalProgress) => {
+          console.log(`Upload total: ${totalProgress}%`);
+        },
+        (fileName, progress) => {
+          console.log(`${fileName}: ${progress}%`);
+        }
+      );
 
       // Criar a entrada do diário
       const result = await addEntry({
@@ -62,6 +74,9 @@ const Diary = () => {
         description: "Ocorreu um erro ao salvar suas anotações.",
         variant: "destructive",
       });
+      throw error; // Re-throw for the form to catch and handle
+    } finally {
+      setFormSubmitting(false);
     }
   };
 
@@ -83,7 +98,7 @@ const Diary = () => {
         <div className="max-w-2xl mx-auto space-y-6">
           <EntryForm 
             onSave={handleSave} 
-            isLoading={isLoading} 
+            isLoading={isLoading || formSubmitting} 
           />
 
           <EntryList 
