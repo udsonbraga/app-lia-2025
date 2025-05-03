@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Loader2, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 import { Pagination } from "@/components/ui/pagination";
@@ -7,26 +8,30 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-}
+import { Product } from "@/lib/supabase";
 
 export function DisguiseMode() {
   const navigate = useNavigate();
-  const { exitDisguiseMode, getProducts, updateProduct } = useDisguiseMode();
+  const { 
+    exitDisguiseMode, 
+    getProducts, 
+    updateProduct, 
+    addProduct, 
+    deleteProduct, 
+    initializeProducts,
+    isLoading 
+  } = useDisguiseMode();
   const [products, setProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [category, setCategory] = useState<string>("all");
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const itemsPerPage = 10;
   const { toast } = useToast();
 
-  // Modal state
+  // Modal states
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
   const [editedName, setEditedName] = useState("");
   const [editedPrice, setEditedPrice] = useState("");
@@ -35,8 +40,23 @@ export function DisguiseMode() {
 
   // Carregar produtos do serviço de dados
   useEffect(() => {
-    setProducts(getProducts());
-  }, [getProducts]);
+    const loadProducts = async () => {
+      const data = await getProducts();
+      setProducts(data);
+
+      // Se não há produtos e ainda não carregou os dados, inicialize o banco
+      if (data.length === 0 && !isDataLoaded) {
+        await initializeProducts();
+        // Tenta carregar novamente depois da inicialização
+        const refreshedData = await getProducts();
+        setProducts(refreshedData);
+      }
+      
+      setIsDataLoaded(true);
+    };
+
+    loadProducts();
+  }, [getProducts, initializeProducts, isDataLoaded]);
 
   const filteredProducts = category === "all" 
     ? products 
@@ -65,7 +85,20 @@ export function DisguiseMode() {
     setIsEditModalOpen(true);
   };
 
-  const handleSaveEdit = () => {
+  const openAddModal = () => {
+    setEditedName("");
+    setEditedPrice("");
+    setEditedImage("");
+    setEditedCategory("");
+    setIsAddModalOpen(true);
+  };
+
+  const openDeleteModal = (product: Product) => {
+    setCurrentProduct(product);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
     if (!currentProduct) return;
 
     // Validate inputs
@@ -115,15 +148,81 @@ export function DisguiseMode() {
       category: editedCategory 
     };
     
-    const updatedProducts = updateProduct(updatedProduct);
+    const updatedProducts = await updateProduct(updatedProduct);
     setProducts(updatedProducts);
     setIsEditModalOpen(false);
-    
-    toast({
-      title: "Produto atualizado",
-      description: "As alterações foram salvas com sucesso.",
-    });
   };
+
+  const handleAddProduct = async () => {
+    // Validate inputs
+    if (!editedName.trim()) {
+      toast({
+        title: "Erro",
+        description: "O nome do produto não pode estar vazio.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const priceNumber = parseFloat(editedPrice);
+    if (isNaN(priceNumber) || priceNumber <= 0) {
+      toast({
+        title: "Erro",
+        description: "O preço deve ser um número positivo.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!editedImage.trim()) {
+      toast({
+        title: "Erro",
+        description: "A URL da imagem não pode estar vazia.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!editedCategory.trim()) {
+      toast({
+        title: "Erro",
+        description: "A categoria não pode estar vazia.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Add new product
+    const newProduct = {
+      name: editedName, 
+      price: priceNumber, 
+      image: editedImage,
+      category: editedCategory 
+    };
+    
+    const updatedProducts = await addProduct(newProduct);
+    setProducts(updatedProducts);
+    setIsAddModalOpen(false);
+  };
+
+  const handleDeleteProduct = async () => {
+    if (!currentProduct) return;
+    
+    const updatedProducts = await deleteProduct(currentProduct.id);
+    setProducts(updatedProducts);
+    setIsDeleteModalOpen(false);
+  };
+
+  if (isLoading && products.length === 0) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 text-pink-500 animate-spin" />
+          <p className="text-gray-500">Carregando produtos...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -140,7 +239,13 @@ export function DisguiseMode() {
             
             <h1 className="text-xl font-semibold">Moda Feminina</h1>
             
-            <div className="w-10" />
+            <button
+              onClick={openAddModal}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              aria-label="Adicionar produto"
+            >
+              <Plus className="h-6 w-6 text-gray-700" />
+            </button>
           </div>
         </div>
       </div>
@@ -191,23 +296,45 @@ export function DisguiseMode() {
         </div>
       </div>
 
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-white bg-opacity-70 z-50 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-2">
+            <Loader2 className="h-8 w-8 text-pink-500 animate-spin" />
+            <p className="text-gray-500">Processando...</p>
+          </div>
+        </div>
+      )}
+
       {/* Product Grid */}
       <div className="container mx-auto px-4 pb-20">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {currentProducts.map((product) => (
-            <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow relative">
-              <button 
-                onClick={() => openEditModal(product)} 
-                className="absolute top-2 right-2 bg-white p-1 rounded-full shadow z-10"
-                aria-label="Editar produto"
-              >
-                <Pencil className="h-4 w-4 text-gray-600" />
-              </button>
+            <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow relative group">
+              <div className="absolute top-2 right-2 flex gap-1 z-10">
+                <button 
+                  onClick={() => openEditModal(product)} 
+                  className="bg-white p-1 rounded-full shadow"
+                  aria-label="Editar produto"
+                >
+                  <Pencil className="h-4 w-4 text-gray-600" />
+                </button>
+                <button 
+                  onClick={() => openDeleteModal(product)} 
+                  className="bg-white p-1 rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label="Excluir produto"
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </button>
+              </div>
               <div className="aspect-square bg-gray-100 overflow-hidden">
                 <img 
                   src={product.image} 
                   alt={product.name}
                   className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://placehold.co/300x300?text=Image+Error';
+                  }}
                 />
               </div>
               <div className="p-3">
@@ -318,11 +445,134 @@ export function DisguiseMode() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+            <Button variant="outline" onClick={() => setIsEditModalOpen(false)} disabled={isLoading}>
               Cancelar
             </Button>
-            <Button onClick={handleSaveEdit}>
-              Salvar
+            <Button onClick={handleSaveEdit} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Salvando
+                </>
+              ) : (
+                "Salvar"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Product Modal */}
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar Produto</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div className="grid w-full gap-1.5">
+              <label htmlFor="add-name">Nome do produto</label>
+              <Input 
+                id="add-name" 
+                value={editedName} 
+                onChange={e => setEditedName(e.target.value)} 
+                placeholder="Nome do produto" 
+              />
+            </div>
+            
+            <div className="grid w-full gap-1.5">
+              <label htmlFor="add-price">Preço (R$)</label>
+              <Input 
+                id="add-price" 
+                value={editedPrice} 
+                onChange={e => setEditedPrice(e.target.value)} 
+                placeholder="0.00" 
+                type="number" 
+                min="0" 
+                step="0.01" 
+              />
+            </div>
+            
+            <div className="grid w-full gap-1.5">
+              <label htmlFor="add-image">URL da Imagem</label>
+              <Input 
+                id="add-image" 
+                value={editedImage} 
+                onChange={e => setEditedImage(e.target.value)} 
+                placeholder="https://example.com/image.jpg" 
+              />
+              {editedImage && (
+                <div className="mt-2 max-w-xs mx-auto">
+                  <div className="aspect-square bg-gray-100 overflow-hidden rounded-md">
+                    <img 
+                      src={editedImage} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://placehold.co/300x300?text=Image+Error';
+                      }} 
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="grid w-full gap-1.5">
+              <label htmlFor="add-category">Categoria</label>
+              <select 
+                id="add-category"
+                value={editedCategory}
+                onChange={e => setEditedCategory(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF84C6] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Selecione uma categoria</option>
+                <option value="clothes">Roupas</option>
+                <option value="shoes">Calçados</option>
+                <option value="accessories">Acessórios</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddModalOpen(false)} disabled={isLoading}>
+              Cancelar
+            </Button>
+            <Button onClick={handleAddProduct} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adicionando
+                </>
+              ) : (
+                "Adicionar"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+          </DialogHeader>
+          <p>Tem certeza que deseja excluir o produto "{currentProduct?.name}"?</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)} disabled={isLoading}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleDeleteProduct} 
+              variant="destructive" 
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Excluindo
+                </>
+              ) : (
+                "Excluir"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
