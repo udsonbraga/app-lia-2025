@@ -1,15 +1,20 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { handleEmergencyAlert } from '@/utils/emergencyUtils';
 import { useToast } from '@/hooks/use-toast';
-import emergencyKeywords from '@/constants/emergencyKeywords';
+import { EMERGENCY_KEYWORDS } from '@/constants/emergencyKeywords';
 
 export function useEmergencySoundDetection() {
   const { toast } = useToast();
+  const [isListening, setIsListening] = useState(false);
+
+  const toggleSoundDetection = () => {
+    setIsListening(prevState => !prevState);
+  };
 
   useEffect(() => {
-    // Only initialize if the browser supports SpeechRecognition
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    // Only initialize if the browser supports SpeechRecognition and isListening is true
+    if (isListening && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
       try {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
@@ -31,7 +36,7 @@ export function useEmergencySoundDetection() {
           console.log('Detected speech:', transcript);
           
           // Check if any emergency keyword is detected
-          const hasEmergencyKeyword = emergencyKeywords.some(keyword => 
+          const hasEmergencyKeyword = EMERGENCY_KEYWORDS.some(keyword => 
             transcript.includes(keyword.toLowerCase())
           );
           
@@ -81,8 +86,11 @@ export function useEmergencySoundDetection() {
       } catch (error) {
         console.error('Failed to initialize speech recognition:', error);
       }
-    } else {
-      console.log('Speech Recognition not supported in this browser');
     }
-  }, [toast]);
+  }, [toast, isListening]);
+
+  return {
+    isListening,
+    toggleSoundDetection
+  };
 }

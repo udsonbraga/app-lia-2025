@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { MainDrawer } from "@/components/MainDrawer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserCircle, Spy } from "lucide-react";
+import { UserCircle, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 
@@ -53,7 +53,7 @@ export function Header() {
                     </AvatarFallback>
                   </Avatar>
                 ) : (
-                  <Spy className="h-6 w-6 text-gray-700" />
+                  <EyeOff className="h-6 w-6 text-gray-700" />
                 )}
               </button>
             </div>
