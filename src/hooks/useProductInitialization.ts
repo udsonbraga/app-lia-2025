@@ -13,17 +13,21 @@ export const useProductInitialization = () => {
       // Verifica se já existem produtos
       const { count, error: countError } = await countProducts();
       
-      if (countError) throw countError;
+      if (countError) {
+        console.error('Erro ao contar produtos:', countError);
+      }
 
       // Se não há produtos, crie uma amostra
       if (count === 0) {
         const { error } = await createSampleProducts();
-        if (error) throw error;
-        
-        toast({
-          title: "Banco de dados inicializado",
-          description: "Produtos de exemplo foram criados com sucesso.",
-        });
+        if (error) {
+          console.error('Erro ao criar produtos de amostra:', error);
+        } else {
+          toast({
+            title: "Banco de dados inicializado",
+            description: "Produtos de exemplo foram criados com sucesso.",
+          });
+        }
       }
     } catch (error) {
       console.error('Erro ao inicializar produtos:', error);

@@ -6,6 +6,13 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-supabase-url.supabase.co';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-supabase-anon-key';
 
+// Verificar se as credenciais são válidas
+const isValidSupabaseConfig = 
+  supabaseUrl !== 'https://your-supabase-url.supabase.co' &&
+  supabaseKey !== 'your-supabase-anon-key';
+
+export const supabaseConfigured = isValidSupabaseConfig;
+
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Tipagem para produtos

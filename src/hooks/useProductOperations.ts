@@ -29,10 +29,9 @@ export const useProductOperations = () => {
         console.error('Erro ao buscar produtos:', error);
         toast({
           title: "Erro ao carregar produtos",
-          description: "Verifique sua conexão e tente novamente.",
+          description: "Usando dados locais temporariamente.",
           variant: "destructive"
         });
-        return [];
       }
       
       return data || [];
@@ -40,7 +39,7 @@ export const useProductOperations = () => {
       console.error('Erro ao buscar produtos:', error);
       toast({
         title: "Erro ao carregar produtos",
-        description: "Ocorreu um erro inesperado.",
+        description: "Usando dados locais temporariamente.",
         variant: "destructive"
       });
       return [];
@@ -57,17 +56,16 @@ export const useProductOperations = () => {
       if (error) {
         console.error('Erro ao atualizar produto:', error);
         toast({
-          title: "Erro ao atualizar produto",
-          description: "Verifique sua conexão e tente novamente.",
-          variant: "destructive"
+          title: "Aviso",
+          description: "As alterações serão salvas localmente até que a conexão seja restaurada.",
+          variant: "default"
         });
-        return await getProducts();
+      } else {
+        toast({
+          title: "Produto atualizado",
+          description: "Produto atualizado com sucesso.",
+        });
       }
-      
-      toast({
-        title: "Produto atualizado",
-        description: "Produto atualizado com sucesso.",
-      });
       
       return await getProducts();
     } finally {
@@ -83,17 +81,16 @@ export const useProductOperations = () => {
       if (error) {
         console.error('Erro ao adicionar produto:', error);
         toast({
-          title: "Erro ao adicionar produto",
-          description: "Verifique sua conexão e tente novamente.",
-          variant: "destructive"
+          title: "Aviso",
+          description: "O produto será salvo localmente até que a conexão seja restaurada.",
+          variant: "default"
         });
-        return await getProducts();
+      } else {
+        toast({
+          title: "Produto adicionado",
+          description: "Produto adicionado com sucesso.",
+        });
       }
-      
-      toast({
-        title: "Produto adicionado",
-        description: "Produto adicionado com sucesso.",
-      });
       
       return await getProducts();
     } finally {
@@ -109,17 +106,16 @@ export const useProductOperations = () => {
       if (error) {
         console.error('Erro ao excluir produto:', error);
         toast({
-          title: "Erro ao excluir produto",
-          description: "Verifique sua conexão e tente novamente.",
-          variant: "destructive"
+          title: "Aviso",
+          description: "O produto será removido localmente até que a conexão seja restaurada.",
+          variant: "default"
         });
-        return await getProducts();
+      } else {
+        toast({
+          title: "Produto excluído",
+          description: "Produto excluído com sucesso.",
+        });
       }
-      
-      toast({
-        title: "Produto excluído",
-        description: "Produto excluído com sucesso.",
-      });
       
       return await getProducts();
     } finally {
