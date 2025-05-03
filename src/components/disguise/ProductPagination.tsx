@@ -11,7 +11,7 @@ export function ProductPagination({ totalPages, currentPage, onPageChange }: Pro
   if (totalPages <= 1) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 px-4">
+    <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 px-4 shadow-md">
       <div className="flex justify-center">
         <div className="flex gap-2">
           {[...Array(totalPages)].map((_, i) => (
@@ -21,7 +21,7 @@ export function ProductPagination({ totalPages, currentPage, onPageChange }: Pro
               className={`h-8 w-8 flex items-center justify-center rounded-full ${
                 currentPage === i + 1
                   ? "bg-pink-500 text-white"
-                  : "bg-gray-100 text-gray-800"
+                  : "bg-gray-100 text-gray-800 hover:bg-gray-200"
               }`}
             >
               {i + 1}

@@ -11,10 +11,10 @@ export function LoadingOverlay({ isLoading, message = "Processando..." }: Loadin
   if (!isLoading) return null;
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-70 z-50 flex items-center justify-center">
-      <div className="flex flex-col items-center gap-2">
+    <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center backdrop-blur-sm">
+      <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center gap-3">
         <Loader2 className="h-8 w-8 text-pink-500 animate-spin" />
-        <p className="text-gray-500">{message}</p>
+        <p className="text-gray-700 font-medium">{message}</p>
       </div>
     </div>
   );

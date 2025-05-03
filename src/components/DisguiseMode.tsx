@@ -231,12 +231,12 @@ export function DisguiseMode() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pb-20">
       {/* Header */}
       <Header onExitDisguise={handleExitDisguise} onAddProduct={openAddModal} />
 
       {/* Category Filter */}
-      <div className="container mx-auto pt-20 pb-4">
+      <div className="container mx-auto pt-24 pb-4">
         <CategoryFilter category={category} setCategory={setCategory} />
       </div>
 
@@ -244,7 +244,7 @@ export function DisguiseMode() {
       <LoadingOverlay isLoading={isLoading} />
 
       {/* Product Grid */}
-      <div className="container mx-auto px-4 pb-20">
+      <div className="container mx-auto px-4 pb-24">
         <ProductGrid 
           products={currentProducts} 
           openEditModal={openEditModal} 
