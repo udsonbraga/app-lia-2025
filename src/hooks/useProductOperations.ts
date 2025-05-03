@@ -1,61 +1,29 @@
 
 import { useState } from 'react';
-import { supabase, Product } from '@/lib/supabase';
+import { Product } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { useProductInitialization } from './useProductInitialization';
+import { 
+  fetchProducts, 
+  updateProductInDB, 
+  addProductToDB, 
+  deleteProductFromDB 
+} from '@/services/productService';
 
 export const useProductOperations = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { initializeProducts: initProducts, isLoading: isInitializing } = useProductInitialization();
 
-  // Função para inicializar o banco de dados com produtos de exemplo (só deve ser usada uma vez)
   const initializeProducts = async () => {
-    setIsLoading(true);
-    try {
-      // Verifica se já existem produtos
-      const { count, error: countError } = await supabase
-        .from('products')
-        .select('*', { count: 'exact', head: true });
-      
-      if (countError) throw countError;
-
-      // Se não há produtos, crie uma amostra
-      if (count === 0) {
-        const sampleProducts = Array(30).fill(null).map((_, index) => ({
-          id: index + 1,
-          name: `Product ${index + 1}`,
-          price: Math.floor(Math.random() * 150) + 50,
-          image: `https://picsum.photos/seed/${index + 1}/300/300`,
-          category: ["clothes", "shoes", "accessories"][Math.floor(Math.random() * 3)]
-        }));
-
-        const { error } = await supabase.from('products').insert(sampleProducts);
-        if (error) throw error;
-        
-        toast({
-          title: "Banco de dados inicializado",
-          description: "Produtos de exemplo foram criados com sucesso.",
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao inicializar produtos:', error);
-      toast({
-        title: "Erro ao inicializar produtos",
-        description: "Não foi possível criar produtos de exemplo.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    await initProducts();
   };
 
-  // Funções para interagir com os produtos
+  // Function to get products from the database
   const getProducts = async (): Promise<Product[]> => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('id', { ascending: true });
+      const { data, error } = await fetchProducts();
       
       if (error) {
         console.error('Erro ao buscar produtos:', error);
@@ -84,15 +52,7 @@ export const useProductOperations = () => {
   const updateProduct = async (updatedProduct: Product): Promise<Product[]> => {
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('products')
-        .update({
-          name: updatedProduct.name,
-          price: updatedProduct.price,
-          image: updatedProduct.image,
-          category: updatedProduct.category
-        })
-        .eq('id', updatedProduct.id);
+      const { error } = await updateProductInDB(updatedProduct);
       
       if (error) {
         console.error('Erro ao atualizar produto:', error);
@@ -110,14 +70,6 @@ export const useProductOperations = () => {
       });
       
       return await getProducts();
-    } catch (error) {
-      console.error('Erro ao atualizar produto:', error);
-      toast({
-        title: "Erro ao atualizar produto",
-        description: "Ocorreu um erro inesperado.",
-        variant: "destructive"
-      });
-      return await getProducts();
     } finally {
       setIsLoading(false);
     }
@@ -126,9 +78,7 @@ export const useProductOperations = () => {
   const addProduct = async (newProduct: Omit<Product, 'id'>): Promise<Product[]> => {
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('products')
-        .insert(newProduct);
+      const { error } = await addProductToDB(newProduct);
       
       if (error) {
         console.error('Erro ao adicionar produto:', error);
@@ -146,14 +96,6 @@ export const useProductOperations = () => {
       });
       
       return await getProducts();
-    } catch (error) {
-      console.error('Erro ao adicionar produto:', error);
-      toast({
-        title: "Erro ao adicionar produto",
-        description: "Ocorreu um erro inesperado.",
-        variant: "destructive"
-      });
-      return await getProducts();
     } finally {
       setIsLoading(false);
     }
@@ -162,10 +104,7 @@ export const useProductOperations = () => {
   const deleteProduct = async (id: number): Promise<Product[]> => {
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
+      const { error } = await deleteProductFromDB(id);
       
       if (error) {
         console.error('Erro ao excluir produto:', error);
@@ -183,21 +122,13 @@ export const useProductOperations = () => {
       });
       
       return await getProducts();
-    } catch (error) {
-      console.error('Erro ao excluir produto:', error);
-      toast({
-        title: "Erro ao excluir produto",
-        description: "Ocorreu um erro inesperado.",
-        variant: "destructive"
-      });
-      return await getProducts();
     } finally {
       setIsLoading(false);
     }
   };
 
   return {
-    isLoading,
+    isLoading: isLoading || isInitializing,
     initializeProducts,
     getProducts,
     updateProduct,
