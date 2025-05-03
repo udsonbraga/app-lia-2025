@@ -23,18 +23,19 @@ export const useProductOperations = () => {
   const getProducts = async (): Promise<Product[]> => {
     setIsLoading(true);
     try {
-      const { data, error } = await fetchProducts();
+      const { data, error, success } = await fetchProducts();
       
-      if (error) {
+      if (!success || error) {
         console.error('Erro ao buscar produtos:', error);
         toast({
           title: "Erro ao carregar produtos",
           description: "Usando dados locais temporariamente.",
           variant: "destructive"
         });
+        return [];
       }
       
-      return data || [];
+      return data as Product[] || [];
     } catch (error) {
       console.error('Erro ao buscar produtos:', error);
       toast({

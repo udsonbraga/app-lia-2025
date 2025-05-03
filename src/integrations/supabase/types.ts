@@ -91,6 +91,10 @@ export type Database = {
           name: string
           phone: string
           relationship: string | null
+          telegramid: string | null
+          twilioaccountsid: string | null
+          twilioauthtoken: string | null
+          twiliowhatsappnumber: string | null
           user_id: string | null
         }
         Insert: {
@@ -99,6 +103,10 @@ export type Database = {
           name: string
           phone: string
           relationship?: string | null
+          telegramid?: string | null
+          twilioaccountsid?: string | null
+          twilioauthtoken?: string | null
+          twiliowhatsappnumber?: string | null
           user_id?: string | null
         }
         Update: {
@@ -107,6 +115,10 @@ export type Database = {
           name?: string
           phone?: string
           relationship?: string | null
+          telegramid?: string | null
+          twilioaccountsid?: string | null
+          twilioauthtoken?: string | null
+          twiliowhatsappnumber?: string | null
           user_id?: string | null
         }
         Relationships: []

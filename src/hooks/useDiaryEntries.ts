@@ -3,12 +3,34 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { DiaryEntry } from '@/lib/supabase';
+import { Json } from '@/integrations/supabase/types';
 
 export const useDiaryEntries = () => {
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [hasLocalEntries, setHasLocalEntries] = useState(false);
+
+  // Função para mapear dados do Supabase para o formato DiaryEntry
+  const mapSupabaseDataToDiaryEntry = (data: any[]): DiaryEntry[] => {
+    return data.map(item => {
+      // Converter Json para o formato esperado por DiaryEntry
+      const attachments = item.attachments 
+        ? (typeof item.attachments === 'string' 
+            ? JSON.parse(item.attachments) 
+            : item.attachments)
+        : [];
+        
+      return {
+        id: item.id,
+        text: item.text,
+        location: item.location || "Não informado",
+        attachments: Array.isArray(attachments) ? attachments : [],
+        created_at: item.created_at,
+        user_id: item.user_id
+      };
+    });
+  };
 
   // Função para buscar entradas do diário do usuário logado
   const fetchEntries = async () => {
@@ -28,7 +50,7 @@ export const useDiaryEntries = () => {
         if (error) throw error;
         
         if (data) {
-          setEntries(data);
+          setEntries(mapSupabaseDataToDiaryEntry(data));
         }
       } else {
         // Se não estiver autenticado, buscar do localStorage
@@ -73,7 +95,8 @@ export const useDiaryEntries = () => {
         if (error) throw error;
         
         if (data) {
-          setEntries([data[0], ...entries]);
+          const mappedData = mapSupabaseDataToDiaryEntry(data);
+          setEntries(prev => [...mappedData, ...prev]);
         }
         
         return { success: true };

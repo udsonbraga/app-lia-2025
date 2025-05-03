@@ -1,6 +1,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { supabase as supabaseInstance } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
 
 // Usar o cliente importado do integrations/supabase/client para garantir que estamos usando as credenciais corretas
 export const supabase = supabaseInstance;

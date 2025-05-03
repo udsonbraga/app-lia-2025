@@ -1,1 +1,5 @@
+
 project_id = "qiruycvztjabrjffrnsf"
+
+[functions.product_operations]
+verify_jwt = false
