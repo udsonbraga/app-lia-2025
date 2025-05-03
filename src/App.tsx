@@ -1,3 +1,4 @@
+
 import React from 'react';
 import './App.css';
 import Index from "./pages/Index";
@@ -9,7 +10,7 @@ import Customize from "./pages/Customize";
 import Help from "./pages/Help";
 import Accessibility from "./pages/Accessibility";
 import NotFound from "./pages/NotFound";
-import LoadingScreen from './components/LoadingScreen';
+import { LoadingScreen } from './components/LoadingScreen';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from './hooks/useAuth';

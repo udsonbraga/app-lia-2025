@@ -1,6 +1,21 @@
 
 import { supabase } from '@/lib/supabase';
 import { SafeContact } from '@/features/support-network/types';
+import { SafeContactDatabase } from '@/lib/supabase';
+
+// Função auxiliar para converter entre os tipos
+const mapDatabaseToSafeContact = (dbContact: SafeContactDatabase): SafeContact => {
+  return {
+    id: dbContact.id,
+    name: dbContact.name,
+    phone: dbContact.phone,
+    relationship: dbContact.relationship || '',
+    telegramId: dbContact.telegramId || '',
+    twilioAccountSid: dbContact.twilioAccountSid,
+    twilioAuthToken: dbContact.twilioAuthToken,
+    twilioWhatsappNumber: dbContact.twilioWhatsappNumber
+  };
+};
 
 export const getSafeContacts = async () => {
   try {
@@ -9,9 +24,10 @@ export const getSafeContacts = async () => {
     if (!session?.user) {
       // Se não estiver autenticado, retorna os contatos do localStorage
       const localContacts = localStorage.getItem('safeContacts');
+      const parsedContacts = localContacts ? JSON.parse(localContacts) : [];
       return { 
         success: true, 
-        data: localContacts ? JSON.parse(localContacts) : [] 
+        data: parsedContacts.map(mapDatabaseToSafeContact)
       };
     }
     
@@ -23,7 +39,10 @@ export const getSafeContacts = async () => {
       
     if (error) throw error;
     
-    return { success: true, data };
+    return { 
+      success: true, 
+      data: data.map(mapDatabaseToSafeContact)
+    };
   } catch (error) {
     console.error('Erro ao buscar contatos seguros:', error);
     return { success: false, error };
@@ -56,7 +75,7 @@ export const addSafeContact = async (contact: Omit<SafeContact, 'id'>) => {
       
     if (error) throw error;
     
-    return { success: true, data: data[0] };
+    return { success: true, data: mapDatabaseToSafeContact(data[0]) };
   } catch (error) {
     console.error('Erro ao adicionar contato seguro:', error);
     return { success: false, error };
@@ -88,7 +107,7 @@ export const updateSafeContact = async (contact: SafeContact) => {
       
     if (error) throw error;
     
-    return { success: true, data: data[0] };
+    return { success: true, data: mapDatabaseToSafeContact(data[0]) };
   } catch (error) {
     console.error('Erro ao atualizar contato seguro:', error);
     return { success: false, error };

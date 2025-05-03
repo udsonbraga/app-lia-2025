@@ -36,5 +36,19 @@ export interface FeedbackItem {
   user_id?: string;
 }
 
+// Tipagem para contatos seguros com campos adicionais para Twilio
+export interface SafeContactDatabase {
+  id: string;
+  name: string;
+  phone: string;
+  relationship: string;
+  user_id?: string;
+  created_at: string;
+  telegramId?: string;
+  twilioAccountSid?: string;
+  twilioAuthToken?: string;
+  twilioWhatsappNumber?: string;
+}
+
 // Flag para verificar se o Supabase está configurado
 export const supabaseConfigured = true;
