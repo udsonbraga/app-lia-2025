@@ -170,7 +170,7 @@ export const useDiaryEntries = () => {
   };
 
   // Função para fazer upload de uma imagem
-  const uploadImage = async (file: File, userId?: string) => {
+  const uploadImage = async (file: File, userId?: string): Promise<{ success: boolean; url?: string; name: string; error?: any }> => {
     try {
       // Verificar se o usuário está autenticado
       const { data: { session } } = await supabase.auth.getSession();
@@ -196,7 +196,7 @@ export const useDiaryEntries = () => {
       return { success: true, url: publicUrl, name: file.name };
     } catch (error) {
       console.error('Erro ao fazer upload da imagem:', error);
-      return { success: false, error };
+      return { success: false, name: file.name, error };
     }
   };
 
