@@ -1,10 +1,8 @@
 
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 
 export function useDisguiseMode() {
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   // Function to reset all passwords
   const resetAllPasswords = () => {
