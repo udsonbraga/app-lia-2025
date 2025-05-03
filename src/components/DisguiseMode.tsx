@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +18,7 @@ interface Product {
 
 export function DisguiseMode() {
   const navigate = useNavigate();
-  const { exitDisguiseMode } = useDisguiseMode();
+  const { exitDisguiseMode, getProducts, updateProduct } = useDisguiseMode();
   const [products, setProducts] = useState<Product[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [category, setCategory] = useState<string>("all");
@@ -34,33 +33,10 @@ export function DisguiseMode() {
   const [editedImage, setEditedImage] = useState("");
   const [editedCategory, setEditedCategory] = useState("");
 
-  // Mock product data
+  // Carregar produtos do serviço de dados
   useEffect(() => {
-    // Try to get products from localStorage or use default mock data
-    const savedProducts = localStorage.getItem("disguiseProducts");
-    
-    if (savedProducts) {
-      setProducts(JSON.parse(savedProducts));
-    } else {
-      const mockProducts: Product[] = Array(30).fill(null).map((_, index) => ({
-        id: index + 1,
-        name: `Product ${index + 1}`,
-        price: Math.floor(Math.random() * 150) + 50,
-        image: `https://picsum.photos/seed/${index + 1}/300/300`,
-        category: ["clothes", "shoes", "accessories"][Math.floor(Math.random() * 3)]
-      }));
-      
-      setProducts(mockProducts);
-      localStorage.setItem("disguiseProducts", JSON.stringify(mockProducts));
-    }
-  }, []);
-
-  // Save products when they change
-  useEffect(() => {
-    if (products.length > 0) {
-      localStorage.setItem("disguiseProducts", JSON.stringify(products));
-    }
-  }, [products]);
+    setProducts(getProducts());
+  }, [getProducts]);
 
   const filteredProducts = category === "all" 
     ? products 
@@ -131,18 +107,15 @@ export function DisguiseMode() {
     }
 
     // Update product
-    const updatedProducts = products.map(product => 
-      product.id === currentProduct.id 
-        ? { 
-            ...product, 
-            name: editedName, 
-            price: priceNumber, 
-            image: editedImage,
-            category: editedCategory 
-          } 
-        : product
-    );
-
+    const updatedProduct = { 
+      ...currentProduct, 
+      name: editedName, 
+      price: priceNumber, 
+      image: editedImage,
+      category: editedCategory 
+    };
+    
+    const updatedProducts = updateProduct(updatedProduct);
     setProducts(updatedProducts);
     setIsEditModalOpen(false);
     
