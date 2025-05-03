@@ -1,9 +1,13 @@
 
 import React, { useState, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 import { Pagination } from "@/components/ui/pagination";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 interface Product {
   id: number;
@@ -20,19 +24,43 @@ export function DisguiseMode() {
   const [currentPage, setCurrentPage] = useState(1);
   const [category, setCategory] = useState<string>("all");
   const itemsPerPage = 10;
+  const { toast } = useToast();
+
+  // Modal state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
+  const [editedName, setEditedName] = useState("");
+  const [editedPrice, setEditedPrice] = useState("");
+  const [editedImage, setEditedImage] = useState("");
+  const [editedCategory, setEditedCategory] = useState("");
 
   // Mock product data
   useEffect(() => {
-    const mockProducts: Product[] = Array(30).fill(null).map((_, index) => ({
-      id: index + 1,
-      name: `Product ${index + 1}`,
-      price: Math.floor(Math.random() * 150) + 50,
-      image: `https://picsum.photos/seed/${index + 1}/300/300`,
-      category: ["clothes", "shoes", "accessories"][Math.floor(Math.random() * 3)]
-    }));
+    // Try to get products from localStorage or use default mock data
+    const savedProducts = localStorage.getItem("disguiseProducts");
     
-    setProducts(mockProducts);
+    if (savedProducts) {
+      setProducts(JSON.parse(savedProducts));
+    } else {
+      const mockProducts: Product[] = Array(30).fill(null).map((_, index) => ({
+        id: index + 1,
+        name: `Product ${index + 1}`,
+        price: Math.floor(Math.random() * 150) + 50,
+        image: `https://picsum.photos/seed/${index + 1}/300/300`,
+        category: ["clothes", "shoes", "accessories"][Math.floor(Math.random() * 3)]
+      }));
+      
+      setProducts(mockProducts);
+      localStorage.setItem("disguiseProducts", JSON.stringify(mockProducts));
+    }
   }, []);
+
+  // Save products when they change
+  useEffect(() => {
+    if (products.length > 0) {
+      localStorage.setItem("disguiseProducts", JSON.stringify(products));
+    }
+  }, [products]);
 
   const filteredProducts = category === "all" 
     ? products 
@@ -50,6 +78,78 @@ export function DisguiseMode() {
 
   const handleExitDisguise = () => {
     exitDisguiseMode();
+  };
+
+  const openEditModal = (product: Product) => {
+    setCurrentProduct(product);
+    setEditedName(product.name);
+    setEditedPrice(product.price.toString());
+    setEditedImage(product.image);
+    setEditedCategory(product.category);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!currentProduct) return;
+
+    // Validate inputs
+    if (!editedName.trim()) {
+      toast({
+        title: "Erro",
+        description: "O nome do produto não pode estar vazio.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const priceNumber = parseFloat(editedPrice);
+    if (isNaN(priceNumber) || priceNumber <= 0) {
+      toast({
+        title: "Erro",
+        description: "O preço deve ser um número positivo.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!editedImage.trim()) {
+      toast({
+        title: "Erro",
+        description: "A URL da imagem não pode estar vazia.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!editedCategory.trim()) {
+      toast({
+        title: "Erro",
+        description: "A categoria não pode estar vazia.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Update product
+    const updatedProducts = products.map(product => 
+      product.id === currentProduct.id 
+        ? { 
+            ...product, 
+            name: editedName, 
+            price: priceNumber, 
+            image: editedImage,
+            category: editedCategory 
+          } 
+        : product
+    );
+
+    setProducts(updatedProducts);
+    setIsEditModalOpen(false);
+    
+    toast({
+      title: "Produto atualizado",
+      description: "As alterações foram salvas com sucesso.",
+    });
   };
 
   return (
@@ -122,7 +222,14 @@ export function DisguiseMode() {
       <div className="container mx-auto px-4 pb-20">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {currentProducts.map((product) => (
-            <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow relative">
+              <button 
+                onClick={() => openEditModal(product)} 
+                className="absolute top-2 right-2 bg-white p-1 rounded-full shadow z-10"
+                aria-label="Editar produto"
+              >
+                <Pencil className="h-4 w-4 text-gray-600" />
+              </button>
               <div className="aspect-square bg-gray-100 overflow-hidden">
                 <img 
                   src={product.image} 
@@ -134,6 +241,10 @@ export function DisguiseMode() {
                 <h3 className="text-sm font-medium text-gray-800 truncate">{product.name}</h3>
                 <p className="text-pink-600 font-semibold mt-1">
                   R$ {product.price.toFixed(2)}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {product.category === "clothes" ? "Roupas" : 
+                   product.category === "shoes" ? "Calçados" : "Acessórios"}
                 </p>
               </div>
             </div>
@@ -163,6 +274,86 @@ export function DisguiseMode() {
           </div>
         </div>
       )}
+
+      {/* Edit Product Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Produto</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div className="grid w-full gap-1.5">
+              <label htmlFor="name">Nome do produto</label>
+              <Input 
+                id="name" 
+                value={editedName} 
+                onChange={e => setEditedName(e.target.value)} 
+                placeholder="Nome do produto" 
+              />
+            </div>
+            
+            <div className="grid w-full gap-1.5">
+              <label htmlFor="price">Preço (R$)</label>
+              <Input 
+                id="price" 
+                value={editedPrice} 
+                onChange={e => setEditedPrice(e.target.value)} 
+                placeholder="0.00" 
+                type="number" 
+                min="0" 
+                step="0.01" 
+              />
+            </div>
+            
+            <div className="grid w-full gap-1.5">
+              <label htmlFor="image">URL da Imagem</label>
+              <Input 
+                id="image" 
+                value={editedImage} 
+                onChange={e => setEditedImage(e.target.value)} 
+                placeholder="https://example.com/image.jpg" 
+              />
+              {editedImage && (
+                <div className="mt-2 max-w-xs mx-auto">
+                  <div className="aspect-square bg-gray-100 overflow-hidden rounded-md">
+                    <img 
+                      src={editedImage} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://placehold.co/300x300?text=Image+Error';
+                      }} 
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="grid w-full gap-1.5">
+              <label htmlFor="category">Categoria</label>
+              <select 
+                id="category"
+                value={editedCategory}
+                onChange={e => setEditedCategory(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF84C6] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Selecione uma categoria</option>
+                <option value="clothes">Roupas</option>
+                <option value="shoes">Calçados</option>
+                <option value="accessories">Acessórios</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveEdit}>
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
