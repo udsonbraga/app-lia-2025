@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, BookOpen, Phone, MessageSquare } from "lucide-react";
@@ -8,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { submitFeedback } from "@/services/feedbackService";
 
 export function MainNavigation() {
   const navigate = useNavigate();
@@ -30,25 +30,22 @@ export function MainNavigation() {
     setFeedbackSubmitting(true);
     
     try {
-      // Simulate sending feedback
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Enviar feedback para o Supabase
+      const result = await submitFeedback(feedbackType, feedbackContent);
       
-      // In a real app, you would save this feedback to a database
-      console.log("Feedback submitted:", {
-        type: feedbackType,
-        content: feedbackContent,
-        date: new Date().toISOString(),
-        user: localStorage.getItem('userName') || 'Anônimo'
-      });
-      
-      toast({
-        title: "Feedback enviado",
-        description: "Agradecemos seu feedback! Sua opinião é muito importante para nós.",
-      });
-      
-      setFeedbackContent("");
-      setFeedbackOpen(false);
+      if (result.success) {
+        toast({
+          title: "Feedback enviado",
+          description: "Agradecemos seu feedback! Sua opinião é muito importante para nós.",
+        });
+        
+        setFeedbackContent("");
+        setFeedbackOpen(false);
+      } else {
+        throw new Error("Falha ao enviar feedback");
+      }
     } catch (error) {
+      console.error("Erro ao enviar feedback:", error);
       toast({
         title: "Erro ao enviar",
         description: "Não foi possível enviar seu feedback. Tente novamente mais tarde.",

@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import html2pdf from 'html2pdf.js';
+import { useDiaryEntries } from '@/hooks/useDiaryEntries';
+import { useAuth } from '@/hooks/useAuth';
 
 interface DiaryEntry {
   id: string;
@@ -21,22 +23,36 @@ interface DiaryEntry {
 const Diary = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [text, setText] = useState("");
   const [location, setLocation] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
   const [attachmentPreviews, setAttachmentPreviews] = useState<Array<{file: File, url: string}>>([]);
-  const [entries, setEntries] = useState<DiaryEntry[]>(() => {
-    const saved = localStorage.getItem('diaryEntries');
-    return saved ? JSON.parse(saved) : [];
-  });
   const [userName, setUserName] = useState<string>("");
+  
+  const {
+    entries,
+    isLoading,
+    addEntry,
+    removeEntry,
+    uploadImage
+  } = useDiaryEntries();
 
   useEffect(() => {
     const storedName = localStorage.getItem("userName");
     if (storedName) {
       setUserName(storedName);
     }
-  }, []);
+    
+    // Se o usuário estiver autenticado, usar o nome do perfil
+    if (user) {
+      const name = user.user_metadata?.name || '';
+      setUserName(name);
+      if (name) {
+        localStorage.setItem("userName", name);
+      }
+    }
+  }, [user]);
 
   const handleAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -54,7 +70,7 @@ const Diary = () => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!text.trim()) {
       toast({
         title: "Erro ao salvar",
@@ -64,61 +80,77 @@ const Diary = () => {
       return;
     }
 
-    // Create structured attachment data with URLs for images
-    const attachmentData = attachments.map(file => {
-      const preview = attachmentPreviews.find(p => p.file === file);
-      return {
-        name: file.name,
-        url: preview?.url || undefined
-      };
-    });
+    try {
+      // Fazer upload das imagens primeiro
+      const uploadedAttachments = [];
+      
+      for (const file of attachments) {
+        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+          const result = await uploadImage(file, user?.id);
+          if (result.success) {
+            uploadedAttachments.push({
+              name: result.name,
+              url: result.url
+            });
+          }
+        } else {
+          // Para arquivos não-imagem, apenas armazenar o nome
+          uploadedAttachments.push({
+            name: file.name
+          });
+        }
+      }
 
-    const newEntry: DiaryEntry = {
-      id: Date.now().toString(),
-      text,
-      attachments: attachmentData,
-      location: location || "Não informado",
-      createdAt: new Date(),
-    };
+      // Criar a entrada do diário
+      const result = await addEntry({
+        text,
+        location: location || "Não informado",
+        attachments: uploadedAttachments
+      });
 
-    const updatedEntries = [newEntry, ...entries];
-    setEntries(updatedEntries);
-    localStorage.setItem('diaryEntries', JSON.stringify(updatedEntries));
+      if (result.success) {
+        setText("");
+        setLocation("");
+        setAttachments([]);
+        setAttachmentPreviews([]);
 
-    setText("");
-    setLocation("");
-    setAttachments([]);
-    setAttachmentPreviews([]);
-
-    toast({
-      title: "Diário salvo",
-      description: "Suas anotações foram salvas com sucesso.",
-    });
+        toast({
+          title: "Diário salvo",
+          description: "Suas anotações foram salvas com sucesso.",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao salvar diário:", error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Ocorreu um erro ao salvar suas anotações.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteEntry = (id: string) => {
-    const updatedEntries = entries.filter(entry => entry.id !== id);
-    setEntries(updatedEntries);
-    localStorage.setItem('diaryEntries', JSON.stringify(updatedEntries));
-
-    toast({
-      title: "Relato removido",
-      description: "O relato foi removido com sucesso.",
-    });
+  const handleDeleteEntry = async (id: string) => {
+    const result = await removeEntry(id);
+    if (result.success) {
+      toast({
+        title: "Relato removido",
+        description: "O relato foi removido com sucesso.",
+      });
+    }
   };
 
-  const generatePDF = (entry: DiaryEntry) => {
+  const generatePDF = (entry: any) => {
     const content = document.createElement('div');
-    const currentUserName = localStorage.getItem('userName') || 'Usuário';
+    const currentUserName = userName || 'Usuário';
     
     let imagesHtml = '';
-    if (entry.attachments.some(att => att.url)) {
+    if (entry.attachments && entry.attachments.some((att: any) => att.url)) {
       imagesHtml = `
         <h2>Imagens</h2>
         <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; margin-bottom: 20px;">
           ${entry.attachments
-            .filter(att => att.url)
-            .map(att => `
+            .filter((att: any) => att.url)
+            .map((att: any) => `
               <div style="margin-bottom: 10px;">
                 <img src="${att.url}" style="max-width: 300px; max-height: 200px; border: 1px solid #ccc; border-radius: 4px;" />
                 <p style="margin-top: 5px; font-size: 12px; color: #666;">${att.name}</p>
@@ -131,17 +163,17 @@ const Diary = () => {
     content.innerHTML = `
       <div style="padding: 20px; font-family: Arial, sans-serif; position: relative;">
         <h1 style="text-align: center; color: #000000; font-size: 28px; font-weight: bold;">Relatório Seguro</h1>
-        <p><strong>Data:</strong> ${format(new Date(entry.createdAt), "dd/MM/yyyy 'às' HH:mm")}</p>
+        <p><strong>Data:</strong> ${format(new Date(entry.created_at), "dd/MM/yyyy 'às' HH:mm")}</p>
         <p><strong>Local:</strong> ${entry.location}</p>
         <h2>Descrição da Ocorrência</h2>
         <p style="white-space: pre-wrap;">${entry.text}</p>
         
         ${imagesHtml}
         
-        ${entry.attachments.length > 0 ? `
+        ${entry.attachments && entry.attachments.length > 0 ? `
           <h2>Anexos</h2>
           <ul>
-            ${entry.attachments.map(attachment => `<li>${attachment.name}</li>`).join('')}
+            ${entry.attachments.map((attachment: any) => `<li>${attachment.name}</li>`).join('')}
           </ul>
         ` : ''}
         
@@ -158,7 +190,7 @@ const Diary = () => {
 
     const opt = {
       margin: 10,
-      filename: `relato-${format(new Date(entry.createdAt), "dd-MM-yyyy")}.pdf`,
+      filename: `relato-${format(new Date(entry.created_at), "dd-MM-yyyy")}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, logging: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -239,21 +271,7 @@ const Diary = () => {
                 multiple
                 accept="image/*,video/*,.pdf,.doc,.docx,.txt"
                 className="hidden"
-                onChange={(e) => {
-                  const files = e.target.files;
-                  if (files) {
-                    const newFiles = Array.from(files);
-                    setAttachments(prev => [...prev, ...newFiles]);
-                    
-                    // Create previews for images
-                    newFiles.forEach(file => {
-                      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-                        const url = URL.createObjectURL(file);
-                        setAttachmentPreviews(prev => [...prev, {file, url}]);
-                      }
-                    });
-                  }
-                }}
+                onChange={handleAttachment}
               />
             </div>
 
@@ -291,10 +309,11 @@ const Diary = () => {
 
           <Button
             onClick={handleSave}
+            disabled={isLoading}
             className="w-full flex items-center justify-center gap-2 bg-[#FF84C6] hover:bg-[#ff6cb7] text-white"
           >
             <Save className="h-5 w-5" />
-            Salvar
+            {isLoading ? "Salvando..." : "Salvar"}
           </Button>
 
           {entries.length > 0 && (
@@ -305,7 +324,7 @@ const Diary = () => {
                   <div key={entry.id} className="py-4">
                     <div className="flex justify-between items-start mb-2">
                       <time className="text-sm text-gray-500">
-                        {format(new Date(entry.createdAt), "dd/MM/yyyy 'às' HH:mm")}
+                        {format(new Date(entry.created_at), "dd/MM/yyyy 'às' HH:mm")}
                       </time>
                       <div className="flex space-x-2">
                         <button
@@ -330,13 +349,13 @@ const Diary = () => {
                     </div>
                     <p className="text-gray-700 whitespace-pre-wrap">{entry.text}</p>
                     
-                    {entry.attachments.some(att => att.url) && (
+                    {entry.attachments && entry.attachments.some((att: any) => att.url) && (
                       <div className="mt-4">
                         <h4 className="text-sm font-medium mb-2">Imagens:</h4>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                           {entry.attachments
-                            .filter(att => att.url)
-                            .map((att, idx) => (
+                            .filter((att: any) => att.url)
+                            .map((att: any, idx: number) => (
                               <div key={idx} className="border rounded-md overflow-hidden">
                                 <img 
                                   src={att.url} 
@@ -349,11 +368,11 @@ const Diary = () => {
                       </div>
                     )}
                     
-                    {entry.attachments.length > 0 && (
+                    {entry.attachments && entry.attachments.length > 0 && (
                       <div className="mt-2">
                         <p className="text-sm font-medium text-gray-600">Anexos:</p>
                         <ul className="mt-1 space-y-1">
-                          {entry.attachments.map((attachment, index) => (
+                          {entry.attachments.map((attachment: any, index: number) => (
                             <li key={index} className="text-sm text-gray-500">
                               {attachment.name}
                             </li>

@@ -1,141 +1,150 @@
-
-import { useState, useEffect } from "react";
-import { SafeContact, UserPremiumStatus } from "@/features/support-network/types";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { SafeContact } from '@/features/support-network/types';
+import { getSafeContacts, addSafeContact, updateSafeContact, removeSafeContact } from '@/services/safeContactService';
+import { useAuth } from '@/hooks/useAuth';
 
 export const useSafeContacts = () => {
   const { toast } = useToast();
-  
-  const [contacts, setContacts] = useState<SafeContact[]>(() => {
-    const savedContacts = localStorage.getItem("safeContacts");
-    return savedContacts ? JSON.parse(savedContacts) : [];
-  });
-
-  const [premiumStatus, setPremiumStatus] = useState<UserPremiumStatus>(() => {
-    const savedStatus = localStorage.getItem("premiumStatus");
-    return savedStatus ? JSON.parse(savedStatus) : { isPremium: false, maxContacts: 1 };
-  });
-
-  const [newContact, setNewContact] = useState<Omit<SafeContact, "id">>({
-    name: "",
-    phone: "",
-    telegramId: "",
-    relationship: "",
-    twilioAccountSid: "",
-    twilioAuthToken: "",
-    twilioWhatsappNumber: "",
-  });
-
+  const { user } = useAuth();
+  const [contacts, setContacts] = useState<SafeContact[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editingContactId, setEditingContactId] = useState<string | null>(null);
   const [showPremiumDialog, setShowPremiumDialog] = useState(false);
+  const [premiumStatus, setPremiumStatus] = useState({
+    isPremium: false,
+    maxContacts: 1,
+  });
+  const [newContact, setNewContact] = useState<Omit<SafeContact, 'id'>>({
+    name: '',
+    phone: '',
+    relationship: '',
+    telegramId: '',
+    twilioWhatsappNumber: undefined,
+    twilioAccountSid: undefined,
+    twilioAuthToken: undefined,
+  });
 
   useEffect(() => {
-    localStorage.setItem("safeContacts", JSON.stringify(contacts));
-  }, [contacts]);
+    fetchContacts();
+  }, [user]);
 
-  useEffect(() => {
-    localStorage.setItem("premiumStatus", JSON.stringify(premiumStatus));
-  }, [premiumStatus]);
-
-  const handleAddContact = () => {
-    if (!newContact.name || !newContact.phone || !newContact.relationship) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Preencha pelo menos o nome, telefone e parentesco para adicionar um contato.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (isEditing && editingContactId) {
-      // Update existing contact
-      setContacts(contacts.map((contact) => 
-        contact.id === editingContactId 
-          ? { ...newContact, id: editingContactId } 
-          : contact
-      ));
-      
-      setIsEditing(false);
-      setEditingContactId(null);
-      
-      toast({
-        title: "Contato atualizado",
-        description: "Contato de segurança atualizado com sucesso.",
-      });
+  const fetchContacts = async () => {
+    const result = await getSafeContacts();
+    if (result.success) {
+      setContacts(result.data || []);
     } else {
-      // Add new contact
-      if (contacts.length >= premiumStatus.maxContacts) {
-        setShowPremiumDialog(true);
-        return;
-      }
-
-      const newContactWithId = {
-        ...newContact,
-        id: Date.now().toString(),
-      };
-
-      setContacts([...contacts, newContactWithId]);
-      
       toast({
-        title: "Contato adicionado",
-        description: "Contato de segurança adicionado com sucesso.",
+        title: "Erro ao carregar contatos",
+        description: "Não foi possível carregar seus contatos de segurança.",
+        variant: "destructive"
       });
     }
-
-    // Reset form
-    setNewContact({ 
-      name: "", 
-      phone: "", 
-      telegramId: "", 
-      relationship: "",
-      twilioAccountSid: "",
-      twilioAuthToken: "",
-      twilioWhatsappNumber: "", 
-    });
-    setIsAdding(false);
-  };
-
-  const handleEditContact = (contact: SafeContact) => {
-    setNewContact({
-      name: contact.name,
-      phone: contact.phone,
-      telegramId: contact.telegramId,
-      relationship: contact.relationship,
-      twilioAccountSid: contact.twilioAccountSid || "",
-      twilioAuthToken: contact.twilioAuthToken || "",
-      twilioWhatsappNumber: contact.twilioWhatsappNumber || "",
-    });
-    setEditingContactId(contact.id);
-    setIsEditing(true);
-    setIsAdding(true);
-  };
-
-  const handleRemoveContact = (id: string) => {
-    setContacts(contacts.filter((contact) => contact.id !== id));
-    toast({
-      title: "Contato removido",
-      description: "Contato de segurança removido com sucesso.",
-    });
   };
 
   const handleNewContactClick = () => {
     if (contacts.length >= premiumStatus.maxContacts) {
       setShowPremiumDialog(true);
-    } else {
-      setIsAdding(true);
+      return;
+    }
+    setIsAdding(true);
+    setIsEditing(false);
+    setNewContact({
+      name: '',
+      phone: '',
+      relationship: '',
+      telegramId: '',
+      twilioWhatsappNumber: undefined,
+      twilioAccountSid: undefined,
+      twilioAuthToken: undefined,
+    });
+  };
+
+  const handleAddContact = async () => {
+    if (!newContact.name || !newContact.phone) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Nome e telefone são obrigatórios.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      if (isEditing && 'id' in newContact) {
+        const result = await updateSafeContact(newContact as SafeContact);
+        if (result.success) {
+          setContacts(contacts.map(c => c.id === (newContact as SafeContact).id ? result.data : c));
+          toast({
+            title: "Contato atualizado",
+            description: "As informações do contato foram atualizadas com sucesso.",
+          });
+        } else {
+          throw new Error("Falha ao atualizar contato");
+        }
+      } else {
+        const result = await addSafeContact(newContact);
+        if (result.success) {
+          setContacts([...contacts, result.data]);
+          toast({
+            title: "Contato adicionado",
+            description: "Novo contato de segurança adicionado com sucesso.",
+          });
+        } else {
+          throw new Error("Falha ao adicionar contato");
+        }
+      }
+      
+      setIsAdding(false);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Erro ao adicionar contato:', error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar o contato. Tente novamente.",
+        variant: "destructive"
+      });
     }
   };
 
+  const handleRemoveContact = async (id: string) => {
+    try {
+      const result = await removeSafeContact(id);
+      if (result.success) {
+        setContacts(contacts.filter(contact => contact.id !== id));
+        toast({
+          title: "Contato removido",
+          description: "O contato foi removido com sucesso.",
+        });
+      } else {
+        throw new Error("Falha ao remover contato");
+      }
+    } catch (error) {
+      console.error('Erro ao remover contato:', error);
+      toast({
+        title: "Erro ao remover",
+        description: "Não foi possível remover o contato. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleEditContact = (contact: SafeContact) => {
+    setNewContact(contact);
+    setIsAdding(true);
+    setIsEditing(true);
+  };
+
   const upgradeToPremium = () => {
-    // Redirect to Google when premium subscription is clicked
-    window.open("https://www.google.com", "_blank");
+    // Implementar lógica de upgrade para premium (integração com pagamentos)
+    setPremiumStatus({
+      isPremium: true,
+      maxContacts: 5,
+    });
     setShowPremiumDialog(false);
-    
     toast({
-      title: "Redirecionando para assinatura Premium",
-      description: "Você será redirecionado para concluir sua assinatura Premium.",
+      title: "Conta atualizada para Premium",
+      description: "Agora você pode adicionar até 5 contatos de segurança!",
     });
   };
 
@@ -152,7 +161,7 @@ export const useSafeContacts = () => {
     handleAddContact,
     handleRemoveContact,
     handleNewContactClick,
-    handleEditContact,
     upgradeToPremium,
+    handleEditContact,
   };
 };
