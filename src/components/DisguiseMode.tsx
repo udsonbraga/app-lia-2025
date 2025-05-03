@@ -1,14 +1,20 @@
 
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Pencil, Plus, Loader2, Trash2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
-import { Pagination } from "@/components/ui/pagination";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Product } from "@/lib/supabase";
+
+// Componentes refatorados
+import { Header } from "@/components/disguise/Header";
+import { CategoryFilter } from "@/components/disguise/CategoryFilter";
+import { ProductGrid } from "@/components/disguise/ProductGrid";
+import { ProductPagination } from "@/components/disguise/ProductPagination";
+import { LoadingOverlay } from "@/components/disguise/LoadingOverlay";
+import { EditProductModal } from "@/components/disguise/modals/EditProductModal";
+import { AddProductModal } from "@/components/disguise/modals/AddProductModal";
+import { DeleteProductModal } from "@/components/disguise/modals/DeleteProductModal";
 
 export function DisguiseMode() {
   const navigate = useNavigate();
@@ -227,356 +233,72 @@ export function DisguiseMode() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-50">
-        <div className="container mx-auto h-full">
-          <div className="flex items-center justify-between h-full px-4">
-            <button
-              onClick={handleExitDisguise}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <ArrowLeft className="h-6 w-6 text-gray-700" />
-            </button>
-            
-            <h1 className="text-xl font-semibold">Moda Feminina</h1>
-            
-            <button
-              onClick={openAddModal}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              aria-label="Adicionar produto"
-            >
-              <Plus className="h-6 w-6 text-gray-700" />
-            </button>
-          </div>
-        </div>
-      </div>
+      <Header onExitDisguise={handleExitDisguise} onAddProduct={openAddModal} />
 
       {/* Category Filter */}
       <div className="container mx-auto pt-20 pb-4">
-        <div className="flex gap-2 overflow-x-auto py-2 px-4">
-          <button 
-            onClick={() => setCategory("all")}
-            className={`px-4 py-1 rounded-full text-sm whitespace-nowrap ${
-              category === "all" 
-                ? "bg-pink-500 text-white" 
-                : "bg-gray-100 text-gray-800"
-            }`}
-          >
-            Todos
-          </button>
-          <button 
-            onClick={() => setCategory("clothes")}
-            className={`px-4 py-1 rounded-full text-sm whitespace-nowrap ${
-              category === "clothes" 
-                ? "bg-pink-500 text-white" 
-                : "bg-gray-100 text-gray-800"
-            }`}
-          >
-            Roupas
-          </button>
-          <button 
-            onClick={() => setCategory("shoes")}
-            className={`px-4 py-1 rounded-full text-sm whitespace-nowrap ${
-              category === "shoes" 
-                ? "bg-pink-500 text-white" 
-                : "bg-gray-100 text-gray-800"
-            }`}
-          >
-            Calçados
-          </button>
-          <button 
-            onClick={() => setCategory("accessories")}
-            className={`px-4 py-1 rounded-full text-sm whitespace-nowrap ${
-              category === "accessories" 
-                ? "bg-pink-500 text-white" 
-                : "bg-gray-100 text-gray-800"
-            }`}
-          >
-            Acessórios
-          </button>
-        </div>
+        <CategoryFilter category={category} setCategory={setCategory} />
       </div>
 
       {/* Loading Overlay */}
-      {isLoading && (
-        <div className="fixed inset-0 bg-white bg-opacity-70 z-50 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-2">
-            <Loader2 className="h-8 w-8 text-pink-500 animate-spin" />
-            <p className="text-gray-500">Processando...</p>
-          </div>
-        </div>
-      )}
+      <LoadingOverlay isLoading={isLoading} />
 
       {/* Product Grid */}
       <div className="container mx-auto px-4 pb-20">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {currentProducts.map((product) => (
-            <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow relative group">
-              <div className="absolute top-2 right-2 flex gap-1 z-10">
-                <button 
-                  onClick={() => openEditModal(product)} 
-                  className="bg-white p-1 rounded-full shadow"
-                  aria-label="Editar produto"
-                >
-                  <Pencil className="h-4 w-4 text-gray-600" />
-                </button>
-                <button 
-                  onClick={() => openDeleteModal(product)} 
-                  className="bg-white p-1 rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity"
-                  aria-label="Excluir produto"
-                >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </button>
-              </div>
-              <div className="aspect-square bg-gray-100 overflow-hidden">
-                <img 
-                  src={product.image} 
-                  alt={product.name}
-                  className="w-full h-full object-cover" 
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://placehold.co/300x300?text=Image+Error';
-                  }}
-                />
-              </div>
-              <div className="p-3">
-                <h3 className="text-sm font-medium text-gray-800 truncate">{product.name}</h3>
-                <p className="text-pink-600 font-semibold mt-1">
-                  R$ {product.price.toFixed(2)}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {product.category === "clothes" ? "Roupas" : 
-                   product.category === "shoes" ? "Calçados" : "Acessórios"}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ProductGrid 
+          products={currentProducts} 
+          openEditModal={openEditModal} 
+          openDeleteModal={openDeleteModal} 
+        />
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 px-4">
-          <div className="flex justify-center">
-            <div className="flex gap-2">
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => handlePageChange(i + 1)}
-                  className={`h-8 w-8 flex items-center justify-center rounded-full ${
-                    currentPage === i + 1
-                      ? "bg-pink-500 text-white"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <ProductPagination 
+        totalPages={totalPages} 
+        currentPage={currentPage} 
+        onPageChange={handlePageChange} 
+      />
 
       {/* Edit Product Modal */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Produto</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 mt-2">
-            <div className="grid w-full gap-1.5">
-              <label htmlFor="name">Nome do produto</label>
-              <Input 
-                id="name" 
-                value={editedName} 
-                onChange={e => setEditedName(e.target.value)} 
-                placeholder="Nome do produto" 
-              />
-            </div>
-            
-            <div className="grid w-full gap-1.5">
-              <label htmlFor="price">Preço (R$)</label>
-              <Input 
-                id="price" 
-                value={editedPrice} 
-                onChange={e => setEditedPrice(e.target.value)} 
-                placeholder="0.00" 
-                type="number" 
-                min="0" 
-                step="0.01" 
-              />
-            </div>
-            
-            <div className="grid w-full gap-1.5">
-              <label htmlFor="image">URL da Imagem</label>
-              <Input 
-                id="image" 
-                value={editedImage} 
-                onChange={e => setEditedImage(e.target.value)} 
-                placeholder="https://example.com/image.jpg" 
-              />
-              {editedImage && (
-                <div className="mt-2 max-w-xs mx-auto">
-                  <div className="aspect-square bg-gray-100 overflow-hidden rounded-md">
-                    <img 
-                      src={editedImage} 
-                      alt="Preview" 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://placehold.co/300x300?text=Image+Error';
-                      }} 
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="grid w-full gap-1.5">
-              <label htmlFor="category">Categoria</label>
-              <select 
-                id="category"
-                value={editedCategory}
-                onChange={e => setEditedCategory(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF84C6] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="">Selecione uma categoria</option>
-                <option value="clothes">Roupas</option>
-                <option value="shoes">Calçados</option>
-                <option value="accessories">Acessórios</option>
-              </select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditModalOpen(false)} disabled={isLoading}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSaveEdit} disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Salvando
-                </>
-              ) : (
-                "Salvar"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EditProductModal 
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        editedName={editedName}
+        setEditedName={setEditedName}
+        editedPrice={editedPrice}
+        setEditedPrice={setEditedPrice}
+        editedImage={editedImage}
+        setEditedImage={setEditedImage}
+        editedCategory={editedCategory}
+        setEditedCategory={setEditedCategory}
+        onSave={handleSaveEdit}
+        isLoading={isLoading}
+      />
 
       {/* Add Product Modal */}
-      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Adicionar Produto</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 mt-2">
-            <div className="grid w-full gap-1.5">
-              <label htmlFor="add-name">Nome do produto</label>
-              <Input 
-                id="add-name" 
-                value={editedName} 
-                onChange={e => setEditedName(e.target.value)} 
-                placeholder="Nome do produto" 
-              />
-            </div>
-            
-            <div className="grid w-full gap-1.5">
-              <label htmlFor="add-price">Preço (R$)</label>
-              <Input 
-                id="add-price" 
-                value={editedPrice} 
-                onChange={e => setEditedPrice(e.target.value)} 
-                placeholder="0.00" 
-                type="number" 
-                min="0" 
-                step="0.01" 
-              />
-            </div>
-            
-            <div className="grid w-full gap-1.5">
-              <label htmlFor="add-image">URL da Imagem</label>
-              <Input 
-                id="add-image" 
-                value={editedImage} 
-                onChange={e => setEditedImage(e.target.value)} 
-                placeholder="https://example.com/image.jpg" 
-              />
-              {editedImage && (
-                <div className="mt-2 max-w-xs mx-auto">
-                  <div className="aspect-square bg-gray-100 overflow-hidden rounded-md">
-                    <img 
-                      src={editedImage} 
-                      alt="Preview" 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://placehold.co/300x300?text=Image+Error';
-                      }} 
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="grid w-full gap-1.5">
-              <label htmlFor="add-category">Categoria</label>
-              <select 
-                id="add-category"
-                value={editedCategory}
-                onChange={e => setEditedCategory(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF84C6] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="">Selecione uma categoria</option>
-                <option value="clothes">Roupas</option>
-                <option value="shoes">Calçados</option>
-                <option value="accessories">Acessórios</option>
-              </select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddModalOpen(false)} disabled={isLoading}>
-              Cancelar
-            </Button>
-            <Button onClick={handleAddProduct} disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adicionando
-                </>
-              ) : (
-                "Adicionar"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AddProductModal 
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        editedName={editedName}
+        setEditedName={setEditedName}
+        editedPrice={editedPrice}
+        setEditedPrice={setEditedPrice}
+        editedImage={editedImage}
+        setEditedImage={setEditedImage}
+        editedCategory={editedCategory}
+        setEditedCategory={setEditedCategory}
+        onAdd={handleAddProduct}
+        isLoading={isLoading}
+      />
 
       {/* Delete Confirmation Modal */}
-      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmar Exclusão</DialogTitle>
-          </DialogHeader>
-          <p>Tem certeza que deseja excluir o produto "{currentProduct?.name}"?</p>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)} disabled={isLoading}>
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleDeleteProduct} 
-              variant="destructive" 
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Excluindo
-                </>
-              ) : (
-                "Excluir"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteProductModal 
+        open={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        product={currentProduct}
+        onDelete={handleDeleteProduct}
+        isLoading={isLoading}
+      />
     </div>
   );
 }
