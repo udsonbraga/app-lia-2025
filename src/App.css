@@ -1,3 +1,4 @@
+
 /* Add these CSS variables to support the accessibility features */
 :root {
   --font-size-multiplier: 100%;
@@ -41,15 +42,6 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* Disguised Mode Styles */
-body.disguised-mode {
-  background-color: #f0f0f0;
-}
-
-body.disguised-mode #root > div {
-  box-shadow: none;
 }
 
 /* Dark Mode Styles */
