@@ -60,6 +60,30 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          category: string
+          id: number
+          image: string
+          name: string
+          price: number
+        }
+        Insert: {
+          category: string
+          id?: number
+          image: string
+          name: string
+          price: number
+        }
+        Update: {
+          category?: string
+          id?: number
+          image?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -129,7 +153,7 @@ export type Database = {
     }
     Functions: {
       check_table_exists: {
-        Args: { table_name: string }
+        Args: { p_table_name: string }
         Returns: boolean
       }
       count_products: {
