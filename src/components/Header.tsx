@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { MainDrawer } from "@/components/MainDrawer";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Eye, EyeOff, UserCircle } from "lucide-react";
+import { Eye, EyeOff, UserCircle, Store } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 
@@ -58,8 +58,7 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
                 onClick={toggleDisguise}
                 className="flex items-center gap-2 text-sm px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
               >
-                <Eye className="h-5 w-5 text-safelady" />
-                <span className="hidden sm:inline text-safelady">Modo Disfarce</span>
+                <Store className="h-5 w-5 text-safelady" />
               </button>
             )}
             

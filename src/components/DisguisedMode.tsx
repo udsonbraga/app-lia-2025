@@ -43,7 +43,7 @@ export function DisguisedMode({
   useEffect(() => {
     // Produtos para o modo disfarce
     const fakeProducts = [
-      // Roupas (8 itens)
+      // Roupas (15 itens)
       {
         id: 1,
         name: "Vestido Floral",
@@ -100,120 +100,274 @@ export function DisguisedMode({
         image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=500",
         category: "roupa"
       },
-      
-      // Calçados (8 itens)
       {
         id: 9,
+        name: "Vestido de Festa",
+        price: 299.90,
+        image: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=500",
+        category: "roupa"
+      },
+      {
+        id: 10,
+        name: "Macacão Jeans",
+        price: 199.90,
+        image: "https://images.unsplash.com/photo-1623609163859-ca93c959b98a?q=80&w=500",
+        category: "roupa"
+      },
+      {
+        id: 11,
+        name: "Cardigan de Tricô",
+        price: 139.90,
+        image: "https://images.unsplash.com/photo-1620799139507-2a76f79a2f4d?q=80&w=500",
+        category: "roupa"
+      },
+      {
+        id: 12,
+        name: "Blusa de Seda",
+        price: 159.90,
+        image: "https://images.unsplash.com/photo-1582142839970-2b9e04b60f65?q=80&w=500",
+        category: "roupa"
+      },
+      {
+        id: 13,
+        name: "Calça Pantalona",
+        price: 179.90,
+        image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=500",
+        category: "roupa"
+      },
+      {
+        id: 14,
+        name: "Shorts Jeans",
+        price: 89.90,
+        image: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?q=80&w=500",
+        category: "roupa"
+      },
+      {
+        id: 15,
+        name: "Kimono Estampado",
+        price: 129.90,
+        image: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=500",
+        category: "roupa"
+      },
+      
+      // Calçados (15 itens)
+      {
+        id: 16,
         name: "Tênis Casual",
         price: 189.90,
         image: "https://images.unsplash.com/photo-1607522370275-f14206abe5d3?q=80&w=500",
         category: "calçado"
       },
       {
-        id: 10,
+        id: 17,
         name: "Sandália de Salto",
         price: 159.90,
         image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=500",
         category: "calçado"
       },
       {
-        id: 11,
+        id: 18,
         name: "Sapato Social",
         price: 219.90,
         image: "https://images.unsplash.com/photo-1533867617858-e7b97e060509?q=80&w=500",
         category: "calçado"
       },
       {
-        id: 12,
+        id: 19,
         name: "Bota de Couro",
         price: 289.90,
         image: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?q=80&w=500",
         category: "calçado"
       },
       {
-        id: 13,
+        id: 20,
         name: "Sapatilha Clássica",
         price: 89.90,
         image: "https://images.unsplash.com/photo-1553545985-1e0d8781d5db?q=80&w=500",
         category: "calçado"
       },
       {
-        id: 14,
+        id: 21,
         name: "Tênis Esportivo",
         price: 249.90,
         image: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=500",
         category: "calçado"
       },
       {
-        id: 15,
+        id: 22,
         name: "Sandália Rasteira",
         price: 79.90,
         image: "https://images.unsplash.com/photo-1535043934128-cf0b28d52f95?q=80&w=500",
         category: "calçado"
       },
       {
-        id: 16,
+        id: 23,
         name: "Scarpin Elegante",
         price: 169.90,
         image: "https://images.unsplash.com/photo-1573100925118-870b8efc799d?q=80&w=500",
         category: "calçado"
       },
-      
-      // Acessórios - Colares (8 itens)
       {
-        id: 17,
+        id: 24,
+        name: "Ankle Boot",
+        price: 239.90,
+        image: "https://images.unsplash.com/photo-1543994571-65e9cf0a6f63?q=80&w=500",
+        category: "calçado"
+      },
+      {
+        id: 25,
+        name: "Tênis Slip On",
+        price: 119.90,
+        image: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&w=500",
+        category: "calçado"
+      },
+      {
+        id: 26,
+        name: "Mocassim de Couro",
+        price: 179.90,
+        image: "https://images.unsplash.com/photo-1626947346165-4c2288dadc2d?q=80&w=500",
+        category: "calçado"
+      },
+      {
+        id: 27,
+        name: "Sandália Plataforma",
+        price: 149.90,
+        image: "https://images.unsplash.com/photo-1562273138-f46be4ebdf33?q=80&w=500",
+        category: "calçado"
+      },
+      {
+        id: 28,
+        name: "Chinelo de Couro",
+        price: 79.90,
+        image: "https://images.unsplash.com/photo-1603487742131-4160ec999306?q=80&w=500",
+        category: "calçado"
+      },
+      {
+        id: 29,
+        name: "Oxford Feminino",
+        price: 199.90,
+        image: "https://images.unsplash.com/photo-1518049362265-d5b2a6467637?q=80&w=500",
+        category: "calçado"
+      },
+      {
+        id: 30,
+        name: "Sandália Anabela",
+        price: 139.90,
+        image: "https://images.unsplash.com/photo-1596703263926-eb0762ee17e4?q=80&w=500",
+        category: "calçado"
+      },
+      
+      // Acessórios - Colares (16 itens)
+      {
+        id: 31,
         name: "Colar de Prata",
         price: 89.90,
         image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=500",
         category: "acessório"
       },
       {
-        id: 18,
+        id: 32,
         name: "Colar de Pérolas",
         price: 119.90,
         image: "https://images.unsplash.com/photo-1602751584581-91565acc5a51?q=80&w=500",
         category: "acessório"
       },
       {
-        id: 19,
+        id: 33,
         name: "Gargantilha Delicada",
         price: 69.90,
         image: "https://images.unsplash.com/photo-1611085583191-a3b181a88401?q=80&w=500",
         category: "acessório"
       },
       {
-        id: 20,
+        id: 34,
         name: "Colar Longo Boho",
         price: 79.90,
         image: "https://images.unsplash.com/photo-1611234877954-e1aca5300dbd?q=80&w=500",
         category: "acessório"
       },
       {
-        id: 21,
+        id: 35,
         name: "Choker Gótico",
         price: 59.90,
         image: "https://images.unsplash.com/photo-1574723205475-f785c1f1c50f?q=80&w=500",
         category: "acessório"
       },
       {
-        id: 22,
+        id: 36,
         name: "Colar com Pingente",
         price: 99.90,
         image: "https://images.unsplash.com/photo-1617038220319-276d3cfab638?q=80&w=500",
         category: "acessório"
       },
       {
-        id: 23,
+        id: 37,
         name: "Corrente Masculina",
         price: 129.90,
         image: "https://images.unsplash.com/photo-1600721391689-2564bb8055de?q=80&w=500",
         category: "acessório"
       },
       {
-        id: 24,
+        id: 38,
         name: "Colar Étnico",
         price: 149.90,
         image: "https://images.unsplash.com/photo-1535632787350-4e68ef0ac584?q=80&w=500",
+        category: "acessório"
+      },
+      {
+        id: 39,
+        name: "Colar Minimalista Ouro",
+        price: 159.90,
+        image: "https://images.unsplash.com/photo-1618403088890-3d9ff6f4c8b1?q=80&w=500",
+        category: "acessório"
+      },
+      {
+        id: 40,
+        name: "Colar Camafeu Vintage",
+        price: 129.90,
+        image: "https://images.unsplash.com/photo-1644172302522-d2ea805fe899?q=80&w=500",
+        category: "acessório"
+      },
+      {
+        id: 41,
+        name: "Colar Mandala",
+        price: 79.90,
+        image: "https://images.unsplash.com/photo-1535556116002-6281ff3e9f36?q=80&w=500",
+        category: "acessório"
+      },
+      {
+        id: 42,
+        name: "Colar com Pedra Natural",
+        price: 199.90,
+        image: "https://images.unsplash.com/photo-1547127796-06bb04e4b315?q=80&w=500",
+        category: "acessório"
+      },
+      {
+        id: 43,
+        name: "Colar Cascata",
+        price: 169.90,
+        image: "https://images.unsplash.com/photo-1599459183200-59c7687a0a6e?q=80&w=500",
+        category: "acessório"
+      },
+      {
+        id: 44,
+        name: "Colar Família",
+        price: 89.90,
+        image: "https://images.unsplash.com/photo-1563949193126-eca0142f1319?q=80&w=500",
+        category: "acessório"
+      },
+      {
+        id: 45,
+        name: "Colar Relicário",
+        price: 109.90,
+        image: "https://images.unsplash.com/photo-1587308550198-02d410e0bdb0?q=80&w=500",
+        category: "acessório"
+      },
+      {
+        id: 46,
+        name: "Colar de Coração",
+        price: 79.90,
+        image: "https://images.unsplash.com/photo-1630019852942-f89202989a59?q=80&w=500",
         category: "acessório"
       }
     ];

@@ -32,7 +32,8 @@ export function useDisguiseMode() {
 
   const toggleDisguise = () => {
     if (!isDisguised) {
-      setShowPasswordPrompt(true);
+      // Directly activate disguise mode without password
+      handleDisguiseSubmit(new Event('submit') as unknown as React.FormEvent);
     } else {
       exitDisguiseMode();
     }
