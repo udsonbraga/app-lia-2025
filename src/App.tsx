@@ -38,14 +38,16 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <Router>
+        <AppRoutes />
+      </Router>
     </AuthProvider>
   );
 }
 
-function AppContent() {
+function AppRoutes() {
   const { user } = useAuth();
-  // Defina o estado para controlar se o modo de disfarce está ativado
+  // Define o estado para controlar se o modo de disfarce está ativado
   const [disguiseMode, setDisguiseMode] = useState(false);
 
   // Função para alternar o modo de disfarce
@@ -54,53 +56,51 @@ function AppContent() {
   };
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={user ? <Navigate to="/home" replace /> : <Index />} />
-        <Route path="/login" element={user ? <Navigate to="/home" replace /> : <LoginPage />} />
-        <Route path="/register" element={user ? <Navigate to="/home" replace /> : <RegisterPage />} />
-        <Route path="/reset-password" element={user ? <Navigate to="/home" replace /> : <ResetPasswordPage />} />
-        
-        {/* Rotas protegidas */}
-        <Route path="/home" element={
-          <RequireAuth>
-            <Home />
-          </RequireAuth>
-        } />
-        <Route path="/diary" element={
-          <RequireAuth>
-            <Diary />
-          </RequireAuth>
-        } />
-        <Route path="/safe-contact" element={
-          <RequireAuth>
-            <SafeContactPage />
-          </RequireAuth>
-        } />
-        <Route path="/support-network" element={
-          <RequireAuth>
-            <SupportNetwork />
-          </RequireAuth>
-        } />
-        <Route path="/customize" element={
-          <RequireAuth>
-            <Customize />
-          </RequireAuth>
-        } />
-        <Route path="/help" element={
-          <RequireAuth>
-            <Help />
-          </RequireAuth>
-        } />
-        <Route path="/accessibility" element={
-          <RequireAuth>
-            <Accessibility />
-          </RequireAuth>
-        } />
-        
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/" element={user ? <Navigate to="/home" replace /> : <Index />} />
+      <Route path="/login" element={user ? <Navigate to="/home" replace /> : <LoginPage />} />
+      <Route path="/register" element={user ? <Navigate to="/home" replace /> : <RegisterPage />} />
+      <Route path="/reset-password" element={user ? <Navigate to="/home" replace /> : <ResetPasswordPage />} />
+      
+      {/* Rotas protegidas */}
+      <Route path="/home" element={
+        <RequireAuth>
+          <Home />
+        </RequireAuth>
+      } />
+      <Route path="/diary" element={
+        <RequireAuth>
+          <Diary />
+        </RequireAuth>
+      } />
+      <Route path="/safe-contact" element={
+        <RequireAuth>
+          <SafeContactPage />
+        </RequireAuth>
+      } />
+      <Route path="/support-network" element={
+        <RequireAuth>
+          <SupportNetwork />
+        </RequireAuth>
+      } />
+      <Route path="/customize" element={
+        <RequireAuth>
+          <Customize />
+        </RequireAuth>
+      } />
+      <Route path="/help" element={
+        <RequireAuth>
+          <Help />
+        </RequireAuth>
+      } />
+      <Route path="/accessibility" element={
+        <RequireAuth>
+          <Accessibility />
+        </RequireAuth>
+      } />
+      
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 
