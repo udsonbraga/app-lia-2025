@@ -16,18 +16,34 @@ export const createDiaryUploadOperations = () => {
       // Criar caminho para o arquivo
       const filePath = `${user.id}/${Date.now()}-${file.name}`;
       
-      // Fazer upload para o Storage com rastreamento de progresso
+      // Fazer upload para o Storage
       const { data, error } = await supabase
         .storage
         .from('diary_images')
         .upload(filePath, file, {
-          onUploadProgress: (progress) => {
-            const percent = progress.percent ? Math.round(progress.percent) : 0;
-            if (onProgress) onProgress(percent);
-          },
           cacheControl: '3600',
           upsert: false
         });
+        
+      // Separately handle progress if provided
+      if (onProgress) {
+        // Simulate upload progress since direct progress tracking isn't available
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 10;
+          if (progress <= 100) {
+            onProgress(progress);
+          } else {
+            clearInterval(interval);
+          }
+        }, 100);
+        
+        // Clear interval after 1 second (artificial but provides feedback)
+        setTimeout(() => {
+          clearInterval(interval);
+          onProgress(100);
+        }, 1000);
+      }
         
       if (error) throw error;
       

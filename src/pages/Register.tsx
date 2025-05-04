@@ -5,54 +5,82 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { validateForm } from "@/features/auth/utils/formValidation";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const { signUp, isLoading } = useAuth();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !email || !password || !confirmPassword) {
-      toast({
-        title: 'Campos obrigatórios',
-        description: 'Por favor, preencha todos os campos.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast({
-        title: 'Senhas não conferem',
-        description: 'A senha e a confirmação de senha devem ser iguais.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    const result = await signUp(email, password, name);
+    // Form validation
+    const validationErrors: Record<string, string> = {};
     
-    if (result.success) {
+    if (!name.trim()) validationErrors.name = 'Nome é obrigatório';
+    if (!email.trim()) validationErrors.email = 'Email é obrigatório';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) validationErrors.email = 'Email inválido';
+    
+    if (!password) validationErrors.password = 'Senha é obrigatória';
+    else if (password.length < 6) validationErrors.password = 'A senha deve ter pelo menos 6 caracteres';
+    
+    if (password !== confirmPassword) validationErrors.confirmPassword = 'As senhas não conferem';
+    
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      // Check if user already exists in local storage
+      const storedUsers = localStorage.getItem('users');
+      const users = storedUsers ? JSON.parse(storedUsers) : [];
+      
+      const userExists = users.some((user: any) => user.email === email);
+      
+      if (userExists) {
+        toast({
+          title: "Email já cadastrado",
+          description: "Já existe uma conta com este email. Tente fazer login.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Add the new user to local storage
+      const newUser = { name, email, password };
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       toast({
-        title: 'Conta criada com sucesso',
-        description: 'Verifique seu e-mail para confirmar o cadastro.',
+        title: "Cadastro realizado com sucesso",
+        description: "Agora você pode fazer login com sua conta.",
       });
+      
+      // Navigate to login page after successful registration
       navigate('/login');
-    } else {
+    } catch (error) {
+      console.error('Erro ao registrar:', error);
       toast({
         title: 'Erro ao criar conta',
-        description: result.error || 'Não foi possível criar sua conta. Tente novamente.',
+        description: 'Não foi possível criar sua conta. Tente novamente.',
         variant: 'destructive',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -76,8 +104,11 @@ const RegisterPage = () => {
                   placeholder="Seu nome"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="pl-10"
+                  className={`pl-10 ${errors.name ? 'border-red-500' : ''}`}
                 />
+                {errors.name && (
+                  <p className="mt-1 text-xs text-red-500">{errors.name}</p>
+                )}
               </div>
             </div>
             
@@ -91,8 +122,11 @@ const RegisterPage = () => {
                   placeholder="seu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
+                  className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
                 />
+                {errors.email && (
+                  <p className="mt-1 text-xs text-red-500">{errors.email}</p>
+                )}
               </div>
             </div>
             
@@ -106,7 +140,7 @@ const RegisterPage = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
+                  className={`pl-10 ${errors.password ? 'border-red-500' : ''}`}
                 />
                 <button
                   type="button"
@@ -119,6 +153,9 @@ const RegisterPage = () => {
                     <Eye className="h-4 w-4" />
                   )}
                 </button>
+                {errors.password && (
+                  <p className="mt-1 text-xs text-red-500">{errors.password}</p>
+                )}
               </div>
             </div>
             
@@ -132,8 +169,11 @@ const RegisterPage = () => {
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pl-10"
+                  className={`pl-10 ${errors.confirmPassword ? 'border-red-500' : ''}`}
                 />
+                {errors.confirmPassword && (
+                  <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>
+                )}
               </div>
             </div>
 
@@ -149,7 +189,7 @@ const RegisterPage = () => {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Já tem uma conta?{" "}
-              <Link to="/login" className="text-safelady hover:underline">
+              <Link to="/login" className="text-[#FF84C6] hover:underline">
                 Entrar
               </Link>
             </p>

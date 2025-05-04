@@ -2,157 +2,149 @@
 import { supabase } from '@/lib/supabase';
 import { Product } from '@/lib/supabase';
 
-// Contador de produtos para setup inicial
-export const countProducts = async () => {
+// Função para buscar todos os produtos
+export const fetchAllProducts = async () => {
   try {
-    // Verificamos se a tabela de produtos existe
-    const { data, error } = await supabase.rpc('count_products');
-    
-    if (error && error.message.includes('does not exist')) {
-      // A tabela não existe, retornamos 0
-      return { count: 0, error: null };
-    } else if (error) {
-      console.error('Erro ao contar produtos:', error);
-      return { count: 0, error };
-    }
-    
-    return { count: data || 0, error: null };
-  } catch (error) {
-    console.error('Erro ao contar produtos:', error);
-    return { count: 0, error };
-  }
-};
-
-// Criação de produtos de exemplo
-export const createSampleProducts = async () => {
-  try {
-    // Verificar se a tabela de produtos existe
-    const { error: tableError } = await supabase.rpc('check_table_exists', { table_name: 'products' });
-    
-    // Se a tabela não existir, criamos ela
-    if (tableError && tableError.message.includes('does not exist')) {
-      // Criar tabela de produtos
-      await supabase.rpc('create_products_table');
-    }
-    
-    const sampleProducts = [
-      {
-        name: "Camisa Floral",
-        price: 79.90,
-        category: "Roupas",
-        image: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"
-      },
-      {
-        name: "Tênis Casual",
-        price: 129.90,
-        category: "Calçados",
-        image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
-      },
-      {
-        name: "Bolsa de Couro",
-        price: 149.90,
-        category: "Acessórios",
-        image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=876&q=80"
-      },
-      {
-        name: "Vestido Elegante",
-        price: 199.90,
-        category: "Roupas",
-        image: "https://images.unsplash.com/photo-1612336307429-8a898d10e223?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80"
-      },
-      {
-        name: "Óculos de Sol",
-        price: 89.90,
-        category: "Acessórios",
-        image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80"
-      }
-    ];
-
-    // Inserir produtos usando RPC para contornar restrição de tabela
-    for (const product of sampleProducts) {
-      await supabase.rpc('insert_product', {
-        p_name: product.name,
-        p_price: product.price,
-        p_category: product.category,
-        p_image: product.image
-      });
-    }
-    
-    return { success: true };
-  } catch (error) {
-    console.error('Erro ao criar produtos de exemplo:', error);
-    return { error };
-  }
-};
-
-// Funções para interagir com produtos
-export const fetchProducts = async () => {
-  try {
-    // Verificar se a tabela existe
-    const { data: exists, error: existsError } = await supabase.rpc('check_table_exists', { table_name: 'products' });
-    
-    if (existsError || !exists) {
-      // Se a tabela não existir ou houver erro, retornamos uma lista vazia
-      return { success: true, data: [] };
-    }
-    
-    // Buscar produtos usando RPC
-    const { data, error } = await supabase.rpc('get_all_products');
-    
+    const { data, error } = await supabase
+      .from('products')
+      .select('*');
+      
     if (error) throw error;
-    return { success: true, data: data || [] };
-  } catch (error) {
+    
+    return { success: true, data };
+  } catch (error: any) {
     console.error('Erro ao buscar produtos:', error);
-    return { success: false, error, data: [] };
+    return { success: false, error: error.message };
   }
 };
 
-export const addProductToDB = async (product: Omit<Product, 'id'>) => {
+// Função para buscar produtos por categoria
+export const fetchProductsByCategory = async (category: string) => {
   try {
-    // Inserir produto usando RPC
-    const { data, error } = await supabase.rpc('insert_product', {
-      p_name: product.name,
-      p_price: product.price,
-      p_category: product.category,
-      p_image: product.image
-    });
-    
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('category', category);
+      
     if (error) throw error;
-    return { success: true, data: data || {} };
-  } catch (error) {
-    console.error('Erro ao adicionar produto:', error);
-    return { success: false, error };
+    
+    return { success: true, data };
+  } catch (error: any) {
+    console.error(`Erro ao buscar produtos da categoria ${category}:`, error);
+    return { success: false, error: error.message };
   }
 };
 
-export const updateProductInDB = async (product: Product) => {
+// Função para buscar um produto específico
+export const fetchProductById = async (id: number) => {
   try {
-    // Atualizar produto usando RPC
-    const { data, error } = await supabase.rpc('update_product', {
-      p_id: product.id,
-      p_name: product.name,
-      p_price: product.price,
-      p_category: product.category,
-      p_image: product.image
-    });
-    
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .single();
+      
     if (error) throw error;
-    return { success: true, data: data || {} };
-  } catch (error) {
-    console.error('Erro ao atualizar produto:', error);
-    return { success: false, error };
+    
+    return { success: true, data };
+  } catch (error: any) {
+    console.error(`Erro ao buscar produto ID ${id}:`, error);
+    return { success: false, error: error.message };
   }
 };
 
-export const deleteProductFromDB = async (id: number) => {
+// Função para criar um novo produto
+export const createProduct = async (product: Omit<Product, 'id'>) => {
   try {
-    // Deletar produto usando RPC
-    const { error } = await supabase.rpc('delete_product', { p_id: id });
-    
+    const { data, error } = await supabase
+      .from('products')
+      .insert([product])
+      .select();
+      
     if (error) throw error;
+    
+    return { success: true, data: data[0] };
+  } catch (error: any) {
+    console.error('Erro ao criar produto:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Função para atualizar um produto existente
+export const updateProduct = async (id: number, updates: Partial<Product>) => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .update(updates)
+      .eq('id', id)
+      .select();
+      
+    if (error) throw error;
+    
+    return { success: true, data: data[0] };
+  } catch (error: any) {
+    console.error(`Erro ao atualizar produto ID ${id}:`, error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Função para excluir um produto
+export const deleteProduct = async (id: number) => {
+  try {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+      
+    if (error) throw error;
+    
     return { success: true };
-  } catch (error) {
-    console.error('Erro ao remover produto:', error);
-    return { success: false, error };
+  } catch (error: any) {
+    console.error(`Erro ao excluir produto ID ${id}:`, error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Função para buscar todas as categorias distintas
+export const fetchAllCategories = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('category')
+      .order('category');
+      
+    if (error) throw error;
+    
+    // Remove duplicates and null values
+    const categories = [...new Set(data.map(item => item.category))]
+      .filter(category => category)
+      .sort();
+      
+    return { success: true, data: categories };
+  } catch (error: any) {
+    console.error('Erro ao buscar categorias:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Função para contar produtos por categoria
+export const countProductsByCategory = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('category');
+      
+    if (error) throw error;
+    
+    const counts: Record<string, number> = {};
+    data.forEach((item) => {
+      const category = item.category || 'Sem categoria';
+      counts[category] = (counts[category] || 0) + 1;
+    });
+    
+    return { success: true, data: counts };
+  } catch (error: any) {
+    console.error('Erro ao contar produtos por categoria:', error);
+    return { success: false, error: error.message };
   }
 };
