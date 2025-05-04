@@ -27,7 +27,7 @@ export const countProducts = async () => {
 export const createSampleProducts = async () => {
   try {
     // Verificar se a tabela de produtos existe
-    const { error: tableError } = await supabase.rpc('check_table_exists', { p_table_name: 'products' });
+    const { error: tableError } = await supabase.rpc('check_table_exists', { table_name: 'products' });
     
     // Se a tabela não existir, criamos ela
     if (tableError && tableError.message.includes('does not exist')) {
@@ -89,7 +89,7 @@ export const createSampleProducts = async () => {
 export const fetchProducts = async () => {
   try {
     // Verificar se a tabela existe
-    const { data: exists, error: existsError } = await supabase.rpc('check_table_exists', { p_table_name: 'products' });
+    const { data: exists, error: existsError } = await supabase.rpc('check_table_exists', { table_name: 'products' });
     
     if (existsError || !exists) {
       // Se a tabela não existir ou houver erro, retornamos uma lista vazia

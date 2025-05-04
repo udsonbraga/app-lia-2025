@@ -60,30 +60,6 @@ export type Database = {
         }
         Relationships: []
       }
-      products: {
-        Row: {
-          category: string
-          id: number
-          image: string
-          name: string
-          price: number
-        }
-        Insert: {
-          category: string
-          id?: number
-          image: string
-          name: string
-          price: number
-        }
-        Update: {
-          category?: string
-          id?: number
-          image?: string
-          name?: string
-          price?: number
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -152,49 +128,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      check_table_exists: {
-        Args: { p_table_name: string }
-        Returns: boolean
-      }
-      count_products: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      create_products_table: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      delete_product: {
-        Args: { p_id: number }
-        Returns: boolean
-      }
-      exec_sql: {
-        Args: { sql: string }
-        Returns: undefined
-      }
-      get_all_products: {
-        Args: Record<PropertyKey, never>
-        Returns: Record<string, unknown>[]
-      }
-      insert_product: {
-        Args: {
-          p_name: string
-          p_price: number
-          p_category: string
-          p_image: string
-        }
-        Returns: Json
-      }
-      update_product: {
-        Args: {
-          p_id: number
-          p_name: string
-          p_price: number
-          p_category: string
-          p_image: string
-        }
-        Returns: Json
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

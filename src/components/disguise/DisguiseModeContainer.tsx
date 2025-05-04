@@ -5,7 +5,6 @@ import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 import { useDisguiseProducts } from "@/hooks/useDisguiseProducts";
 import { useProductEditing } from "./hooks/useProductEditing";
 import { Product } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
 
 // Components
 import { Header } from "./Header";
@@ -16,10 +15,9 @@ import { LoadingOverlay } from "./LoadingOverlay";
 import { EditProductModal } from "./modals/EditProductModal";
 import { AddProductModal } from "./modals/AddProductModal";
 import { DeleteProductModal } from "./modals/DeleteProductModal";
-import { Badge } from "@/components/ui/badge";
 
 export function DisguiseModeContainer() {
-  const { exitDisguiseMode, useLocalStorage, toggleStorageMode } = useDisguiseMode();
+  const { exitDisguiseMode } = useDisguiseMode();
   const {
     products,
     totalPages,
@@ -114,21 +112,8 @@ export function DisguiseModeContainer() {
       {/* Header */}
       <Header onExitDisguise={handleExitDisguise} onAddProduct={openAddModal} />
 
-      {/* Storage Mode Indicator */}
-      <div className="container mx-auto pt-24 pb-2 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <Badge variant={useLocalStorage ? "outline" : "default"} className={useLocalStorage ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200" : ""}>
-            {useLocalStorage ? "Modo Local" : "Modo Online"}
-          </Badge>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-xs px-2 py-1 h-auto"
-            onClick={toggleStorageMode}
-          >
-            {useLocalStorage ? "Tentar usar banco de dados" : "Usar armazenamento local"}
-          </Button>
-        </div>
+      {/* Category Filter */}
+      <div className="container mx-auto pt-24 pb-4">
         <CategoryFilter category={category} setCategory={setCategory} />
       </div>
 

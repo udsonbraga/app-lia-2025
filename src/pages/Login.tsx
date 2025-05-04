@@ -69,7 +69,7 @@ const LoginPage = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Senha</Label>
-                <Link to="/reset-password" className="text-xs text-pink-500 hover:underline">
+                <Link to="/reset-password" className="text-xs text-safelady hover:underline">
                   Esqueceu a senha?
                 </Link>
               </div>
@@ -109,7 +109,7 @@ const LoginPage = () => {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Não tem uma conta?{" "}
-              <Link to="/register" className="text-pink-500 hover:underline">
+              <Link to="/register" className="text-safelady hover:underline">
                 Cadastre-se
               </Link>
             </p>

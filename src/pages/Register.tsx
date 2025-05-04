@@ -44,9 +44,9 @@ const RegisterPage = () => {
     if (result.success) {
       toast({
         title: 'Conta criada com sucesso',
-        description: 'Bem-vindo ao Safe Lady!',
+        description: 'Verifique seu e-mail para confirmar o cadastro.',
       });
-      navigate('/home');
+      navigate('/login');
     } else {
       toast({
         title: 'Erro ao criar conta',
@@ -149,7 +149,7 @@ const RegisterPage = () => {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Já tem uma conta?{" "}
-              <Link to="/login" className="text-pink-500 hover:underline">
+              <Link to="/login" className="text-safelady hover:underline">
                 Entrar
               </Link>
             </p>
