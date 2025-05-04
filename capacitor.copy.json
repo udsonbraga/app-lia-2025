@@ -1,4 +1,0 @@
-
-{
-  "build:mobile": "vite build && npx cap sync"
-}
