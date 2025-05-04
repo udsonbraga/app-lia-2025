@@ -10,6 +10,8 @@ import SafeContact from "@/pages/SafeContact";
 import SupportNetwork from "@/pages/SupportNetwork";
 import { LoadingScreen } from "./components/LoadingScreen";
 import Help from "@/pages/Help";
+import Accessories from "@/pages/Accessories";
+import Clothing from "@/pages/Clothing";
 import "./App.css";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -62,6 +64,22 @@ function App() {
             element={
               <PrivateRoute>
                 <Help />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/acessories"
+            element={
+              <PrivateRoute>
+                <Accessories />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/clothing"
+            element={
+              <PrivateRoute>
+                <Clothing />
               </PrivateRoute>
             }
           />

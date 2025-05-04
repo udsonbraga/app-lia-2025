@@ -1,12 +1,16 @@
 
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Heart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface DisguisedModeProps {
   exitDisguiseMode: () => void;
 }
 
 export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
+  const [likedProducts, setLikedProducts] = useState<number[]>([]);
+  const navigate = useNavigate();
+  
   // Produtos da loja fictícia
   const products = [
     {
@@ -47,6 +51,20 @@ export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
     }
   ];
 
+  const toggleLike = (productId: number) => {
+    setLikedProducts(prev => {
+      if (prev.includes(productId)) {
+        return prev.filter(id => id !== productId);
+      } else {
+        return [...prev, productId];
+      }
+    });
+  };
+
+  const navigateToCategory = (path: string) => {
+    navigate(path);
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="px-4 py-6">
@@ -56,6 +74,28 @@ export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
           <p className="text-pink-700">Até 50% de desconto em itens selecionados!</p>
         </div>
         
+        {/* Categorias */}
+        <div className="flex overflow-x-auto gap-2 pb-3 mb-4">
+          <button 
+            className="whitespace-nowrap px-4 py-2 bg-pink-500 text-white rounded-full flex-shrink-0"
+            onClick={() => navigate('/home')}
+          >
+            Destaques
+          </button>
+          <button 
+            className="whitespace-nowrap px-4 py-2 bg-white border border-pink-300 text-pink-500 rounded-full flex-shrink-0"
+            onClick={() => navigate('/acessories')}
+          >
+            Acessórios
+          </button>
+          <button 
+            className="whitespace-nowrap px-4 py-2 bg-white border border-pink-300 text-pink-500 rounded-full flex-shrink-0"
+            onClick={() => navigate('/clothing')}
+          >
+            Roupas
+          </button>
+        </div>
+        
         {/* Grid de produtos */}
         <div className="grid grid-cols-2 gap-4">
           {products.map((product) => (
@@ -63,12 +103,20 @@ export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
               key={product.id} 
               className="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200"
             >
-              <div className="h-40 overflow-hidden">
+              <div className="h-40 overflow-hidden relative">
                 <img 
                   src={product.image} 
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
+                <button 
+                  className="absolute top-2 right-2 p-1.5 bg-white/80 rounded-full"
+                  onClick={() => toggleLike(product.id)}
+                >
+                  <Heart 
+                    className={`${likedProducts.includes(product.id) ? 'fill-pink-500 text-pink-500' : 'text-gray-500'} w-5 h-5`}
+                  />
+                </button>
               </div>
               <div className="p-3">
                 <h3 className="font-medium text-gray-800 text-sm">{product.name}</h3>
@@ -80,18 +128,6 @@ export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Botão escondido na parte inferior para sair do modo disfarce */}
-      <div className="fixed bottom-4 right-4 opacity-30 hover:opacity-100 transition-opacity">
-        <Button
-          onClick={exitDisguiseMode}
-          variant="outline"
-          size="sm"
-          className="bg-white shadow-md"
-        >
-          Sair
-        </Button>
       </div>
     </div>
   );
