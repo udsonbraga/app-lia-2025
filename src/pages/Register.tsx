@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
-import { validateForm } from "@/features/auth/utils/formValidation";
+import { useAuth } from '@/hooks/useAuth';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const { localSignUp, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState('');
@@ -18,6 +19,7 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,37 +44,23 @@ const RegisterPage = () => {
     setIsLoading(true);
     
     try {
-      // Check if user already exists in local storage
-      const storedUsers = localStorage.getItem('users');
-      const users = storedUsers ? JSON.parse(storedUsers) : [];
+      const result = await localSignUp(name, email, password);
       
-      const userExists = users.some((user: any) => user.email === email);
-      
-      if (userExists) {
+      if (result.success) {
+        setRegistrationSuccess(true);
+        
+        // Redirecionar para a página de login após 3 segundos
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      } else {
         toast({
-          title: "Email já cadastrado",
-          description: "Já existe uma conta com este email. Tente fazer login.",
-          variant: "destructive",
+          title: "Erro ao criar conta",
+          description: result.error || "Não foi possível criar sua conta. Tente novamente.",
+          variant: 'destructive',
         });
-        setIsLoading(false);
-        return;
       }
-      
-      // Add the new user to local storage
-      const newUser = { name, email, password };
-      users.push(newUser);
-      localStorage.setItem('users', JSON.stringify(users));
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Cadastro realizado com sucesso",
-        description: "Agora você pode fazer login com sua conta.",
-      });
-      
-      // Navigate to login page after successful registration
-      navigate('/login');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao registrar:', error);
       toast({
         title: 'Erro ao criar conta',
@@ -83,6 +71,31 @@ const RegisterPage = () => {
       setIsLoading(false);
     }
   };
+
+  // Tela de sucesso
+  if (registrationSuccess) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Cadastro realizado com sucesso!</h2>
+            <p className="text-gray-600 mb-6">Sua conta foi criada com sucesso. Você será redirecionado para a página de login em instantes.</p>
+            <Button 
+              onClick={() => navigate('/login')} 
+              className="w-full bg-[#FF84C6] hover:bg-[#FF5AA9] text-white"
+            >
+              Ir para o login agora
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white flex items-center justify-center p-4">
@@ -105,6 +118,7 @@ const RegisterPage = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className={`pl-10 ${errors.name ? 'border-red-500' : ''}`}
+                  disabled={isLoading || authLoading}
                 />
                 {errors.name && (
                   <p className="mt-1 text-xs text-red-500">{errors.name}</p>
@@ -123,6 +137,7 @@ const RegisterPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                  disabled={isLoading || authLoading}
                 />
                 {errors.email && (
                   <p className="mt-1 text-xs text-red-500">{errors.email}</p>
@@ -141,11 +156,13 @@ const RegisterPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={`pl-10 ${errors.password ? 'border-red-500' : ''}`}
+                  disabled={isLoading || authLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  disabled={isLoading || authLoading}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -170,6 +187,7 @@ const RegisterPage = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className={`pl-10 ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                  disabled={isLoading || authLoading}
                 />
                 {errors.confirmPassword && (
                   <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>
@@ -180,9 +198,9 @@ const RegisterPage = () => {
             <Button
               type="submit"
               className="w-full bg-[#FF84C6] hover:bg-[#FF5AA9] text-white"
-              disabled={isLoading}
+              disabled={isLoading || authLoading}
             >
-              {isLoading ? "Criando conta..." : "Criar conta"}
+              {isLoading || authLoading ? "Criando conta..." : "Criar conta"}
             </Button>
           </form>
 

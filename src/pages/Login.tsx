@@ -6,10 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { localSignIn, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,39 +35,16 @@ const LoginPage = () => {
     setIsLoading(true);
 
     try {
-      // Check for stored users
-      const storedUsers = localStorage.getItem('users');
-      const users = storedUsers ? JSON.parse(storedUsers) : [];
+      const result = await localSignIn(email, password);
       
-      const foundUser = users.find((user: any) => 
-        user.email === email && user.password === password
-      );
-      
-      if (foundUser) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('userName', foundUser.name);
-        
-        toast({
-          title: "Login efetuado com sucesso",
-          description: `Bem-vinda de volta, ${foundUser.name}!`,
-        });
-        
-        navigate('/home');
-      } else if (email === "usuario@teste.com" && password === "senha123") {
-        // Fallback test user
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('userName', 'Usuária Teste');
-        
-        toast({
-          title: "Login efetuado com sucesso",
-          description: "Bem-vinda de volta, Usuária Teste!",
-        });
-        
+      if (result.success) {
         navigate('/home');
       } else {
-        throw new Error("Credenciais inválidas");
+        toast({
+          title: "Erro ao fazer login",
+          description: result.error || "Usuário não cadastrado ou senha incorreta",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       toast({
@@ -99,6 +78,7 @@ const LoginPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                  disabled={isLoading || authLoading}
                 />
                 {errors.email && (
                   <p className="mt-1 text-xs text-red-500">{errors.email}</p>
@@ -122,11 +102,13 @@ const LoginPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={`pl-10 ${errors.password ? 'border-red-500' : ''}`}
+                  disabled={isLoading || authLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  disabled={isLoading || authLoading}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -143,9 +125,9 @@ const LoginPage = () => {
             <Button
               type="submit"
               className="w-full bg-[#FF84C6] hover:bg-[#FF5AA9] text-white"
-              disabled={isLoading}
+              disabled={isLoading || authLoading}
             >
-              {isLoading ? "Entrando..." : "Entrar"}
+              {isLoading || authLoading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
 
