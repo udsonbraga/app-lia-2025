@@ -5,17 +5,17 @@ import { DisguiseModeContainer } from "@/components/disguise/DisguiseModeContain
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 
 const DisguiseModePage: React.FC = () => {
-  const { exitDisguiseMode } = useDisguiseMode();
+  const { exitDisguiseMode, initializeProducts } = useDisguiseMode();
 
   // Initialize products when the component mounts
   useEffect(() => {
     // This will ensure we have products to display when entering disguise mode
     const initializeData = async () => {
-      // Any initial setup for disguise mode can go here
+      await initializeProducts();
     };
     
     initializeData();
-  }, []);
+  }, [initializeProducts]);
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

@@ -128,7 +128,49 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_table_exists: {
+        Args: { table_name: string }
+        Returns: boolean
+      }
+      count_products: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      create_products_table: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      delete_product: {
+        Args: { p_id: number }
+        Returns: boolean
+      }
+      exec_sql: {
+        Args: { sql: string }
+        Returns: undefined
+      }
+      get_all_products: {
+        Args: Record<PropertyKey, never>
+        Returns: Record<string, unknown>[]
+      }
+      insert_product: {
+        Args: {
+          p_name: string
+          p_price: number
+          p_category: string
+          p_image: string
+        }
+        Returns: Json
+      }
+      update_product: {
+        Args: {
+          p_id: number
+          p_name: string
+          p_price: number
+          p_category: string
+          p_image: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
