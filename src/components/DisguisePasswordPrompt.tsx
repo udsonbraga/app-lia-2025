@@ -1,18 +1,13 @@
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Lock, X } from "lucide-react";
+import { X } from "lucide-react";
 
 interface DisguisePasswordPromptProps {
-  password: string;
-  onPasswordChange: (password: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
 }
 
 export function DisguisePasswordPrompt({
-  password,
-  onPasswordChange,
   onSubmit,
   onCancel,
 }: DisguisePasswordPromptProps) {
@@ -28,31 +23,18 @@ export function DisguisePasswordPrompt({
         
         <div className="flex flex-col items-center mb-6">
           <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mb-4">
-            <Lock className="h-6 w-6 text-rose-500" />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
           <h2 className="text-xl font-semibold text-gray-800">Modo Disfarce</h2>
           <p className="text-sm text-gray-600 text-center mt-2">
-            Defina uma senha para ativar o modo disfarce. Você precisará desta senha para voltar ao modo normal.
+            Você está prestes a ativar o modo disfarce. Este modo transformará o aplicativo em uma loja de roupas para proteger sua privacidade.
           </p>
         </div>
         
         <form onSubmit={onSubmit}>
           <div className="space-y-4">
-            <div>
-              <label htmlFor="disguise-password" className="block text-sm font-medium text-gray-700 mb-1">
-                Senha
-              </label>
-              <Input
-                id="disguise-password"
-                type="password"
-                value={password}
-                onChange={(e) => onPasswordChange(e.target.value)}
-                placeholder="Digite uma senha segura"
-                className="w-full"
-                required
-              />
-            </div>
-            
             <div className="flex gap-2 justify-end">
               <Button
                 type="button"

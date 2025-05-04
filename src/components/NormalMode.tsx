@@ -13,8 +13,6 @@ interface NormalModeProps {
 
 export function NormalMode({
   showPasswordPrompt,
-  disguisePassword,
-  onPasswordChange,
   onDisguiseSubmit,
   onCancel
 }: NormalModeProps) {
@@ -22,8 +20,6 @@ export function NormalMode({
     <div className="flex-1 flex flex-col items-center justify-center">
       {showPasswordPrompt && (
         <DisguisePasswordPrompt
-          password={disguisePassword}
-          onPasswordChange={onPasswordChange}
           onSubmit={onDisguiseSubmit}
           onCancel={onCancel}
         />

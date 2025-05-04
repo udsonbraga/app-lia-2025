@@ -7,20 +7,13 @@ import { NormalMode } from "@/components/NormalMode";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 import { useFinancialNotes } from "@/hooks/useFinancialNotes";
 import { useMotionDetector } from "@/hooks/useMotionDetector";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 
 const Index = () => {
   const {
     isDisguised,
-    disguisePassword,
     showPasswordPrompt,
-    showExitPasswordPrompt,
-    setDisguisePassword,
     setShowPasswordPrompt,
-    setShowExitPasswordPrompt,
     handleDisguiseSubmit,
     toggleDisguise,
     exitDisguiseMode
@@ -36,7 +29,6 @@ const Index = () => {
     setNoteToEdit
   } = useFinancialNotes();
 
-  const [exitPassword, setExitPassword] = useState("");
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   // Use motion detector
@@ -85,12 +77,13 @@ const Index = () => {
             handleEditNote={handleEditNote}
             handleDeleteNote={handleDeleteNote}
             setNoteToEdit={setNoteToEdit}
+            exitDisguiseMode={exitDisguiseMode}
           />
         ) : (
           <NormalMode 
             showPasswordPrompt={showPasswordPrompt}
-            disguisePassword={disguisePassword}
-            onPasswordChange={setDisguisePassword}
+            disguisePassword={""}
+            onPasswordChange={() => {}}
             onDisguiseSubmit={handleDisguiseSubmit}
             onCancel={() => setShowPasswordPrompt(false)}
           />
@@ -102,38 +95,6 @@ const Index = () => {
           © 2025 SafeLady. Todos os direitos reservados.
         </div>
       )}
-
-      {/* Exit Disguise Mode Password Dialog */}
-      <Dialog open={showExitPasswordPrompt} onOpenChange={setShowExitPasswordPrompt}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-center">Verificação de Senha</DialogTitle>
-            <DialogDescription className="text-center">
-              Para sair do modo disfarce, digite sua senha.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="p-4">
-            <Input
-              type="password"
-              value={exitPassword}
-              onChange={(e) => setExitPassword(e.target.value)}
-              placeholder="Digite sua senha"
-              className="mb-4"
-            />
-          </div>
-          <DialogFooter className="flex flex-col sm:flex-row sm:justify-center gap-2">
-            <Button variant="outline" onClick={() => setShowExitPasswordPrompt(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={() => {
-              exitDisguiseMode(exitPassword);
-              setExitPassword("");
-            }}>
-              Confirmar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
