@@ -10,6 +10,7 @@ import Customize from "./pages/Customize";
 import Help from "./pages/Help";
 import Accessibility from "./pages/Accessibility";
 import NotFound from "./pages/NotFound";
+import DisguiseModePage from "./pages/DisguiseMode"; // Import the DisguiseMode page
 import { LoadingScreen } from './components/LoadingScreen';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -96,6 +97,12 @@ function AppRoutes() {
       <Route path="/accessibility" element={
         <RequireAuth>
           <Accessibility />
+        </RequireAuth>
+      } />
+      {/* Adicionar rota de disfarce */}
+      <Route path="/disguise" element={
+        <RequireAuth>
+          <DisguiseModePage />
         </RequireAuth>
       } />
       

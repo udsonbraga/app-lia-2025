@@ -1,389 +1,293 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Camera, Save, MapPin, Trash2, FileDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { Input } from "@/components/ui/input";
-import html2pdf from 'html2pdf.js';
-import { useDiaryEntries } from '@/hooks/useDiaryEntries';
-import { useAuth } from '@/hooks/useAuth';
 
-interface DiaryEntry {
-  id: string;
-  text: string;
-  attachments: Array<{
-    name: string;
-    url?: string;
-  }>;
-  location: string;
-  createdAt: Date;
-}
+import React, { useState, useEffect } from 'react';
+import { Header } from '@/components/Header';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { LoadingScreen } from '@/components/LoadingScreen';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { useDiaryEntries } from '@/hooks/useDiaryEntries';
+import { MapPin, Paperclip, Trash2 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 const Diary = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const { entries, isLoading, addEntry, removeEntry, uploadImage } = useDiaryEntries();
+  const [newEntry, setNewEntry] = useState('');
+  const [location, setLocation] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
-  const [text, setText] = useState("");
-  const [location, setLocation] = useState("");
-  const [attachments, setAttachments] = useState<File[]>([]);
-  const [attachmentPreviews, setAttachmentPreviews] = useState<Array<{file: File, url: string}>>([]);
-  const [userName, setUserName] = useState<string>("");
+  const { toast } = useToast();
   
-  const {
-    entries,
-    isLoading,
-    addEntry,
-    removeEntry,
-    uploadImage
-  } = useDiaryEntries();
-
   useEffect(() => {
-    const storedName = localStorage.getItem("userName");
-    if (storedName) {
-      setUserName(storedName);
-    }
-    
-    // Se o usuário estiver autenticado, usar o nome do perfil
-    if (user) {
-      const name = user.user_metadata?.name || '';
-      setUserName(name);
-      if (name) {
-        localStorage.setItem("userName", name);
-      }
-    }
-  }, [user]);
-
-  const handleAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      const newFiles = Array.from(files);
-      setAttachments(prev => [...prev, ...newFiles]);
-      
-      // Create previews for images
-      newFiles.forEach(file => {
-        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-          const url = URL.createObjectURL(file);
-          setAttachmentPreviews(prev => [...prev, {file, url}]);
+    // Tentar obter localização atual se permitido
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const latitude = position.coords.latitude.toFixed(6);
+          const longitude = position.coords.longitude.toFixed(6);
+          setLocation(`${latitude}, ${longitude}`);
+        },
+        (error) => {
+          console.log('Erro ao obter localização:', error);
+          setLocation('Localização não disponível');
         }
-      });
+      );
     }
-  };
+  }, []);
 
-  const handleSave = async () => {
-    if (!text.trim()) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newEntry.trim() === '') {
       toast({
-        title: "Erro ao salvar",
-        description: "O texto não pode estar vazio.",
-        variant: "destructive",
+        title: 'Campo obrigatório',
+        description: 'Por favor, escreva algo no seu relato.',
+        variant: 'destructive',
       });
       return;
     }
 
+    setIsSubmitting(true);
     try {
-      // Fazer upload das imagens primeiro
-      const uploadedAttachments = [];
+      // Array para armazenar informações dos arquivos anexados
+      const attachments = [];
       
-      for (const file of attachments) {
-        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-          const result = await uploadImage(file, user?.id);
-          if (result.success) {
-            uploadedAttachments.push({
-              name: result.name,
-              url: result.url
-            });
-          }
-        } else {
-          // Para arquivos não-imagem, apenas armazenar o nome
-          uploadedAttachments.push({
-            name: file.name
+      // Upload de cada arquivo selecionado
+      for (const file of selectedFiles) {
+        const userId = user?.id || 'anonymous'; 
+        const result = await uploadImage(file, userId);
+        
+        if (result.success) {
+          attachments.push({
+            name: result.name,
+            url: result.url
           });
         }
       }
-
-      // Criar a entrada do diário
-      const result = await addEntry({
-        text,
-        location: location || "Não informado",
-        attachments: uploadedAttachments
+      
+      // Adicionar entrada com os anexos
+      await addEntry({
+        text: newEntry,
+        location: location,
+        attachments: attachments
       });
-
-      if (result.success) {
-        setText("");
-        setLocation("");
-        setAttachments([]);
-        setAttachmentPreviews([]);
-
-        toast({
-          title: "Diário salvo",
-          description: "Suas anotações foram salvas com sucesso.",
-        });
-      }
+      
+      setNewEntry('');
+      setSelectedFiles([]);
+      
+      toast({
+        title: 'Relato salvo',
+        description: 'Seu relato foi adicionado com sucesso.',
+      });
     } catch (error) {
-      console.error("Erro ao salvar diário:", error);
+      console.error('Erro ao adicionar entrada:', error);
       toast({
-        title: "Erro ao salvar",
-        description: "Ocorreu um erro ao salvar suas anotações.",
-        variant: "destructive",
+        title: 'Erro ao salvar',
+        description: 'Não foi possível salvar seu relato.',
+        variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleDeleteEntry = async (id: string) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setSelectedFiles(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDelete = async (id: string) => {
     const result = await removeEntry(id);
-    if (result.success) {
+    if (!result.success) {
       toast({
-        title: "Relato removido",
-        description: "O relato foi removido com sucesso.",
+        title: 'Erro',
+        description: 'Não foi possível remover o relato.',
+        variant: 'destructive',
       });
     }
   };
 
-  const generatePDF = (entry: any) => {
-    const content = document.createElement('div');
-    const currentUserName = userName || 'Usuário';
-    
-    let imagesHtml = '';
-    if (entry.attachments && entry.attachments.some((att: any) => att.url)) {
-      imagesHtml = `
-        <h2>Imagens</h2>
-        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; margin-bottom: 20px;">
-          ${entry.attachments
-            .filter((att: any) => att.url)
-            .map((att: any) => `
-              <div style="margin-bottom: 10px;">
-                <img src="${att.url}" style="max-width: 300px; max-height: 200px; border: 1px solid #ccc; border-radius: 4px;" />
-                <p style="margin-top: 5px; font-size: 12px; color: #666;">${att.name}</p>
-              </div>
-            `).join('')}
-        </div>
-      `;
-    }
-    
-    content.innerHTML = `
-      <div style="padding: 20px; font-family: Arial, sans-serif; position: relative;">
-        <h1 style="text-align: center; color: #000000; font-size: 28px; font-weight: bold;">Relatório Seguro</h1>
-        <p><strong>Data:</strong> ${format(new Date(entry.created_at), "dd/MM/yyyy 'às' HH:mm")}</p>
-        <p><strong>Local:</strong> ${entry.location}</p>
-        <h2>Descrição da Ocorrência</h2>
-        <p style="white-space: pre-wrap;">${entry.text}</p>
-        
-        ${imagesHtml}
-        
-        ${entry.attachments && entry.attachments.length > 0 ? `
-          <h2>Anexos</h2>
-          <ul>
-            ${entry.attachments.map((attachment: any) => `<li>${attachment.name}</li>`).join('')}
-          </ul>
-        ` : ''}
-        
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; opacity: 0.1; transform: rotate(-30deg); font-size: 80px; color: #FF84C6; font-weight: bold;">
-          SAFE LADY
-        </div>
-        
-        <footer style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 10px; text-align: right; font-size: 12px; color: #666;">
-          <p>Documento gerado por: ${currentUserName}</p>
-          <p>Data de geração: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}</p>
-        </footer>
-      </div>
-    `;
-
-    const opt = {
-      margin: 10,
-      filename: `relato-${format(new Date(entry.created_at), "dd-MM-yyyy")}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    html2pdf().from(content).set(opt).save();
-
-    toast({
-      title: "PDF gerado",
-      description: "O relatório foi exportado com sucesso.",
-    });
-  };
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
-      <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-50">
-        <div className="container mx-auto h-full">
-          <div className="flex items-center justify-between h-full px-4">
-            <button
-              onClick={() => navigate('/home')}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <ArrowLeft className="h-6 w-6 text-gray-700" />
-            </button>
-            <h1 className="text-xl font-semibold">Diário Seguro</h1>
-            <div className="w-8" />
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 pt-20 pb-20">
-        <div className="max-w-2xl mx-auto space-y-6">
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="location" className="block text-sm font-medium text-gray-700">
-                Local da Ocorrência
-              </label>
-              <div className="mt-1 flex items-center">
-                <MapPin className="h-5 w-5 text-gray-400 mr-2" />
-                <Input
-                  id="location"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Onde ocorreu o incidente?"
-                  className="flex-1"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="diary-text" className="block text-sm font-medium text-gray-700">
-                Descreva o Ocorrido
-              </label>
-              <textarea
-                id="diary-text"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Escreva seus pensamentos aqui..."
-                className="w-full h-48 p-4 mt-1 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => document.getElementById('file-input')?.click()}
-                className="flex items-center gap-2"
-              >
-                <Camera className="h-6 w-6" />
-                Capturar
-              </Button>
-              <input
-                id="file-input"
-                type="file"
-                multiple
-                accept="image/*,video/*,.pdf,.doc,.docx,.txt"
-                className="hidden"
-                onChange={handleAttachment}
-              />
-            </div>
-
-            {attachmentPreviews.length > 0 && (
-              <div className="space-y-2 mt-2">
-                <p className="text-sm font-medium text-gray-700">Pré-visualização:</p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {attachmentPreviews.map((preview, index) => (
-                    <div key={index} className="border rounded-md p-2">
-                      <img 
-                        src={preview.url} 
-                        alt={preview.file.name}
-                        className="h-40 w-full object-cover rounded mb-2" 
-                      />
-                      <p className="text-xs text-gray-600 truncate">{preview.file.name}</p>
-                    </div>
-                  ))}
+    <div className="min-h-screen bg-gradient-to-b from-rose-100 to-white">
+      <Header />
+      
+      <div className="container mx-auto px-4 pt-16 pb-20">
+        <div className="mt-4">
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">Diário de Segurança</h1>
+          
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Novo Relato</CardTitle>
+              <CardDescription>
+                Registre situações de risco, assédio ou violência que você tenha vivenciado.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Textarea
+                    placeholder="Descreva o ocorrido..."
+                    value={newEntry}
+                    onChange={(e) => setNewEntry(e.target.value)}
+                    className="min-h-[120px]"
+                  />
                 </div>
-              </div>
-            )}
-
-            {attachments.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700">Anexos:</p>
-                <ul className="space-y-2">
-                  {attachments.map((file, index) => (
-                    <li key={index} className="text-sm text-gray-600">
-                      {file.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          <Button
-            onClick={handleSave}
-            disabled={isLoading}
-            className="w-full flex items-center justify-center gap-2 bg-[#FF84C6] hover:bg-[#ff6cb7] text-white"
-          >
-            <Save className="h-5 w-5" />
-            {isLoading ? "Salvando..." : "Salvar"}
-          </Button>
-
-          {entries.length > 0 && (
-            <div className="mt-8 space-y-4">
-              <h2 className="text-lg font-semibold text-gray-900">Entradas anteriores</h2>
-              <div className="divide-y divide-gray-100">
-                {entries.map((entry) => (
-                  <div key={entry.id} className="py-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <time className="text-sm text-gray-500">
-                        {format(new Date(entry.created_at), "dd/MM/yyyy 'às' HH:mm")}
-                      </time>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => generatePDF(entry)}
-                          className="p-1 text-gray-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors"
-                          title="Exportar como PDF"
-                        >
-                          <FileDown className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteEntry(entry.id)}
-                          className="p-1 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                          title="Remover relato"
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
+                
+                <div className="flex items-center gap-2">
+                  <MapPin size={16} className="text-gray-500" />
+                  <Input 
+                    value={location} 
+                    onChange={(e) => setLocation(e.target.value)} 
+                    placeholder="Localização" 
+                    className="flex-1"
+                    disabled
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="file-upload" className="cursor-pointer">
+                    <div className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800">
+                      <Paperclip size={16} />
+                      <span>Anexar fotos ou vídeos</span>
+                    </div>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      multiple
+                      accept="image/*,video/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                  
+                  {selectedFiles.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500 mb-1">Arquivos selecionados:</p>
+                      <div className="space-y-1">
+                        {selectedFiles.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between text-sm bg-gray-100 rounded px-2 py-1">
+                            <span>{file.name}</span>
+                            <button 
+                              type="button" 
+                              onClick={() => removeFile(index)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                    <div className="flex items-start gap-2 mb-2">
-                      <MapPin className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
-                      <p className="text-sm text-gray-600">{entry.location}</p>
-                    </div>
-                    <p className="text-gray-700 whitespace-pre-wrap">{entry.text}</p>
+                  )}
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button disabled={isSubmitting || newEntry.trim() === ''}>
+                    {isSubmitting ? 'Salvando...' : 'Salvar Relato'}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+          
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Histórico de Relatos</h2>
+          
+          {entries.length === 0 ? (
+            <Card>
+              <CardContent className="flex items-center justify-center p-8 text-gray-500">
+                <p>Nenhum relato registrado ainda.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <ScrollArea className="h-[400px] rounded-lg border">
+              <div className="space-y-4 p-4">
+                {entries.map((entry, index) => (
+                  <Card key={entry.id} className="bg-white">
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-md font-semibold">
+                          {formatDistanceToNow(new Date(entry.created_at), { 
+                            addSuffix: true,
+                            locale: ptBR 
+                          })}
+                        </CardTitle>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Trash2 size={16} className="text-gray-500 hover:text-red-500" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja excluir este relato? Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(entry.id)} className="bg-red-500 hover:bg-red-600">
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                      <div className="flex items-center text-xs text-gray-500">
+                        <MapPin size={12} className="mr-1" />
+                        <span>{entry.location}</span>
+                      </div>
+                    </CardHeader>
                     
-                    {entry.attachments && entry.attachments.some((att: any) => att.url) && (
-                      <div className="mt-4">
-                        <h4 className="text-sm font-medium mb-2">Imagens:</h4>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                          {entry.attachments
-                            .filter((att: any) => att.url)
-                            .map((att: any, idx: number) => (
-                              <div key={idx} className="border rounded-md overflow-hidden">
+                    <CardContent>
+                      <p className="whitespace-pre-line text-gray-700">{entry.text}</p>
+                      
+                      {entry.attachments && entry.attachments.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-xs text-gray-500 mb-2">Anexos:</p>
+                          <div className="grid grid-cols-3 gap-2">
+                            {entry.attachments.map((attachment: any, idx: number) => (
+                              <a 
+                                key={idx} 
+                                href={attachment.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="block"
+                              >
                                 <img 
-                                  src={att.url} 
-                                  alt={att.name}
-                                  className="h-32 w-full object-cover" 
+                                  src={attachment.url} 
+                                  alt={attachment.name || 'Anexo'} 
+                                  className="rounded object-cover h-20 w-full"
                                 />
-                              </div>
+                              </a>
                             ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </CardContent>
                     
-                    {entry.attachments && entry.attachments.length > 0 && (
-                      <div className="mt-2">
-                        <p className="text-sm font-medium text-gray-600">Anexos:</p>
-                        <ul className="mt-1 space-y-1">
-                          {entry.attachments.map((attachment: any, index: number) => (
-                            <li key={index} className="text-sm text-gray-500">
-                              {attachment.name}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
+                    {index < entries.length - 1 && <Separator />}
+                  </Card>
                 ))}
               </div>
-            </div>
+            </ScrollArea>
           )}
         </div>
       </div>

@@ -6,7 +6,7 @@ import { Product } from '@/lib/supabase';
 export const countProducts = async () => {
   try {
     // Verificamos se a tabela de produtos existe
-    const { data, error } = await supabase.rpc('count_products');
+    const { data, error } = await supabase.rpc('count_products', {});
     
     if (error && error.message.includes('does not exist')) {
       // A tabela não existe, retornamos 0
@@ -32,7 +32,7 @@ export const createSampleProducts = async () => {
     // Se a tabela não existir, criamos ela
     if (tableError && tableError.message.includes('does not exist')) {
       // Criar tabela de produtos
-      await supabase.rpc('create_products_table');
+      await supabase.rpc('create_products_table', {});
     }
     
     const sampleProducts = [
@@ -97,7 +97,7 @@ export const fetchProducts = async () => {
     }
     
     // Buscar produtos usando RPC
-    const { data, error } = await supabase.rpc('get_all_products');
+    const { data, error } = await supabase.rpc('get_all_products', {});
     
     if (error) throw error;
     return { success: true, data: data || [] };
