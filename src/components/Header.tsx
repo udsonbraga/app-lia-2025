@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { MainDrawer } from "@/components/MainDrawer";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Eye, EyeOff, UserCircle, Store } from "lucide-react";
+import { ArrowLeft, UserCircle, Store } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
   isDisguised: boolean;
@@ -38,22 +38,26 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
           <div className="flex items-center">
             {/* Only show drawer menu when not in disguise mode */}
             {!isDisguised && <MainDrawer />}
+            
+            {/* Back button for disguise mode */}
+            {isDisguised && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="mr-2 p-1"
+                onClick={toggleDisguise}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            )}
           </div>
           
           <h1 className="text-xl font-semibold">
-            {isDisguised ? 'Finanças Pessoais' : 'Safe Lady'}
+            {isDisguised ? 'Moda Elegante' : 'Safe Lady'}
           </h1>
           
           <div className="flex items-center gap-3">
-            {isDisguised ? (
-              <button 
-                onClick={toggleDisguise}
-                className="flex items-center gap-2 text-sm px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"
-              >
-                <EyeOff className="h-5 w-5 text-gray-600" />
-                <span className="hidden sm:inline text-gray-600">Sair</span>
-              </button>
-            ) : (
+            {!isDisguised && (
               <button 
                 onClick={toggleDisguise}
                 className="flex items-center gap-2 text-sm px-2 py-1 rounded-md hover:bg-gray-100 transition-colors"

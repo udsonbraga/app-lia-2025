@@ -211,7 +211,7 @@ export function DisguisedMode({
         id: 24,
         name: "Ankle Boot",
         price: 239.90,
-        image: "https://images.unsplash.com/photo-1543994571-65e9cf0a6f63?q=80&w=500",
+        image: "https://images.unsplash.com/photo-1512389142860-9c449e58a543?q=80&w=500",
         category: "calçado"
       },
       {
@@ -225,7 +225,7 @@ export function DisguisedMode({
         id: 26,
         name: "Mocassim de Couro",
         price: 179.90,
-        image: "https://images.unsplash.com/photo-1626947346165-4c2288dadc2d?q=80&w=500",
+        image: "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?q=80&w=500",
         category: "calçado"
       },
       {
@@ -269,7 +269,7 @@ export function DisguisedMode({
         id: 32,
         name: "Colar de Pérolas",
         price: 119.90,
-        image: "https://images.unsplash.com/photo-1602751584581-91565acc5a51?q=80&w=500",
+        image: "https://images.unsplash.com/photo-1611085367031-7344c2e4981b?q=80&w=500",
         category: "acessório"
       },
       {
@@ -283,14 +283,14 @@ export function DisguisedMode({
         id: 34,
         name: "Colar Longo Boho",
         price: 79.90,
-        image: "https://images.unsplash.com/photo-1611234877954-e1aca5300dbd?q=80&w=500",
+        image: "https://images.unsplash.com/photo-1622398925373-3f91b1e275f5?q=80&w=500",
         category: "acessório"
       },
       {
         id: 35,
         name: "Choker Gótico",
         price: 59.90,
-        image: "https://images.unsplash.com/photo-1574723205475-f785c1f1c50f?q=80&w=500",
+        image: "https://images.unsplash.com/photo-1551844547-d26d5903d265?q=80&w=500",
         category: "acessório"
       },
       {
@@ -325,7 +325,7 @@ export function DisguisedMode({
         id: 40,
         name: "Colar Camafeu Vintage",
         price: 129.90,
-        image: "https://images.unsplash.com/photo-1644172302522-d2ea805fe899?q=80&w=500",
+        image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=500",
         category: "acessório"
       },
       {
@@ -346,21 +346,21 @@ export function DisguisedMode({
         id: 43,
         name: "Colar Cascata",
         price: 169.90,
-        image: "https://images.unsplash.com/photo-1599459183200-59c7687a0a6e?q=80&w=500",
+        image: "https://images.unsplash.com/photo-1627293509201-cd0c780043e6?q=80&w=500",
         category: "acessório"
       },
       {
         id: 44,
         name: "Colar Família",
         price: 89.90,
-        image: "https://images.unsplash.com/photo-1563949193126-eca0142f1319?q=80&w=500",
+        image: "https://images.unsplash.com/photo-1631751048352-2d4bd7c5af9c?q=80&w=500",
         category: "acessório"
       },
       {
         id: 45,
         name: "Colar Relicário",
         price: 109.90,
-        image: "https://images.unsplash.com/photo-1587308550198-02d410e0bdb0?q=80&w=500",
+        image: "https://images.unsplash.com/photo-1611107683227-e9060eccd846?q=80&w=500",
         category: "acessório"
       },
       {
@@ -398,7 +398,7 @@ export function DisguisedMode({
           onClick={exitDisguiseMode}
         >
           <ArrowLeft className="h-5 w-5" />
-          <span className="sr-only">Sair do modo disfarce</span>
+          <span className="sr-only">Voltar</span>
         </Button>
       </div>
       

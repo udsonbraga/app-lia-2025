@@ -82,9 +82,6 @@ const Index = () => {
         ) : (
           <NormalMode 
             showPasswordPrompt={showPasswordPrompt}
-            disguisePassword={""}
-            onPasswordChange={() => {}}
-            onDisguiseSubmit={handleDisguiseSubmit}
             onCancel={() => setShowPasswordPrompt(false)}
           />
         )}
