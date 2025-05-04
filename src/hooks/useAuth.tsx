@@ -1,11 +1,14 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
-import { Session, User } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
 
+interface User {
+  id: string;
+  email: string;
+  name: string;
+}
+
 interface AuthContextType {
-  session: Session | null;
   user: User | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{
@@ -22,50 +25,63 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Primeiro configura o listener para mudanças de estado de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        
-        if (event === 'SIGNED_IN') {
-          toast({
-            title: "Login realizado com sucesso",
-            description: "Bem-vindo de volta!",
-          });
-        } else if (event === 'SIGNED_OUT') {
-          toast({
-            title: "Logout realizado com sucesso",
-            description: "Você saiu da sua conta.",
-          });
-        }
+    // Check for stored authentication on mount
+    const checkAuth = () => {
+      const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+      if (isAuthenticated) {
+        const userName = localStorage.getItem('userName') || '';
+        const userEmail = localStorage.getItem('userEmail') || '';
+        const userId = localStorage.getItem('userId') || '';
+        setUser({
+          id: userId,
+          name: userName,
+          email: userEmail
+        });
       }
-    );
-
-    // Depois busca a sessão atual
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
       setIsLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
     };
+    
+    checkAuth();
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      return { success: true };
+      
+      // Check for stored users
+      const storedUsers = localStorage.getItem('users');
+      const users = storedUsers ? JSON.parse(storedUsers) : [];
+      
+      const foundUser = users.find((user: any) => 
+        user.email === email && user.password === password
+      );
+      
+      if (foundUser) {
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('userName', foundUser.name);
+        localStorage.setItem('userEmail', foundUser.email);
+        localStorage.setItem('userId', foundUser.id || crypto.randomUUID());
+        
+        setUser({
+          id: foundUser.id || crypto.randomUUID(),
+          name: foundUser.name,
+          email: foundUser.email
+        });
+        
+        toast({
+          title: "Login realizado com sucesso",
+          description: `Bem-vindo de volta, ${foundUser.name}!`,
+        });
+        
+        return { success: true };
+      } else {
+        throw new Error("Credenciais inválidas");
+      }
     } catch (error: any) {
       console.error('Erro ao fazer login:', error);
       return { success: false, error: error.message };
@@ -77,18 +93,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, name: string) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          data: { name }
-        }
+      
+      // Check for existing users
+      const storedUsers = localStorage.getItem('users');
+      const users = storedUsers ? JSON.parse(storedUsers) : [];
+      
+      const userExists = users.some((user: any) => user.email === email);
+      
+      if (userExists) {
+        return { 
+          success: false, 
+          error: "Já existe uma conta com este email. Tente fazer login." 
+        };
+      }
+      
+      // Create new user
+      const userId = crypto.randomUUID();
+      const newUser = {
+        id: userId,
+        name: name,
+        email: email,
+        password: password
+      };
+      
+      // Add to users list
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      // Set as authenticated
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userName', name);
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userId', userId);
+      
+      // Update state
+      setUser({
+        id: userId,
+        name: name,
+        email: email
       });
-      if (error) throw error;
+      
       toast({
         title: "Conta criada com sucesso",
-        description: "Verifique seu e-mail para confirmar o cadastro.",
+        description: "Bem-vindo ao Safe Lady!",
       });
+      
       return { success: true };
     } catch (error: any) {
       console.error('Erro ao registrar:', error);
@@ -100,12 +149,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     setIsLoading(true);
-    await supabase.auth.signOut();
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userId');
+    setUser(null);
     setIsLoading(false);
+    
+    toast({
+      title: "Logout realizado com sucesso",
+      description: "Você saiu da sua conta.",
+    });
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, isLoading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, isLoading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

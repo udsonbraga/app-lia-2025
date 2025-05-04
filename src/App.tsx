@@ -36,14 +36,6 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-  // Defina o estado para controlar se o modo de disfarce está ativado
-  const [disguiseMode, setDisguiseMode] = useState(false);
-
-  // Função para alternar o modo de disfarce
-  const toggleDisguiseMode = () => {
-    setDisguiseMode(!disguiseMode);
-  };
-
   return (
     <AuthProvider>
       <AppContent />
