@@ -15,7 +15,9 @@ export const useDisguiseMode = () => {
     getProducts,
     updateProduct,
     addProduct,
-    deleteProduct
+    deleteProduct,
+    useLocalStorage,
+    toggleStorageMode
   } = useProductOperations();
 
   return {
@@ -30,6 +32,10 @@ export const useDisguiseMode = () => {
     getProducts,
     updateProduct,
     addProduct,
-    deleteProduct
+    deleteProduct,
+    
+    // Storage mode
+    useLocalStorage,
+    toggleStorageMode
   };
 };
