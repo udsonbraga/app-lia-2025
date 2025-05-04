@@ -3,6 +3,8 @@ import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { handleEmergencyAlert } from "@/utils/emergencyUtils";
+import { getCurrentPosition } from "@/utils/geolocationUtils";
+import { sendTelegramMessage } from "@/utils/telegramUtils";
 
 export function EmergencyButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -12,11 +14,7 @@ export function EmergencyButton() {
     setIsLoading(true);
     
     try {
-      await handleEmergencyAlert();
-      toast({
-        title: "Alerta de emergência enviado",
-        description: "Alertas enviados para seus contatos de emergência.",
-      });
+      await handleEmergencyAlert({ toast });
     } catch (error) {
       console.error("Erro ao enviar alerta de emergência:", error);
       toast({

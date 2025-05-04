@@ -10,9 +10,13 @@ import Header from "@/components/safe-contact/Header";
 import ContactList from "@/components/safe-contact/ContactList";
 import AddContactForm from "@/components/safe-contact/AddContactForm";
 import PremiumDialog from "@/components/safe-contact/PremiumDialog";
+import PasswordDialog from "@/components/safe-contact/PasswordDialog";
 
 const SafeContactPage = () => {
   const navigate = useNavigate();
+  const { isDisguised } = useDisguiseMode();
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [password, setPassword] = useState("");
   
   const {
     contacts,
@@ -32,7 +36,26 @@ const SafeContactPage = () => {
   } = useSafeContacts();
 
   const handleNavigateBack = () => {
-    navigate('/home');
+    if (isDisguised) {
+      setShowPasswordDialog(true);
+    } else {
+      navigate('/home');
+    }
+  };
+
+  const handlePasswordSubmit = () => {
+    const savedPassword = localStorage.getItem('disguisePassword');
+    if (password === savedPassword) {
+      navigate('/home');
+    } else {
+      useToast().toast({
+        title: "Senha incorreta",
+        description: "A senha fornecida não está correta.",
+        variant: "destructive",
+      });
+    }
+    setPassword("");
+    setShowPasswordDialog(false);
   };
 
   return (
@@ -83,6 +106,14 @@ const SafeContactPage = () => {
         open={showPremiumDialog} 
         onOpenChange={setShowPremiumDialog} 
         onUpgradeToPremium={upgradeToPremium}
+      />
+
+      <PasswordDialog
+        open={showPasswordDialog}
+        onOpenChange={setShowPasswordDialog}
+        password={password}
+        onPasswordChange={setPassword}
+        onSubmit={handlePasswordSubmit}
       />
     </div>
   );

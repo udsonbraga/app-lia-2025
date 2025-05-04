@@ -2,15 +2,13 @@
 import { useNavigate } from "react-router-dom";
 import { MainDrawer } from "@/components/MainDrawer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserCircle, EyeOff } from "lucide-react";
+import { UserCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 
 export function Header() {
   const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>("");
-  const { isDisguiseActive, toggleDisguiseMode } = useDisguiseMode();
 
   useEffect(() => {
     // Get user avatar and name from localStorage
@@ -38,24 +36,15 @@ export function Header() {
           
           <div className="flex items-center gap-3">
             <div className="flex items-center">
-              {userName && !isDisguiseActive && (
+              {userName && (
                 <span className="text-sm font-medium mr-2 hidden sm:block">{userName}</span>
               )}
-              <button 
-                onClick={toggleDisguiseMode}
-                className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-all"
-              >
-                {isDisguiseActive ? (
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={avatarUrl || ""} alt="Avatar" />
-                    <AvatarFallback>
-                      {userName ? userName.charAt(0).toUpperCase() : <UserCircle className="h-8 w-8" />}
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <EyeOff className="h-6 w-6 text-gray-700" />
-                )}
-              </button>
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={avatarUrl || ""} alt="Avatar" />
+                <AvatarFallback>
+                  {userName ? userName.charAt(0).toUpperCase() : <UserCircle className="h-8 w-8" />}
+                </AvatarFallback>
+              </Avatar>
             </div>
           </div>
         </div>
