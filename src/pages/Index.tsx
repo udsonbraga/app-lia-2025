@@ -70,13 +70,6 @@ const Index = () => {
         
         {isDisguised ? (
           <DisguisedMode 
-            notes={notes}
-            noteToEdit={noteToEdit}
-            handleSaveNote={handleSaveNote}
-            toggleNotePaid={toggleNotePaid}
-            handleEditNote={handleEditNote}
-            handleDeleteNote={handleDeleteNote}
-            setNoteToEdit={setNoteToEdit}
             exitDisguiseMode={exitDisguiseMode}
           />
         ) : (

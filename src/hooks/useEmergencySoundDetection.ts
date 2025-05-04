@@ -2,7 +2,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { EMERGENCY_KEYWORDS } from "@/constants/emergencyKeywords";
-import { handleEmergencyAlert } from "@/utils/emergencyUtils";
 
 /**
  * Hook for handling emergency sound detection functionality
@@ -12,7 +11,11 @@ export function useEmergencySoundDetection() {
   const { toast } = useToast();
 
   const handleEmergencyDetected = useCallback(async () => {
-    await handleEmergencyAlert({ toast });
+    toast({
+      title: "Palavra de emergência detectada",
+      description: "Esta funcionalidade está desativada para envio de mensagens.",
+      variant: "destructive"
+    });
   }, [toast]);
 
   useEffect(() => {

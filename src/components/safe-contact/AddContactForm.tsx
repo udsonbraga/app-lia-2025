@@ -3,10 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SafeContact } from "@/features/support-network/types";
-import { Separator } from "@/components/ui/separator";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp, Save, User, Phone, MessageCircle, Users, ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { User, Phone, MessageCircle, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface AddContactFormProps {
@@ -24,24 +21,12 @@ const AddContactForm = ({
   onCancel,
   isEditing = false,
 }: AddContactFormProps) => {
-  const [isWhatsappOpen, setIsWhatsappOpen] = useState(false);
-
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, "");
     if (numbers.length <= 11) {
       return numbers.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
     }
     return value;
-  };
-
-  // Preencher com os dados da Twilio fornecidos pelo usuário
-  const handlePrefillTwilioData = () => {
-    onNewContactChange({
-      ...newContact,
-      twilioAccountSid: "ACa442b3fbd9216a4ba74662505c414e2b",
-      twilioAuthToken: "a9cfb35d626f6eb0ac331d2740aa211f",
-      twilioWhatsappNumber: "+18312176749"
-    });
   };
 
   return (
@@ -121,93 +106,6 @@ const AddContactForm = ({
           </div>
         </div>
 
-        <Separator className="my-2" />
-
-        <Collapsible
-          open={isWhatsappOpen}
-          onOpenChange={setIsWhatsappOpen}
-          className="w-full border rounded-md overflow-hidden"
-        >
-          <CollapsibleTrigger className="flex items-center justify-between w-full text-sm font-medium p-4 bg-gray-50 hover:bg-gray-100 transition-colors">
-            <div className="flex items-center">
-              <ShieldCheck className="h-4 w-4 text-safelady mr-2" />
-              <span>Configuração do WhatsApp (Twilio)</span>
-            </div>
-            {isWhatsappOpen ? (
-              <ChevronUp className="h-4 w-4 text-gray-500" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-gray-500" />
-            )}
-          </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-3 p-4 bg-gray-50/50">
-            <div className="flex justify-end">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handlePrefillTwilioData}
-                className="text-xs bg-safelady-light text-safelady hover:bg-safelady hover:text-white transition-colors"
-              >
-                Preencher dados Twilio
-              </Button>
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">
-                Twilio Account SID
-              </label>
-              <Input
-                placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                value={newContact.twilioAccountSid}
-                onChange={(e) =>
-                  onNewContactChange({
-                    ...newContact,
-                    twilioAccountSid: e.target.value,
-                  })
-                }
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Exemplo: ACa442b3fbd9216a4ba74662505c414e2b
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">
-                Twilio Auth Token
-              </label>
-              <Input
-                placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                type="password"
-                value={newContact.twilioAuthToken}
-                onChange={(e) =>
-                  onNewContactChange({
-                    ...newContact,
-                    twilioAuthToken: e.target.value,
-                  })
-                }
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Exemplo: a9cfb35d626f6eb0ac331d2740aa211f
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">
-                Twilio WhatsApp Number
-              </label>
-              <Input
-                placeholder="+1xxxxxxxxxx"
-                value={newContact.twilioWhatsappNumber}
-                onChange={(e) =>
-                  onNewContactChange({
-                    ...newContact,
-                    twilioWhatsappNumber: e.target.value,
-                  })
-                }
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Exemplo: +18312176749 (informe apenas o número, o prefixo "whatsapp:" será adicionado automaticamente)
-              </p>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-
         <div className="flex gap-2 pt-4">
           <Button 
             variant="outline" 
@@ -220,7 +118,6 @@ const AddContactForm = ({
             onClick={onAddContact} 
             className="flex-1 bg-[#FF84C6] hover:bg-[#FF5AA9] text-white flex items-center justify-center gap-2"
           >
-            <Save className="h-4 w-4" />
             {isEditing ? "Salvar Contato" : "Adicionar Contato"}
           </Button>
         </div>

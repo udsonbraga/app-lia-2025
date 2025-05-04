@@ -3,8 +3,6 @@ import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { handleEmergencyAlert } from "@/utils/emergencyUtils";
-import { getCurrentPosition } from "@/utils/geolocationUtils";
-import { sendTelegramMessage } from "@/utils/telegramUtils";
 
 export function EmergencyButton() {
   const [isLoading, setIsLoading] = useState(false);

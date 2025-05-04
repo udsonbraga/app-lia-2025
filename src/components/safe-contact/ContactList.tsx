@@ -1,5 +1,5 @@
 
-import { User, Phone, MessageSquare, Trash2, Shield, Pencil } from "lucide-react";
+import { User, Phone, MessageSquare, Trash2, Pencil } from "lucide-react";
 import { SafeContact } from "@/features/support-network/types";
 
 interface ContactListProps {
@@ -42,12 +42,6 @@ const ContactList = ({ contacts, onRemoveContact, onEditContact }: ContactListPr
               <MessageSquare className="h-3 w-3 mr-2 text-gray-400" />
               Telegram: @{contact.telegramId}
             </p>
-            {contact.twilioWhatsappNumber && (
-              <p className="text-sm text-gray-600 flex items-center mt-1">
-                <Shield className="h-3 w-3 mr-2 text-gray-400" />
-                WhatsApp configurado
-              </p>
-            )}
             <p className="text-sm text-gray-600 mt-1">
               <span className="text-gray-500">Parentesco:</span> {contact.relationship}
             </p>

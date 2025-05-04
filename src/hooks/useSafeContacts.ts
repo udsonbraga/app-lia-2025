@@ -21,9 +21,6 @@ export const useSafeContacts = () => {
     phone: "",
     telegramId: "",
     relationship: "",
-    twilioAccountSid: "",
-    twilioAuthToken: "",
-    twilioWhatsappNumber: "",
   });
 
   const [isAdding, setIsAdding] = useState(false);
@@ -90,9 +87,6 @@ export const useSafeContacts = () => {
       phone: "", 
       telegramId: "", 
       relationship: "",
-      twilioAccountSid: "",
-      twilioAuthToken: "",
-      twilioWhatsappNumber: "", 
     });
     setIsAdding(false);
   };
@@ -103,9 +97,6 @@ export const useSafeContacts = () => {
       phone: contact.phone,
       telegramId: contact.telegramId,
       relationship: contact.relationship,
-      twilioAccountSid: contact.twilioAccountSid || "",
-      twilioAuthToken: contact.twilioAuthToken || "",
-      twilioWhatsappNumber: contact.twilioWhatsappNumber || "",
     });
     setEditingContactId(contact.id);
     setIsEditing(true);

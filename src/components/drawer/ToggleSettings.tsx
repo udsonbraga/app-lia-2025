@@ -53,7 +53,7 @@ export const ToggleSettings = ({
             <div>
               <div className="font-medium text-gray-900">Detecção de Áudio</div>
               <div className="text-sm text-gray-500">
-                Envia alerta automático ao detectar palavras de emergência
+                Detecta palavras de emergência
               </div>
             </div>
           </div>
@@ -75,7 +75,7 @@ export const ToggleSettings = ({
             <div>
               <div className="font-medium text-gray-900">Detecção de Movimento</div>
               <div className="text-sm text-gray-500">
-                Alerta seus contatos em caso de movimento brusco
+                Detecta movimento brusco
               </div>
             </div>
           </div>
