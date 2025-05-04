@@ -1,7 +1,7 @@
 
 import { Header } from "@/components/Header";
 import { useState } from "react";
-import { Heart } from "lucide-react";
+import { Heart, Glasses, Hat } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 
@@ -40,7 +40,7 @@ const Accessories = () => {
       id: 5,
       name: "Tiara Elegante",
       price: "R$ 39,90",
-      image: "https://images.unsplash.com/photo-1596944924616-7b38e7cfbfc8?w=400&h=400&auto=format&fit=crop"
+      image: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=400&h=400&auto=format&fit=crop"
     },
     {
       id: 6,
@@ -52,13 +52,13 @@ const Accessories = () => {
       id: 7,
       name: "Óculos de Sol",
       price: "R$ 129,90",
-      image: "https://images.unsplash.com/photo-1546180572-27c5b837aead?w=400&h=400&auto=format&fit=crop"
+      image: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=400&auto=format&fit=crop"
     },
     {
       id: 8,
       name: "Chapéu de Praia",
       price: "R$ 79,90",
-      image: "https://images.unsplash.com/photo-1565354881528-88befdcda05b?w=400&h=400&auto=format&fit=crop"
+      image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&h=400&auto=format&fit=crop"
     }
   ];
 

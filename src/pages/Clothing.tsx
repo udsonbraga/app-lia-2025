@@ -1,7 +1,7 @@
 
 import { Header } from "@/components/Header";
 import { useState } from "react";
-import { Heart } from "lucide-react";
+import { Heart, Shirt } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 
@@ -22,7 +22,7 @@ const Clothing = () => {
       id: 2,
       name: "Blusa de Seda",
       price: "R$ 119,90",
-      image: "https://images.unsplash.com/photo-1588737006914-67962f57a701?w=400&h=400&auto=format&fit=crop"
+      image: "https://images.unsplash.com/photo-1551048632-24e444b48a3e?w=400&h=400&auto=format&fit=crop"
     },
     {
       id: 3,
