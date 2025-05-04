@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { Header } from "@/components/Header";
@@ -45,8 +46,10 @@ const Index = () => {
   useEffect(() => {
     if (isDisguised) {
       document.body.classList.add('disguised-mode');
+      document.title = "Moda Elegante"; // Altera o título da página quando disfarçada
     } else {
       document.body.classList.remove('disguised-mode');
+      document.title = "Safe Lady"; // Restaura o título original
     }
   }, [isDisguised]);
 

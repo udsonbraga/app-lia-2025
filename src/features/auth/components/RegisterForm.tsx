@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield, ExternalLink } from "lucide-react";
@@ -72,18 +71,19 @@ export function RegisterForm() {
       users.push(newUser);
       localStorage.setItem('users', JSON.stringify(users));
       
-      // Set the user as authenticated and store name
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('userName', formData.name);
+      // Removido: Não autenticar o usuário diretamente após o registro
+      // localStorage.setItem('isAuthenticated', 'true');
+      // localStorage.setItem('userName', formData.name);
       
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       toast({
         title: "Cadastro realizado com sucesso!",
-        description: "Bem-vinda ao SafeLady.",
+        description: "Agora você pode fazer login no SafeLady.",
       });
       
-      navigate("/home");
+      // Redireciona para a página de login em vez da página inicial
+      navigate("/login");
     } catch (error) {
       toast({
         title: "Erro ao realizar cadastro",
