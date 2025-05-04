@@ -17,15 +17,6 @@ interface AuthContextType {
     error?: string;
   }>;
   signOut: () => Promise<void>;
-  localSignIn: (email: string, password: string) => Promise<{
-    success: boolean;
-    error?: string;
-    userName?: string;
-  }>;
-  localSignUp: (name: string, email: string, password: string) => Promise<{
-    success: boolean;
-    error?: string;
-  }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -67,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [toast]);
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -107,114 +98,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const localSignIn = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      // Check for stored users
-      const storedUsers = localStorage.getItem('users');
-      const users = storedUsers ? JSON.parse(storedUsers) : [];
-      
-      const foundUser = users.find((user: any) => 
-        user.email === email && user.password === password
-      );
-      
-      if (foundUser) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('userName', foundUser.name);
-        
-        toast({
-          title: "Login efetuado com sucesso",
-          description: `Bem-vinda de volta, ${foundUser.name}!`,
-        });
-        
-        return { success: true, userName: foundUser.name };
-      } else if (email === "usuario@teste.com" && password === "senha123") {
-        // Fallback test user
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('userName', 'Usuária Teste');
-        
-        toast({
-          title: "Login efetuado com sucesso",
-          description: "Bem-vinda de volta, Usuária Teste!",
-        });
-        
-        return { success: true, userName: 'Usuária Teste' };
-      }
-      
-      return { success: false, error: "Credenciais inválidas" };
-    } catch (error: any) {
-      console.error('Erro ao fazer login:', error);
-      return { success: false, error: error.message || "Erro desconhecido ao fazer login" };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const localSignUp = async (name: string, email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      
-      // Check if user already exists
-      const storedUsers = localStorage.getItem('users');
-      const users = storedUsers ? JSON.parse(storedUsers) : [];
-      
-      const userExists = users.some((user: any) => user.email === email);
-      
-      if (userExists) {
-        return { 
-          success: false, 
-          error: "Este email já está cadastrado. Tente fazer login."
-        };
-      }
-      
-      // Add the new user
-      const newUser = { name, email, password };
-      users.push(newUser);
-      localStorage.setItem('users', JSON.stringify(users));
-      
-      // Simulate a delay for the network request
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Cadastro realizado com sucesso",
-        description: "Agora você pode fazer login com sua conta.",
-      });
-      
-      return { success: true };
-    } catch (error: any) {
-      console.error('Erro ao registrar:', error);
-      return { 
-        success: false, 
-        error: error.message || "Erro desconhecido ao registrar" 
-      };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const signOut = async () => {
     setIsLoading(true);
-    // Remove local storage authentication
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userName');
-    // Also sign out from Supabase if needed
     await supabase.auth.signOut();
     setIsLoading(false);
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      session, 
-      user, 
-      isLoading, 
-      signIn, 
-      signUp, 
-      signOut,
-      localSignIn,
-      localSignUp
-    }}>
+    <AuthContext.Provider value={{ session, user, isLoading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

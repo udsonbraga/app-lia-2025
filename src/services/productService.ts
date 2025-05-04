@@ -1,197 +1,158 @@
 
 import { supabase } from '@/lib/supabase';
+import { Product } from '@/lib/supabase';
 
-// Define the Product type since we don't have a generated type for it
-export interface Product {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-}
-
-// Function to count products (for initialization check)
+// Contador de produtos para setup inicial
 export const countProducts = async () => {
   try {
-    // Since we're working with local storage for now, we'll check localStorage
-    const storedProducts = localStorage.getItem('products');
-    const products = storedProducts ? JSON.parse(storedProducts) : [];
+    // Verificamos se a tabela de produtos existe
+    const { data, error } = await supabase.rpc('count_products');
     
-    return { count: products.length, error: null };
-  } catch (error: any) {
-    console.error('Error counting products:', error);
-    return { count: 0, error: error.message };
-  }
-};
-
-// Function to fetch all products
-export const fetchProducts = async () => {
-  try {
-    // Get products from localStorage
-    const storedProducts = localStorage.getItem('products');
-    const products = storedProducts ? JSON.parse(storedProducts) : [];
-    
-    return { success: true, data: products };
-  } catch (error: any) {
-    console.error('Error fetching products:', error);
-    return { success: false, error: error.message };
-  }
-};
-
-// Function to fetch products by category
-export const fetchProductsByCategory = async (category: string) => {
-  try {
-    const { data: allProducts, error } = await fetchProducts();
-    
-    if (error) throw error;
-    
-    const filtered = allProducts.filter((product: Product) => product.category === category);
-    return { success: true, data: filtered };
-  } catch (error: any) {
-    console.error(`Error fetching products by category ${category}:`, error);
-    return { success: false, error: error.message };
-  }
-};
-
-// Function to fetch a specific product
-export const fetchProductById = async (id: number) => {
-  try {
-    const { data: allProducts, error } = await fetchProducts();
-    
-    if (error) throw error;
-    
-    const product = allProducts.find((p: Product) => p.id === id);
-    
-    if (!product) {
-      throw new Error(`Product with ID ${id} not found`);
+    if (error && error.message.includes('does not exist')) {
+      // A tabela não existe, retornamos 0
+      return { count: 0, error: null };
+    } else if (error) {
+      console.error('Erro ao contar produtos:', error);
+      return { count: 0, error };
     }
     
-    return { success: true, data: product };
-  } catch (error: any) {
-    console.error(`Error fetching product ID ${id}:`, error);
-    return { success: false, error: error.message };
+    return { count: data || 0, error: null };
+  } catch (error) {
+    console.error('Erro ao contar produtos:', error);
+    return { count: 0, error };
   }
 };
 
-// Function to add a product to the database
-export const addProductToDB = async (product: Omit<Product, 'id'>) => {
-  try {
-    // Get current products
-    const storedProducts = localStorage.getItem('products');
-    const products = storedProducts ? JSON.parse(storedProducts) : [];
-    
-    // Generate a new ID (max ID + 1 or 1 if no products)
-    const newId = products.length > 0 
-      ? Math.max(...products.map((p: Product) => p.id)) + 1 
-      : 1;
-    
-    // Add new product with generated ID
-    const newProduct = { ...product, id: newId };
-    products.push(newProduct);
-    
-    // Save updated products back to localStorage
-    localStorage.setItem('products', JSON.stringify(products));
-    
-    return { success: true, data: newProduct };
-  } catch (error: any) {
-    console.error('Error adding product:', error);
-    return { success: false, error: error.message };
-  }
-};
-
-// Function to update a product
-export const updateProductInDB = async (updatedProduct: Product) => {
-  try {
-    // Get current products
-    const storedProducts = localStorage.getItem('products');
-    const products = storedProducts ? JSON.parse(storedProducts) : [];
-    
-    // Find and update the product
-    const index = products.findIndex((p: Product) => p.id === updatedProduct.id);
-    
-    if (index === -1) {
-      throw new Error(`Product with ID ${updatedProduct.id} not found`);
-    }
-    
-    products[index] = updatedProduct;
-    
-    // Save updated products back to localStorage
-    localStorage.setItem('products', JSON.stringify(products));
-    
-    return { success: true, data: updatedProduct };
-  } catch (error: any) {
-    console.error(`Error updating product ID ${updatedProduct.id}:`, error);
-    return { success: false, error: error.message };
-  }
-};
-
-// Function to delete a product
-export const deleteProductFromDB = async (id: number) => {
-  try {
-    // Get current products
-    const storedProducts = localStorage.getItem('products');
-    const products = storedProducts ? JSON.parse(storedProducts) : [];
-    
-    // Find the product to delete
-    const index = products.findIndex((p: Product) => p.id === id);
-    
-    if (index === -1) {
-      throw new Error(`Product with ID ${id} not found`);
-    }
-    
-    // Remove the product
-    products.splice(index, 1);
-    
-    // Save updated products back to localStorage
-    localStorage.setItem('products', JSON.stringify(products));
-    
-    return { success: true };
-  } catch (error: any) {
-    console.error(`Error deleting product ID ${id}:`, error);
-    return { success: false, error: error.message };
-  }
-};
-
-// Function to create sample products (for initialization)
+// Criação de produtos de exemplo
 export const createSampleProducts = async () => {
   try {
+    // Verificar se a tabela de produtos existe
+    const { error: tableError } = await supabase.rpc('check_table_exists', { table_name: 'products' });
+    
+    // Se a tabela não existir, criamos ela
+    if (tableError && tableError.message.includes('does not exist')) {
+      // Criar tabela de produtos
+      await supabase.rpc('create_products_table');
+    }
+    
     const sampleProducts = [
       {
-        id: 1,
-        name: "Vestido Floral",
-        price: 129.90,
-        image: "https://images.unsplash.com/photo-1612336307429-8a898d10e223?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8ZHJlc3N8ZW58MHx8MHx8fDA%3D",
-        category: "Vestidos"
-      },
-      {
-        id: 2,
-        name: "Bolsa de Couro",
-        price: 189.90,
-        image: "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8aGFuZGJhZ3xlbnwwfHwwfHx8MA%3D%3D",
-        category: "Acessórios"
-      },
-      {
-        id: 3,
-        name: "Sapato de Salto",
-        price: 159.90,
-        image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8aGlnaCUyMGhlZWxzfGVufDB8fDB8fHww",
-        category: "Calçados"
-      },
-      {
-        id: 4,
-        name: "Blusa Básica",
+        name: "Camisa Floral",
         price: 79.90,
-        image: "https://images.unsplash.com/photo-1554568218-0f1715e72254?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8dCUyMHNoaXJ0fGVufDB8fDB8fHww",
-        category: "Blusas"
+        category: "Roupas",
+        image: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"
+      },
+      {
+        name: "Tênis Casual",
+        price: 129.90,
+        category: "Calçados",
+        image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+      },
+      {
+        name: "Bolsa de Couro",
+        price: 149.90,
+        category: "Acessórios",
+        image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=876&q=80"
+      },
+      {
+        name: "Vestido Elegante",
+        price: 199.90,
+        category: "Roupas",
+        image: "https://images.unsplash.com/photo-1612336307429-8a898d10e223?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80"
+      },
+      {
+        name: "Óculos de Sol",
+        price: 89.90,
+        category: "Acessórios",
+        image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80"
       }
     ];
+
+    // Inserir produtos usando RPC para contornar restrição de tabela
+    for (const product of sampleProducts) {
+      await supabase.rpc('insert_product', {
+        p_name: product.name,
+        p_price: product.price,
+        p_category: product.category,
+        p_image: product.image
+      });
+    }
     
-    // Save sample products to localStorage
-    localStorage.setItem('products', JSON.stringify(sampleProducts));
+    return { success: true };
+  } catch (error) {
+    console.error('Erro ao criar produtos de exemplo:', error);
+    return { error };
+  }
+};
+
+// Funções para interagir com produtos
+export const fetchProducts = async () => {
+  try {
+    // Verificar se a tabela existe
+    const { data: exists, error: existsError } = await supabase.rpc('check_table_exists', { table_name: 'products' });
     
-    return { success: true, error: null };
-  } catch (error: any) {
-    console.error('Error creating sample products:', error);
-    return { success: false, error: error.message };
+    if (existsError || !exists) {
+      // Se a tabela não existir ou houver erro, retornamos uma lista vazia
+      return { success: true, data: [] };
+    }
+    
+    // Buscar produtos usando RPC
+    const { data, error } = await supabase.rpc('get_all_products');
+    
+    if (error) throw error;
+    return { success: true, data: data || [] };
+  } catch (error) {
+    console.error('Erro ao buscar produtos:', error);
+    return { success: false, error, data: [] };
+  }
+};
+
+export const addProductToDB = async (product: Omit<Product, 'id'>) => {
+  try {
+    // Inserir produto usando RPC
+    const { data, error } = await supabase.rpc('insert_product', {
+      p_name: product.name,
+      p_price: product.price,
+      p_category: product.category,
+      p_image: product.image
+    });
+    
+    if (error) throw error;
+    return { success: true, data: data || {} };
+  } catch (error) {
+    console.error('Erro ao adicionar produto:', error);
+    return { success: false, error };
+  }
+};
+
+export const updateProductInDB = async (product: Product) => {
+  try {
+    // Atualizar produto usando RPC
+    const { data, error } = await supabase.rpc('update_product', {
+      p_id: product.id,
+      p_name: product.name,
+      p_price: product.price,
+      p_category: product.category,
+      p_image: product.image
+    });
+    
+    if (error) throw error;
+    return { success: true, data: data || {} };
+  } catch (error) {
+    console.error('Erro ao atualizar produto:', error);
+    return { success: false, error };
+  }
+};
+
+export const deleteProductFromDB = async (id: number) => {
+  try {
+    // Deletar produto usando RPC
+    const { error } = await supabase.rpc('delete_product', { p_id: id });
+    
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Erro ao remover produto:', error);
+    return { success: false, error };
   }
 };

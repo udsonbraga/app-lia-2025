@@ -5,55 +5,39 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { signIn, isLoading } = useAuth();
   const { toast } = useToast();
-  const { localSignIn, isLoading: authLoading } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Form validation
-    const validationErrors: Record<string, string> = {};
-    
-    if (!email.trim()) validationErrors.email = 'Email é obrigatório';
-    if (!password) validationErrors.password = 'Senha é obrigatória';
-    
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+    if (!email || !password) {
+      toast({
+        title: 'Campos obrigatórios',
+        description: 'Por favor, preencha todos os campos.',
+        variant: 'destructive',
+      });
       return;
     }
-    
-    setIsLoading(true);
 
-    try {
-      const result = await localSignIn(email, password);
-      
-      if (result.success) {
-        navigate('/home');
-      } else {
-        toast({
-          title: "Erro ao fazer login",
-          description: result.error || "Usuário não cadastrado ou senha incorreta",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
+    const result = await signIn(email, password);
+    
+    if (result.success) {
+      navigate('/home');
+    } else {
       toast({
-        title: "Erro ao fazer login",
-        description: "Usuário não cadastrado ou senha incorreta",
-        variant: "destructive",
+        title: 'Erro ao fazer login',
+        description: result.error || 'Verifique suas credenciais e tente novamente.',
+        variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -77,19 +61,15 @@ const LoginPage = () => {
                   placeholder="seu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
-                  disabled={isLoading || authLoading}
+                  className="pl-10"
                 />
-                {errors.email && (
-                  <p className="mt-1 text-xs text-red-500">{errors.email}</p>
-                )}
               </div>
             </div>
             
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Senha</Label>
-                <Link to="/reset-password" className="text-xs text-[#FF84C6] hover:underline">
+                <Link to="/reset-password" className="text-xs text-safelady hover:underline">
                   Esqueceu a senha?
                 </Link>
               </div>
@@ -101,14 +81,12 @@ const LoginPage = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`pl-10 ${errors.password ? 'border-red-500' : ''}`}
-                  disabled={isLoading || authLoading}
+                  className="pl-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  disabled={isLoading || authLoading}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -116,25 +94,22 @@ const LoginPage = () => {
                     <Eye className="h-4 w-4" />
                   )}
                 </button>
-                {errors.password && (
-                  <p className="mt-1 text-xs text-red-500">{errors.password}</p>
-                )}
               </div>
             </div>
 
             <Button
               type="submit"
               className="w-full bg-[#FF84C6] hover:bg-[#FF5AA9] text-white"
-              disabled={isLoading || authLoading}
+              disabled={isLoading}
             >
-              {isLoading || authLoading ? "Entrando..." : "Entrar"}
+              {isLoading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Não tem uma conta?{" "}
-              <Link to="/register" className="text-[#FF84C6] hover:underline">
+              <Link to="/register" className="text-safelady hover:underline">
                 Cadastre-se
               </Link>
             </p>

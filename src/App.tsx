@@ -17,54 +17,46 @@ import { AuthProvider, useAuth } from './hooks/useAuth';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import ResetPasswordPage from './pages/ResetPassword';
-import { Toaster } from '@/components/ui/toaster';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
-  const [isLocalAuth, setIsLocalAuth] = useState(false);
-  const [localAuthLoading, setLocalAuthLoading] = useState(true);
   
-  // Check for local storage authentication
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-    setIsLocalAuth(isAuthenticated);
-    setLocalAuthLoading(false);
-  }, []);
-  
-  // Still loading either auth method, show loading screen
-  if (isLoading || localAuthLoading) {
+  // Ainda carregando, mostra uma tela de carregamento
+  if (isLoading) {
     return <LoadingScreen />;
   }
   
-  // Not authenticated via Supabase or localStorage, redirect to login
-  if (!user && !isLocalAuth) {
+  // Não autenticado, redireciona para login
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
   
-  // Authenticated, show the content
+  // Autenticado, mostra o conteúdo protegido
   return <>{children}</>;
 }
 
 function App() {
+  // Defina o estado para controlar se o modo de disfarce está ativado
+  const [disguiseMode, setDisguiseMode] = useState(false);
+
+  // Função para alternar o modo de disfarce
+  const toggleDisguiseMode = () => {
+    setDisguiseMode(!disguiseMode);
+  };
+
   return (
     <AuthProvider>
       <AppContent />
-      <Toaster />
     </AuthProvider>
   );
 }
 
 function AppContent() {
   const { user } = useAuth();
-  const [isLocalAuth, setIsLocalAuth] = useState(false);
+  // Defina o estado para controlar se o modo de disfarce está ativado
   const [disguiseMode, setDisguiseMode] = useState(false);
 
-  // Check for local storage authentication
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-    setIsLocalAuth(isAuthenticated);
-  }, []);
-
+  // Função para alternar o modo de disfarce
   const toggleDisguiseMode = () => {
     setDisguiseMode(!disguiseMode);
   };
@@ -72,10 +64,10 @@ function AppContent() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={(user || isLocalAuth) ? <Navigate to="/home" replace /> : <Index />} />
-        <Route path="/login" element={(user || isLocalAuth) ? <Navigate to="/home" replace /> : <LoginPage />} />
-        <Route path="/register" element={(user || isLocalAuth) ? <Navigate to="/home" replace /> : <RegisterPage />} />
-        <Route path="/reset-password" element={(user || isLocalAuth) ? <Navigate to="/home" replace /> : <ResetPasswordPage />} />
+        <Route path="/" element={user ? <Navigate to="/home" replace /> : <Index />} />
+        <Route path="/login" element={user ? <Navigate to="/home" replace /> : <LoginPage />} />
+        <Route path="/register" element={user ? <Navigate to="/home" replace /> : <RegisterPage />} />
+        <Route path="/reset-password" element={user ? <Navigate to="/home" replace /> : <ResetPasswordPage />} />
         
         {/* Rotas protegidas */}
         <Route path="/home" element={
