@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Product } from '@/lib/supabase';
+import { Product } from '@/services/productService';
 import { useToast } from '@/hooks/use-toast';
 import { useProductInitialization } from './useProductInitialization';
 import { 

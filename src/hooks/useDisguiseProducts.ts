@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
-import { Product } from "@/lib/supabase";
+import { Product } from "@/services/productService";
 import { useToast } from "@/hooks/use-toast";
 
 export const useDisguiseProducts = () => {
