@@ -14,7 +14,7 @@ const Accessories = () => {
   const accessories = [
     {
       id: 1,
-      name: "Colar de Pérolas",
+      name: "Colar de Pérolasssss",
       price: "R$ 79,90",
       image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=400&h=400&auto=format&fit=crop"
     },
