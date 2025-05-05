@@ -1,7 +1,7 @@
 
 import { Header } from "@/components/Header";
-import { useState } from "react";
-import { Heart, Glasses, Hat } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Heart, Glasses } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 
@@ -72,8 +72,15 @@ const Accessories = () => {
     });
   };
 
+  // Verificar o modo de disfarce no useEffect para evitar avisos de navegação
+  useEffect(() => {
+    if (!isDisguised) {
+      navigate('/home');
+    }
+  }, [isDisguised, navigate]);
+
+  // Se não estiver no modo disfarce, não renderiza nada até que o useEffect redirecione
   if (!isDisguised) {
-    navigate('/home');
     return null;
   }
 
