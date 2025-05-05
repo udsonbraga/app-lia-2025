@@ -59,6 +59,30 @@ const Clothing = () => {
       name: "Cardigan de Tricô",
       price: "R$ 129,90",
       image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&h=400&auto=format&fit=crop"
+    },
+    {
+      id: 9,
+      name: "Vestido Estampado",
+      price: "R$ 159,90",
+      image: "https://images.unsplash.com/photo-1612423284934-2850a4ea6b0f?w=400&h=400&auto=format&fit=crop"
+    },
+    {
+      id: 10,
+      name: "Blusa Básica",
+      price: "R$ 69,90",
+      image: "https://images.unsplash.com/photo-1559334417-b71eee034724?w=400&h=400&auto=format&fit=crop"
+    },
+    {
+      id: 11,
+      name: "Blazer Feminino",
+      price: "R$ 219,90",
+      image: "https://images.unsplash.com/photo-1561524891-7d88c50e2cd6?w=400&h=400&auto=format&fit=crop"
+    },
+    {
+      id: 12,
+      name: "Short Jeans",
+      price: "R$ 119,90",
+      image: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&h=400&auto=format&fit=crop"
     }
   ];
 
@@ -100,7 +124,7 @@ const Clothing = () => {
             </button>
             <button 
               className="whitespace-nowrap px-4 py-2 bg-white border border-pink-300 text-pink-500 rounded-full flex-shrink-0"
-              onClick={() => navigate('/acessories')}
+              onClick={() => navigate('/accessories')}
             >
               Acessórios
             </button>

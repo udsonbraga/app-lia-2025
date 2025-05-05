@@ -20,7 +20,7 @@ const Accessories = () => {
     },
     {
       id: 2,
-      name: "Brincos Douradosssss",
+      name: "Brincos Dourados",
       price: "R$ 49,90",
       image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400&h=400&auto=format&fit=crop"
     },
@@ -59,6 +59,30 @@ const Accessories = () => {
       name: "Chapéu de Praia",
       price: "R$ 79,90",
       image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&h=400&auto=format&fit=crop"
+    },
+    {
+      id: 9,
+      name: "Relógio Feminino",
+      price: "R$ 159,90",
+      image: "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400&h=400&auto=format&fit=crop"
+    },
+    {
+      id: 10,
+      name: "Bracelete Dourado",
+      price: "R$ 69,90",
+      image: "https://images.unsplash.com/photo-1535556116002-6281ff3e9f36?w=400&h=400&auto=format&fit=crop"
+    },
+    {
+      id: 11,
+      name: "Bolsa Pequena",
+      price: "R$ 99,90",
+      image: "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=400&h=400&auto=format&fit=crop"
+    },
+    {
+      id: 12,
+      name: "Choker Delicado",
+      price: "R$ 29,90",
+      image: "https://images.unsplash.com/photo-1576552665000-9c1affb2adf6?w=400&h=400&auto=format&fit=crop"
     }
   ];
 

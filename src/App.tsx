@@ -68,7 +68,7 @@ function App() {
             }
           />
           <Route
-            path="/acessories"
+            path="/accessories"
             element={
               <PrivateRoute>
                 <Accessories />
