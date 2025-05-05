@@ -14,13 +14,13 @@ const Accessories = () => {
   const accessories = [
     {
       id: 1,
-      name: "Colar de Pérolasssss",
+      name: "Colar de Pérolas",
       price: "R$ 79,90",
       image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=400&h=400&auto=format&fit=crop"
     },
     {
       id: 2,
-      name: "Brincos Dourados",
+      name: "Brincos Douradosssss",
       price: "R$ 49,90",
       image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400&h=400&auto=format&fit=crop"
     },
