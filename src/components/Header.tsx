@@ -53,7 +53,7 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
           </div>
           
           <h1 className="text-xl font-semibold">
-            {isDisguised ? 'Moda Elegante' : 'Safe Lady'}
+            {isDisguised ? 'Moda Elegante' : 'Lia'}
           </h1>
           
           <div className="flex items-center gap-3">

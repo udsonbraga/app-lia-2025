@@ -17,12 +17,12 @@ export const LoginLayout = ({ children }: LoginLayoutProps) => {
         <div className="flex justify-center">
           <img 
             src="/lovable-uploads/0d65b2be-45e2-4d35-ae90-6efa24396f55.png" 
-            alt="Safe Lady Logo" 
+            alt="Lia Logo" 
             className="h-28 w-28 object-contain drop-shadow-lg" 
           />
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-white drop-shadow-md">
-          Safe Lady
+          Lia
         </h2>
         <p className="mt-2 text-center text-sm text-white/80">
           Seu aplicativo pessoal de segurança e proteção

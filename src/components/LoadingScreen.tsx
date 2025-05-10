@@ -63,7 +63,7 @@ export const LoadingScreen = () => {
         <div className={`absolute inset-0 flex items-center justify-center transition-all duration-1000 ${showWelcome ? "scale-100 opacity-100" : "scale-75 opacity-0"}`}>
           <img
             src="/lovable-uploads/0d65b2be-45e2-4d35-ae90-6efa24396f55.png"
-            alt="Safe Lady Logo"
+            alt="Lia Logo"
             className="w-full h-full object-contain animate-pulse"
           />
         </div>
@@ -72,7 +72,7 @@ export const LoadingScreen = () => {
       <div className={`transition-all duration-700 delay-300 transform ${showWelcome ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}>
         <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-md flex items-center gap-2">
           <Shield className="h-8 w-8" />
-          Safe Lady
+          Lia
         </h1>
       </div>
       
