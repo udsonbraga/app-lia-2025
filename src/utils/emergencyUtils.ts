@@ -45,7 +45,7 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps) => {
     
     toast({
       title: "Alerta de emergência enviado",
-      description: "Som de emergência detectado! Alertas enviados via Telegram.",
+      description: "Botão de Emergência Acionado! Alertas enviados via Telegram.",
     });
   } catch (error) {
     console.error("Erro ao enviar alerta automático:", error);
