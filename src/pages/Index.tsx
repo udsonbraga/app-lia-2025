@@ -5,7 +5,6 @@ import { Header } from "@/components/Header";
 import { DisguisedMode } from "@/components/DisguisedMode";
 import { NormalMode } from "@/components/NormalMode";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
-import { useFinancialNotes } from "@/hooks/useFinancialNotes";
 import { useMotionDetector } from "@/hooks/useMotionDetector";
 import { useState, useEffect } from "react";
 
@@ -18,16 +17,6 @@ const Index = () => {
     toggleDisguise,
     exitDisguiseMode
   } = useDisguiseMode();
-
-  const {
-    notes,
-    noteToEdit,
-    handleSaveNote,
-    handleEditNote,
-    handleDeleteNote,
-    toggleNotePaid,
-    setNoteToEdit
-  } = useFinancialNotes();
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
