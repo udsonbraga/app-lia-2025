@@ -1,7 +1,7 @@
 
 import { Header } from "@/components/Header";
 import { useState, useEffect } from "react";
-import { Heart, Shirt } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 
@@ -10,7 +10,7 @@ const Clothing = () => {
   const navigate = useNavigate();
   const { isDisguised, exitDisguiseMode } = useDisguiseMode();
   
-  // Produtos de roupas
+  // Produtos de roupas - exatamente 8 itens
   const clothes = [
     {
       id: 1,
@@ -59,30 +59,6 @@ const Clothing = () => {
       name: "Cardigan de Tricô",
       price: "R$ 129,90",
       image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&h=400&auto=format&fit=crop"
-    },
-    {
-      id: 9,
-      name: "Vestido Estampado",
-      price: "R$ 159,90",
-      image: "https://images.unsplash.com/photo-1612423284934-2850a4ea6b0f?w=400&h=400&auto=format&fit=crop"
-    },
-    {
-      id: 10,
-      name: "Blusa Básica",
-      price: "R$ 69,90",
-      image: "https://images.unsplash.com/photo-1559334417-b71eee034724?w=400&h=400&auto=format&fit=crop"
-    },
-    {
-      id: 11,
-      name: "Blazer Feminino",
-      price: "R$ 219,90",
-      image: "https://images.unsplash.com/photo-1561524891-7d88c50e2cd6?w=400&h=400&auto=format&fit=crop"
-    },
-    {
-      id: 12,
-      name: "Short Jeans",
-      price: "R$ 119,90",
-      image: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&h=400&auto=format&fit=crop"
     }
   ];
 
@@ -94,6 +70,10 @@ const Clothing = () => {
         return [...prev, productId];
       }
     });
+  };
+
+  const handleBuy = (productId: number) => {
+    console.log(`Roupa ${productId} adicionada ao carrinho`);
   };
 
   // Verificar o modo de disfarce no useEffect para evitar avisos de navegação
@@ -166,9 +146,20 @@ const Clothing = () => {
                 <div className="p-3">
                   <h3 className="font-medium text-gray-800 text-sm">{product.name}</h3>
                   <p className="text-pink-600 font-semibold mt-1">{product.price}</p>
-                  <button className="w-full mt-2 text-xs bg-pink-500 hover:bg-pink-600 text-white py-1 px-2 rounded">
-                    Adicionar ao Carrinho
-                  </button>
+                  <div className="flex flex-col space-y-2 mt-2">
+                    <button 
+                      className="w-full text-xs bg-pink-500 hover:bg-pink-600 text-white py-1 px-2 rounded"
+                      onClick={() => handleBuy(product.id)}
+                    >
+                      Adicionar ao Carrinho
+                    </button>
+                    <button 
+                      className="w-full text-xs bg-pink-700 hover:bg-pink-800 text-white py-1 px-2 rounded flex items-center justify-center"
+                      onClick={() => handleBuy(product.id)}
+                    >
+                      <ShoppingCart className="w-3 h-3 mr-1" /> Comprar
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

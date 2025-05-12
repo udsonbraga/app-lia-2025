@@ -1,7 +1,7 @@
 
 import { Header } from "@/components/Header";
 import { useState, useEffect } from "react";
-import { Heart, Glasses } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 
@@ -10,7 +10,7 @@ const Accessories = () => {
   const navigate = useNavigate();
   const { isDisguised, exitDisguiseMode } = useDisguiseMode();
   
-  // Produtos de acessórios
+  // Produtos de acessórios - exatamente 8 itens
   const accessories = [
     {
       id: 1,
@@ -59,30 +59,6 @@ const Accessories = () => {
       name: "Chapéu de Praia",
       price: "R$ 79,90",
       image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&h=400&auto=format&fit=crop"
-    },
-    {
-      id: 9,
-      name: "Relógio Feminino",
-      price: "R$ 159,90",
-      image: "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400&h=400&auto=format&fit=crop"
-    },
-    {
-      id: 10,
-      name: "Bracelete Dourado",
-      price: "R$ 69,90",
-      image: "https://images.unsplash.com/photo-1535556116002-6281ff3e9f36?w=400&h=400&auto=format&fit=crop"
-    },
-    {
-      id: 11,
-      name: "Bolsa Pequena",
-      price: "R$ 99,90",
-      image: "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=400&h=400&auto=format&fit=crop"
-    },
-    {
-      id: 12,
-      name: "Choker Delicado",
-      price: "R$ 29,90",
-      image: "https://images.unsplash.com/photo-1576552665000-9c1affb2adf6?w=400&h=400&auto=format&fit=crop"
     }
   ];
 
@@ -94,6 +70,10 @@ const Accessories = () => {
         return [...prev, productId];
       }
     });
+  };
+  
+  const handleBuy = (productId: number) => {
+    console.log(`Acessório ${productId} adicionado ao carrinho`);
   };
 
   // Verificar o modo de disfarce no useEffect para evitar avisos de navegação
@@ -166,9 +146,20 @@ const Accessories = () => {
                 <div className="p-3">
                   <h3 className="font-medium text-gray-800 text-sm">{product.name}</h3>
                   <p className="text-pink-600 font-semibold mt-1">{product.price}</p>
-                  <button className="w-full mt-2 text-xs bg-pink-500 hover:bg-pink-600 text-white py-1 px-2 rounded">
-                    Adicionar ao Carrinho
-                  </button>
+                  <div className="flex flex-col space-y-2 mt-2">
+                    <button 
+                      className="w-full text-xs bg-pink-500 hover:bg-pink-600 text-white py-1 px-2 rounded"
+                      onClick={() => handleBuy(product.id)}
+                    >
+                      Adicionar ao Carrinho
+                    </button>
+                    <button 
+                      className="w-full text-xs bg-pink-700 hover:bg-pink-800 text-white py-1 px-2 rounded flex items-center justify-center"
+                      onClick={() => handleBuy(product.id)}
+                    >
+                      <ShoppingCart className="w-3 h-3 mr-1" /> Comprar
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

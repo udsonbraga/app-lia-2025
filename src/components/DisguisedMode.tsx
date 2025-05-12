@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Heart } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface DisguisedModeProps {
@@ -11,7 +11,7 @@ export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
   const [likedProducts, setLikedProducts] = useState<number[]>([]);
   const navigate = useNavigate();
   
-  // Produtos da loja fictícia
+  // Produtos da loja fictícia - limitados a 8
   const products = [
     {
       id: 1,
@@ -48,6 +48,18 @@ export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
       name: "Colar Feminino",
       price: "R$ 59,90",
       image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=400&auto=format&fit=crop"
+    },
+    {
+      id: 7,
+      name: "Brinco Dourado",
+      price: "R$ 49,90",
+      image: "https://images.unsplash.com/photo-1599459183200-28c912c18e1f?w=400&h=400&auto=format&fit=crop"
+    },
+    {
+      id: 8,
+      name: "Cinto Fino",
+      price: "R$ 79,90",
+      image: "https://images.unsplash.com/photo-1605733160314-4fc7dac4bb16?w=400&h=400&auto=format&fit=crop"
     }
   ];
 
@@ -61,8 +73,8 @@ export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
     });
   };
 
-  const navigateToCategory = (path: string) => {
-    navigate(path);
+  const handleBuy = (productId: number) => {
+    console.log(`Produto ${productId} adicionado ao carrinho`);
   };
 
   return (
@@ -84,7 +96,7 @@ export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
           </button>
           <button 
             className="whitespace-nowrap px-4 py-2 bg-white border border-pink-300 text-pink-500 rounded-full flex-shrink-0"
-            onClick={() => navigate('/acessories')}
+            onClick={() => navigate('/accessories')}
           >
             Acessórios
           </button>
@@ -121,9 +133,20 @@ export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
               <div className="p-3">
                 <h3 className="font-medium text-gray-800 text-sm">{product.name}</h3>
                 <p className="text-pink-600 font-semibold mt-1">{product.price}</p>
-                <button className="w-full mt-2 text-xs bg-pink-500 hover:bg-pink-600 text-white py-1 px-2 rounded">
-                  Adicionar ao Carrinho
-                </button>
+                <div className="flex flex-col space-y-2 mt-2">
+                  <button 
+                    className="w-full text-xs bg-pink-500 hover:bg-pink-600 text-white py-1 px-2 rounded"
+                    onClick={() => handleBuy(product.id)}
+                  >
+                    Adicionar ao Carrinho
+                  </button>
+                  <button 
+                    className="w-full text-xs bg-pink-700 hover:bg-pink-800 text-white py-1 px-2 rounded flex items-center justify-center"
+                    onClick={() => handleBuy(product.id)}
+                  >
+                    <ShoppingCart className="w-3 h-3 mr-1" /> Comprar
+                  </button>
+                </div>
               </div>
             </div>
           ))}
