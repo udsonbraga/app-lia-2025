@@ -18,8 +18,6 @@ const Index = () => {
     exitDisguiseMode
   } = useDisguiseMode();
 
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-
   // Use motion detector
   useMotionDetector();
 
@@ -34,16 +32,10 @@ const Index = () => {
     }
   }, [isDisguised]);
 
-  // Check if dark mode is enabled
-  useEffect(() => {
-    const darkModeEnabled = localStorage.getItem("darkMode") === "true";
-    setIsDarkMode(darkModeEnabled);
-  }, []);
-
   const navigate = useNavigate();
 
   return (
-    <div className={`min-h-screen ${isDisguised ? 'bg-white' : 'bg-gradient-to-b from-rose-100 to-white'} ${isDarkMode ? 'dark' : ''}`}>
+    <div className={`min-h-screen ${isDisguised ? 'bg-white' : 'bg-gradient-to-b from-rose-100 to-white'}`}>
       <Header 
         isDisguised={isDisguised} 
         toggleDisguise={toggleDisguise} 

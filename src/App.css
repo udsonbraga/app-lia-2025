@@ -1,3 +1,4 @@
+
 /* Add these CSS variables to support the accessibility features */
 :root {
   --font-size-multiplier: 100%;
@@ -50,48 +51,4 @@ body.disguised-mode {
 
 body.disguised-mode #root > div {
   box-shadow: none;
-}
-
-/* Dark Mode Styles */
-body.dark {
-  background-color: #121212;
-  color: #ffffff;
-}
-
-body.dark .bg-white {
-  background-color: #1e1e1e;
-}
-
-body.dark .text-gray-800 {
-  color: #f0f0f0;
-}
-
-body.dark .text-gray-600 {
-  color: #d4d4d4;
-}
-
-body.dark .hover\:bg-gray-100:hover {
-  background-color: #333;
-}
-
-body.dark .shadow-sm {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
-}
-
-body.dark .border-gray-200 {
-  border-color: #333;
-}
-
-body.dark input,
-body.dark textarea {
-  background-color: #333;
-  color: #fff;
-}
-
-body.dark .ring-gray-100 {
-  --tw-ring-color: #333;
-}
-
-body.dark .text-gray-700 {
-    color: #d4d4d4;
 }

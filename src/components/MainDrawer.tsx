@@ -26,29 +26,13 @@ export const MainDrawer = () => {
     localStorage.getItem("avatarUrl")
   );
   const [userName, setUserName] = useState<string>("");
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem("darkMode") === "true";
-  });
 
   useEffect(() => {
     const storedName = localStorage.getItem("userName");
     if (storedName) {
       setUserName(storedName);
     }
-
-    // Apply dark mode class if enabled
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDarkMode]);
-
-  const toggleDarkMode = () => {
-    const newDarkModeState = !isDarkMode;
-    setIsDarkMode(newDarkModeState);
-    localStorage.setItem("darkMode", newDarkModeState.toString());
-  };
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
@@ -75,8 +59,6 @@ export const MainDrawer = () => {
         
         <div className="px-4 pb-6">
           <ToggleSettings 
-            isDarkMode={isDarkMode}
-            toggleDarkMode={toggleDarkMode}
             isListening={isListening}
             toggleSoundDetection={toggleSoundDetection}
             isMotionDetectionEnabled={isMotionDetectionEnabled}
