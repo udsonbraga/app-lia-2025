@@ -22,11 +22,7 @@ export function useDisguiseMode() {
     localStorage.setItem('disguiseMode', 'active');
     setIsDisguised(true);
     setShowPasswordPrompt(false);
-    toast({
-      title: "Modo disfarce ativado",
-      description: "O aplicativo agora está em modo disfarce",
-    });
-    // Removido o window.location.reload() para evitar piscar a tela
+    // Toast notification removed
   };
 
   const toggleDisguise = () => {
@@ -42,11 +38,7 @@ export function useDisguiseMode() {
     setIsDisguised(false);
     localStorage.removeItem('disguiseMode');
     navigate('/home');
-    toast({
-      title: "Modo disfarce desativado",
-      description: "Você saiu do modo disfarce com sucesso.",
-    });
-    // Removido o window.location.reload() para evitar piscar a tela
+    // Toast notification removed
   };
 
   // Function to reset all passwords
