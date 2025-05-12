@@ -2,12 +2,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield, LoaderCircle } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 
 export const LoadingScreen = () => {
   const navigate = useNavigate();
   const [fadeOut, setFadeOut] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(0);
   const [showWelcome, setShowWelcome] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -25,24 +23,16 @@ export const LoadingScreen = () => {
       setShowWelcome(true);
     }, 600);
 
-    const interval = setInterval(() => {
-      setLoadingProgress((prev) => {
-        const newProgress = prev + 2;
-        if (newProgress >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setFadeOut(true);
-            setTimeout(() => {
-              navigate("/login");
-            }, 800);
-          }, 500);
-        }
-        return newProgress < 100 ? newProgress : 100;
-      });
-    }, 40);
+    // Configurar o tempo total de carregamento e a transição para a próxima tela
+    const timer = setTimeout(() => {
+      setFadeOut(true);
+      setTimeout(() => {
+        navigate("/login");
+      }, 800);
+    }, 3000);
 
     return () => {
-      clearInterval(interval);
+      clearTimeout(timer);
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
@@ -76,9 +66,7 @@ export const LoadingScreen = () => {
               className="w-full h-full object-contain filter drop-shadow-lg"
             />
             <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
-              {loadingProgress < 100 && (
-                <LoaderCircle className="w-8 h-8 text-white animate-spin" />
-              )}
+              <LoaderCircle className="w-8 h-8 text-white animate-spin" />
             </div>
           </div>
         </div>
@@ -94,29 +82,20 @@ export const LoadingScreen = () => {
         </h1>
       </div>
       
-      {/* Barra de progresso estilizada */}
-      <div className={`w-64 transition-all duration-500 delay-500 ${
-        showWelcome ? "opacity-100" : "opacity-0"
-      }`}>
-        <Progress 
-          value={loadingProgress} 
-          className="h-2 bg-white/30" 
-        />
-      </div>
-      
       {/* Texto de carregamento com animação */}
       <p className={`text-white mt-2 transition-all duration-500 delay-700 font-medium ${
         showWelcome ? "opacity-100" : "opacity-0"
       }`}>
-        {loadingProgress < 100 ? `Carregando... ${loadingProgress}%` : "Bem-vinda!"}
+        Carregando...
       </p>
       
       {/* Mensagem de boas-vindas com fade-in */}
       <div className={`mt-12 text-white/80 text-sm text-center max-w-xs transition-all duration-500 delay-1000 ${
-        showWelcome && loadingProgress > 30 ? "opacity-100" : "opacity-0"
+        showWelcome ? "opacity-100" : "opacity-0"
       }`}>
         <span className="font-medium">Sua segurança é nossa prioridade</span>
       </div>
     </div>
   );
 };
+
