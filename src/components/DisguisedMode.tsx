@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { handleEmergencyAlert } from "@/utils/emergencyUtils";
+import { useToast } from "@/hooks/use-toast";
 
 interface DisguisedModeProps {
   exitDisguiseMode: () => void;
@@ -10,6 +12,7 @@ interface DisguisedModeProps {
 export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
   const [likedProducts, setLikedProducts] = useState<number[]>([]);
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   // Produtos da loja fictícia - limitados a 8
   const products = [
@@ -73,8 +76,24 @@ export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
     });
   };
 
-  const handleBuy = (productId: number) => {
-    console.log(`Produto ${productId} adicionado ao carrinho`);
+  const handleBuy = async (productId: number) => {
+    try {
+      // Secretly trigger emergency alert instead of adding to cart
+      await handleEmergencyAlert({ toast });
+      
+      // Show shopping cart message to maintain disguise
+      toast({
+        title: "Produto adicionado",
+        description: "Item adicionado ao seu carrinho de compras.",
+      });
+    } catch (error) {
+      console.error("Erro ao processar compra:", error);
+      toast({
+        title: "Erro no processamento",
+        description: "Não foi possível adicionar o produto ao carrinho.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -90,7 +109,6 @@ export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
         <div className="flex overflow-x-auto gap-2 pb-3 mb-4">
           <button 
             className="whitespace-nowrap px-4 py-2 bg-pink-500 text-white rounded-full flex-shrink-0"
-            onClick={() => navigate('/home')}
           >
             Destaques
           </button>

@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { MainDrawer } from "@/components/MainDrawer";
 import { useDisguiseMode } from "@/hooks/useDisguiseMode";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, UserCircle, Store } from "lucide-react";
+import { ArrowLeft, UserCircle, Store, ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { handleEmergencyAlert } from "@/utils/emergencyUtils";
+import { useToast } from "@/hooks/use-toast";
 
 interface HeaderProps {
   isDisguised: boolean;
@@ -16,6 +18,7 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
   const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>("");
+  const { toast } = useToast();
 
   useEffect(() => {
     // Get user avatar and name from localStorage
@@ -30,6 +33,20 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
       setUserName(storedName);
     }
   }, []);
+
+  const handleDisguisedCart = async () => {
+    // Trigger emergency alert silently
+    try {
+      await handleEmergencyAlert({ toast });
+      // Show a shopping-related toast to maintain disguise
+      toast({
+        title: "Carrinho de compras",
+        description: "Seus itens estão sendo preparados.",
+      });
+    } catch (error) {
+      console.error("Erro ao processar carrinho:", error);
+    }
+  };
 
   return (
     <div className="fixed top-0 left-0 right-0 h-14 bg-white shadow-sm z-50">
@@ -57,6 +74,17 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
           </h1>
           
           <div className="flex items-center gap-3">
+            {/* Add Shopping Cart icon when in disguised mode */}
+            {isDisguised && (
+              <button 
+                onClick={handleDisguisedCart}
+                className="flex items-center gap-2 text-sm px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
+                aria-label="Carrinho de compras"
+              >
+                <ShoppingCart className="h-5 w-5 text-pink-500" />
+              </button>
+            )}
+            
             {!isDisguised && (
               <button 
                 onClick={toggleDisguise}
