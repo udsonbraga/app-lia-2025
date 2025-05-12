@@ -44,6 +44,25 @@ body {
   }
 }
 
+/* Loading Screen Custom Animations */
+@keyframes floatingBubble {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.floating-bubble {
+  animation: floatingBubble 5s ease-in-out infinite;
+}
+
+/* Progress bar custom styling */
+[role="progressbar"] {
+  transition: width 0.3s ease-out;
+}
+
 /* Disguised Mode Styles */
 body.disguised-mode {
   background-color: #f0f0f0;
