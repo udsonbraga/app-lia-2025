@@ -26,8 +26,7 @@ export function useDisguiseMode() {
       title: "Modo disfarce ativado",
       description: "O aplicativo agora está em modo disfarce",
     });
-    // Force page reload to apply disguise
-    window.location.reload();
+    // Removido o window.location.reload() para evitar piscar a tela
   };
 
   const toggleDisguise = () => {
@@ -47,8 +46,7 @@ export function useDisguiseMode() {
       title: "Modo disfarce desativado",
       description: "Você saiu do modo disfarce com sucesso.",
     });
-    // Force page reload to exit disguise
-    window.location.reload();
+    // Removido o window.location.reload() para evitar piscar a tela
   };
 
   // Function to reset all passwords
