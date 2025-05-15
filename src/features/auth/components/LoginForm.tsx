@@ -5,7 +5,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import FormField from "@/features/auth/components/FormField";
+import { FormFieldRHF } from "@/features/auth/components/FormField";
 import { loginFormSchema } from "@/features/auth/utils/formValidation";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -42,7 +42,7 @@ export const LoginForm = () => {
       <h1 className="text-2xl font-bold text-center mb-6">Entre na sua conta</h1>
       
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField
+        <FormFieldRHF
           name="email"
           label="Email"
           placeholder="seu.email@exemplo.com"
@@ -52,7 +52,7 @@ export const LoginForm = () => {
           disabled={isLoading}
         />
         
-        <FormField
+        <FormFieldRHF
           name="password"
           label="Senha"
           placeholder="Sua senha"

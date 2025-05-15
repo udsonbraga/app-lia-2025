@@ -1,5 +1,4 @@
 
-import { Google } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SocialLoginProps {
@@ -27,7 +26,14 @@ export const SocialLogin = ({ onGoogleLogin, isLoading }: SocialLoginProps) => {
         disabled={isLoading}
         className="w-full flex items-center justify-center"
       >
-        <Google className="h-4 w-4 mr-2" />
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          viewBox="0 0 24 24" 
+          className="h-4 w-4 mr-2"
+          fill="currentColor"
+        >
+          <path d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81z" />
+        </svg>
         {isLoading ? "Carregando..." : "Google"}
       </Button>
     </div>

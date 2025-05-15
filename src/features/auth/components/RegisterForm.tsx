@@ -5,8 +5,8 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import FormField from "@/features/auth/components/FormField";
-import TermsCheckbox from "@/features/auth/components/TermsCheckbox";
+import { FormFieldRHF } from "@/features/auth/components/FormField";
+import { TermsCheckbox } from "@/features/auth/components/TermsCheckbox";
 import { registerFormSchema } from "@/features/auth/utils/formValidation";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -50,8 +50,8 @@ export const RegisterForm = () => {
     }
   };
 
-  const handleTermsChange = (event: FormEvent<HTMLInputElement>) => {
-    setAcceptedTerms(event.currentTarget.checked);
+  const onCheckedChange = (checked: boolean) => {
+    setAcceptedTerms(checked);
   };
 
   return (
@@ -61,7 +61,7 @@ export const RegisterForm = () => {
       </h1>
 
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField
+        <FormFieldRHF
           name="name"
           label="Nome"
           placeholder="Seu nome completo"
@@ -70,7 +70,7 @@ export const RegisterForm = () => {
           disabled={isLoading}
         />
 
-        <FormField
+        <FormFieldRHF
           name="email"
           label="Email"
           placeholder="seu.email@exemplo.com"
@@ -80,7 +80,7 @@ export const RegisterForm = () => {
           disabled={isLoading}
         />
 
-        <FormField
+        <FormFieldRHF
           name="password"
           label="Senha"
           placeholder="Crie uma senha forte"
@@ -90,7 +90,7 @@ export const RegisterForm = () => {
           disabled={isLoading}
         />
 
-        <FormField
+        <FormFieldRHF
           name="confirmPassword"
           label="Confirmar Senha"
           placeholder="Confirme sua senha"
@@ -101,9 +101,8 @@ export const RegisterForm = () => {
         />
 
         <TermsCheckbox
-          onChange={handleTermsChange}
-          checked={acceptedTerms}
-          disabled={isLoading}
+          acceptedTerms={acceptedTerms}
+          onCheckedChange={onCheckedChange}
         />
 
         <Button
