@@ -4,15 +4,15 @@ import {
   ToastActionElement,
   ToastProps,
 } from "@/components/ui/toast";
-import {
-  useToast as useShadcnToast
-} from "@/components/ui/use-toast";
 
-export type ToasterToast = Toast & {
+export type ToasterToast = {
   id: string;
   title?: React.ReactNode;
   description?: React.ReactNode;
   action?: ToastActionElement;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  variant?: "default" | "destructive";
 };
 
 const TOAST_LIMIT = 5;
@@ -29,10 +29,26 @@ function genId() {
 
 const toasts: ToasterToast[] = [];
 
+const useToast = () => {
+  return {
+    toasts,
+    toast,
+    dismiss: (toastId?: string) => {
+      if (toastId) {
+        toasts.forEach(t => {
+          if (t.id === toastId) {
+            t.open = false;
+          }
+        });
+      }
+    },
+  };
+};
+
 const toast: ToastActionType = props => {
   const id = genId();
 
-  const update = (props: ToastProps) => {
+  const update = (props: ToasterToast) => {
     toasts.forEach(t => {
       if (t.id === id) {
         t.title = props.title;
@@ -76,4 +92,4 @@ const toast: ToastActionType = props => {
   };
 };
 
-export { useShadcnToast as useToast, toast };
+export { useToast, toast };
