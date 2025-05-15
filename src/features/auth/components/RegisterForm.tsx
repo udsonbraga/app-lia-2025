@@ -1,76 +1,132 @@
 
+import { useState, FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { RegisterHeader } from "./RegisterHeader";
-import { FormField } from "./FormField";
-import { TermsCheckbox } from "./TermsCheckbox";
-import { formatPhone } from "@/features/auth/utils/formValidation";
-import { useRegisterForm } from "@/features/auth/utils/registerFormUtils";
+import FormField from "@/features/auth/components/FormField";
+import TermsCheckbox from "@/features/auth/components/TermsCheckbox";
+import { registerFormSchema } from "@/features/auth/utils/formValidation";
+import { useAuth } from "@/hooks/useAuth";
 
-export function RegisterForm() {
-  const { 
-    formData, 
-    setFormData, 
-    errors, 
-    isLoading, 
-    acceptedTerms, 
-    setAcceptedTerms,
-    handleSubmit 
-  } = useRegisterForm();
+export const RegisterForm = () => {
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { signUp } = useAuth();
+
+  // Definir tipo do formulário usando o esquema Zod
+  type FormValues = z.infer<typeof registerFormSchema>;
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(registerFormSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: ""
+    },
+  });
+
+  const handleSubmit = async (values: FormValues) => {
+    if (!acceptedTerms) {
+      // Mostrar erro se os termos não foram aceitos
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Chamar função de registro usando o hook de autenticação
+      const success = await signUp(values.email, values.password, values.name);
+      
+      if (!success) {
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      setIsLoading(false);
+    }
+  };
+
+  const handleTermsChange = (event: FormEvent<HTMLInputElement>) => {
+    setAcceptedTerms(event.currentTarget.checked);
+  };
 
   return (
-    <div className="max-w-md mx-auto">
-      <RegisterHeader />
+    <div className="space-y-4 w-full max-w-md">
+      <h1 className="text-2xl font-bold text-center mb-6">
+        Criar Nova Conta
+      </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
-          label="Nome Completo"
-          type="text"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="Digite seu nome completo"
-          error={errors.name}
+          name="name"
+          label="Nome"
+          placeholder="Seu nome completo"
+          register={form.register}
+          error={form.formState.errors.name}
+          disabled={isLoading}
         />
 
         <FormField
-          label="E-mail"
+          name="email"
+          label="Email"
+          placeholder="seu.email@exemplo.com"
           type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          placeholder="seu@email.com"
-          error={errors.email}
+          register={form.register}
+          error={form.formState.errors.email}
+          disabled={isLoading}
         />
 
         <FormField
-          label="Telefone"
-          type="tel"
-          value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
-          placeholder="(00) 00000-0000"
-          error={errors.phone}
-        />
-
-        <FormField
+          name="password"
           label="Senha"
+          placeholder="Crie uma senha forte"
           type="password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          placeholder="••••••••"
-          error={errors.password}
+          register={form.register}
+          error={form.formState.errors.password}
+          disabled={isLoading}
         />
 
-        <TermsCheckbox 
-          acceptedTerms={acceptedTerms}
-          onCheckedChange={setAcceptedTerms}
+        <FormField
+          name="confirmPassword"
+          label="Confirmar Senha"
+          placeholder="Confirme sua senha"
+          type="password"
+          register={form.register}
+          error={form.formState.errors.confirmPassword}
+          disabled={isLoading}
+        />
+
+        <TermsCheckbox
+          onChange={handleTermsChange}
+          checked={acceptedTerms}
+          disabled={isLoading}
         />
 
         <Button
           type="submit"
+          className="w-full bg-[#FF84C6] hover:bg-[#FF5AA9] text-white"
           disabled={isLoading || !acceptedTerms}
-          className="w-full py-3 px-4 rounded-lg bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? "Cadastrando..." : "Criar Conta"}
+          {isLoading ? "Criando conta..." : "Criar Conta"}
         </Button>
+
+        <div className="text-center">
+          <p className="text-sm text-gray-600">
+            Já tem uma conta?{" "}
+            <button
+              type="button"
+              onClick={() => navigate("/login")}
+              className="text-blue-600 hover:underline"
+            >
+              Faça login
+            </button>
+          </p>
+        </div>
       </form>
     </div>
   );
-}
+};

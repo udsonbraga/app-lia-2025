@@ -1,42 +1,43 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export const useGoogleAuth = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      // Simulate sign in with Google without account selection
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Use a fixed email for demo purposes
-      const userEmail = "usuario@gmail.com";
-      localStorage.setItem('isAuthenticated', 'true');
-      
-      // Extract name from email (simple approach)
-      const userName = userEmail.split('@')[0].replace(/\./g, ' ').replace(/(\w)(\w*)/g, 
-        (g0, g1, g2) => g1.toUpperCase() + g2);
-      
-      localStorage.setItem('userName', userName);
-      
-      toast({
-        title: "Login efetuado com sucesso",
-        description: `Bem-vinda, ${userName}!`,
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/home`
+        }
       });
-      
-      navigate('/home');
-    } catch (error) {
+
+      if (error) {
+        toast({
+          title: "Erro ao fazer login com Google",
+          description: error.message,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // O redirecionamento será feito pelo Supabase OAuth
+      localStorage.setItem('isAuthenticated', 'true');
+    } catch (error: any) {
+      console.error("Google login error:", error);
       toast({
-        title: "Erro ao fazer login com Google",
-        description: "Tente novamente mais tarde",
+        title: "Erro de sistema",
+        description: "Ocorreu um erro ao processar sua solicitação.",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
