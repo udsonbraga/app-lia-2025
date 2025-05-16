@@ -20,6 +20,10 @@ export const useGoogleAuth = () => {
       });
 
       if (error) {
+        if (error.message.includes("provider is not enabled")) {
+          throw new Error("O provedor Google não está habilitado no Supabase. Por favor, configure-o no painel de controle do Supabase.");
+        }
+        
         toast({
           title: "Erro ao fazer login com Google",
           description: error.message,
@@ -33,11 +37,8 @@ export const useGoogleAuth = () => {
       localStorage.setItem('isAuthenticated', 'true');
     } catch (error: any) {
       console.error("Google login error:", error);
-      toast({
-        title: "Erro de sistema",
-        description: "Ocorreu um erro ao processar sua solicitação.",
-        variant: "destructive",
-      });
+      throw error; // Propagate the error to be handled by the component
+    } finally {
       setIsLoading(false);
     }
   };
