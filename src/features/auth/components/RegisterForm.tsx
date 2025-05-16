@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/features/auth/components/FormField";
-import TermsCheckbox from "@/features/auth/components/TermsCheckbox";
+import { TermsCheckbox } from "@/features/auth/components/TermsCheckbox";
 import { registerFormSchema } from "@/features/auth/utils/formValidation";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -50,8 +50,8 @@ export const RegisterForm = () => {
     }
   };
 
-  const handleTermsChange = (event: FormEvent<HTMLInputElement>) => {
-    setAcceptedTerms(event.currentTarget.checked);
+  const handleTermsChange = (checked: boolean) => {
+    setAcceptedTerms(checked);
   };
 
   return (
@@ -65,9 +65,12 @@ export const RegisterForm = () => {
           name="name"
           label="Nome"
           placeholder="Seu nome completo"
+          type="text"
           register={form.register}
           error={form.formState.errors.name}
           disabled={isLoading}
+          value=""
+          onChange={() => {}}
         />
 
         <FormField
@@ -78,6 +81,8 @@ export const RegisterForm = () => {
           register={form.register}
           error={form.formState.errors.email}
           disabled={isLoading}
+          value=""
+          onChange={() => {}}
         />
 
         <FormField
@@ -88,6 +93,8 @@ export const RegisterForm = () => {
           register={form.register}
           error={form.formState.errors.password}
           disabled={isLoading}
+          value=""
+          onChange={() => {}}
         />
 
         <FormField
@@ -98,11 +105,13 @@ export const RegisterForm = () => {
           register={form.register}
           error={form.formState.errors.confirmPassword}
           disabled={isLoading}
+          value=""
+          onChange={() => {}}
         />
 
         <TermsCheckbox
-          onChange={handleTermsChange}
-          checked={acceptedTerms}
+          acceptedTerms={acceptedTerms}
+          onCheckedChange={handleTermsChange}
           disabled={isLoading}
         />
 

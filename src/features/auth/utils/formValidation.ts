@@ -1,45 +1,31 @@
 
-interface FormData {
-  name: string;
-  email: string;
-  phone: string;
-  password: string;
-}
+import { z } from "zod";
 
-export const validateEmail = (email: string): boolean => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-};
+export const registerFormSchema = z.object({
+  name: z.string()
+    .min(3, "Nome deve ter pelo menos 3 caracteres")
+    .max(100, "Nome deve ter no máximo 100 caracteres"),
+  email: z.string()
+    .email("Email inválido"),
+  password: z.string()
+    .min(8, "Senha deve ter pelo menos 8 caracteres")
+    .regex(/[A-Z]/, "Senha deve conter pelo menos uma letra maiúscula")
+    .regex(/[a-z]/, "Senha deve conter pelo menos uma letra minúscula")
+    .regex(/[0-9]/, "Senha deve conter pelo menos um número"),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"]
+});
 
-export const validatePhone = (phone: string): boolean => {
-  return /^\(\d{2}\) \d{5}-\d{4}$/.test(phone);
-};
+export const loginFormSchema = z.object({
+  email: z.string()
+    .email("Email inválido"),
+  password: z.string()
+    .min(1, "Senha é obrigatória")
+});
 
-export const formatPhone = (value: string): string => {
-  const numbers = value.replace(/\D/g, "");
-  if (numbers.length <= 11) {
-    return numbers.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-  }
-  return value;
-};
-
-export const validateForm = (formData: FormData): Partial<FormData> => {
-  const errors: Partial<FormData> = {};
-
-  if (!formData.name) {
-    errors.name = "Nome é obrigatório";
-  }
-
-  if (!formData.email || !validateEmail(formData.email)) {
-    errors.email = "E-mail inválido";
-  }
-
-  if (!formData.phone || !validatePhone(formData.phone)) {
-    errors.phone = "Telefone inválido - Use o formato (99) 99999-9999";
-  }
-
-  if (!formData.password || formData.password.length < 6) {
-    errors.password = "A senha deve ter pelo menos 6 caracteres";
-  }
-
-  return errors;
-};
+export const passwordRecoverySchema = z.object({
+  email: z.string()
+    .email("Email inválido")
+});

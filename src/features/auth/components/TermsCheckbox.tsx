@@ -6,9 +6,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface TermsCheckboxProps {
   acceptedTerms: boolean;
   onCheckedChange: (checked: boolean) => void;
+  disabled?: boolean;
 }
 
-export function TermsCheckbox({ acceptedTerms, onCheckedChange }: TermsCheckboxProps) {
+export function TermsCheckbox({ acceptedTerms, onCheckedChange, disabled }: TermsCheckboxProps) {
   const navigate = useNavigate();
 
   return (
@@ -18,6 +19,7 @@ export function TermsCheckbox({ acceptedTerms, onCheckedChange }: TermsCheckboxP
         checked={acceptedTerms}
         onCheckedChange={(checked) => onCheckedChange(checked === true)}
         className="mt-1"
+        disabled={disabled}
       />
       <div className="grid gap-1.5 leading-none">
         <label
