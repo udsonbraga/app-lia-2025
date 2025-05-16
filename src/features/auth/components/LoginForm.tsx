@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -59,9 +58,9 @@ export const LoginForm = () => {
       <h1 className="text-2xl font-bold text-center mb-6">Entre na sua conta</h1>
       
       {isEmailNotConfirmed && (
-        <Alert variant="warning" className="mb-4 bg-amber-50 border-amber-200">
-          <Mail className="h-4 w-4 text-amber-500" />
-          <AlertDescription className="text-amber-800">
+        <Alert variant="warning" className="mb-4">
+          <Mail className="h-4 w-4" />
+          <AlertDescription>
             <span className="font-medium">Email não confirmado.</span> Por favor, verifique sua caixa de entrada e confirme seu email antes de fazer login. 
             <p className="mt-1 text-sm">Enviamos um link de confirmação para <strong>{emailAddress}</strong></p>
           </AlertDescription>
