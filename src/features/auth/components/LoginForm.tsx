@@ -8,9 +8,12 @@ import { Button } from "@/components/ui/button";
 import { FormFieldRHF } from "@/features/auth/components/FormField";
 import { loginFormSchema } from "@/features/auth/utils/formValidation";
 import { useAuth } from "@/hooks/useAuth";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { signIn } = useAuth();
   
@@ -25,14 +28,18 @@ export const LoginForm = () => {
   });
 
   const handleSubmit = async (values: FormValues) => {
+    setLoginError(null);
     setIsLoading(true);
     try {
+      console.log("Tentando login com:", values.email);
       const success = await signIn(values.email, values.password);
+      
       if (!success) {
         setIsLoading(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
+      setLoginError(error.message || "Ocorreu um erro durante o login. Tente novamente.");
       setIsLoading(false);
     }
   };
@@ -40,6 +47,13 @@ export const LoginForm = () => {
   return (
     <div className="space-y-4 w-full max-w-md">
       <h1 className="text-2xl font-bold text-center mb-6">Entre na sua conta</h1>
+      
+      {loginError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{loginError}</AlertDescription>
+        </Alert>
+      )}
       
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormFieldRHF
