@@ -32,13 +32,10 @@ export const useSignIn = () => {
       if (error) {
         console.error("Erro de login:", error.message);
         
-        // Mensagem específica para email não confirmado
+        // Specific handling for email not confirmed error
         if (error.message.includes("Email not confirmed")) {
-          toast({
-            title: "Email não confirmado",
-            description: "Por favor, verifique seu email e confirme sua conta antes de fazer login.",
-            variant: "destructive"
-          });
+          setError("Email not confirmed");
+          throw new Error("Email not confirmed");
         } else {
           toast({
             title: "Erro ao fazer login",
@@ -73,14 +70,20 @@ export const useSignIn = () => {
       return false;
     } catch (error: any) {
       console.error("Erro no processo de login:", error);
-      toast({
-        title: "Erro de sistema",
-        description: "Ocorreu um erro ao processar sua solicitação.",
-        variant: "destructive"
-      });
+      
+      if (error.message === "Email not confirmed") {
+        // Let the component handle this specific error
+        throw error;
+      } else {
+        toast({
+          title: "Erro de sistema",
+          description: "Ocorreu um erro ao processar sua solicitação.",
+          variant: "destructive"
+        });
+      }
       
       setError(error.message);
-      return false;
+      throw error;
     } finally {
       setIsLoading(false);
     }
