@@ -1,20 +1,16 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { FormFieldRHF } from "@/features/auth/components/FormField";
+import FormField from "@/features/auth/components/FormField";
 import { loginFormSchema } from "@/features/auth/utils/formValidation";
 import { useAuth } from "@/hooks/useAuth";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Mail } from "lucide-react";
 
 export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [loginError, setLoginError] = useState<string | null>(null);
-  const [isEmailNotConfirmed, setIsEmailNotConfirmed] = useState(false);
-  const [emailAddress, setEmailAddress] = useState<string>("");
   const navigate = useNavigate();
   const { signIn } = useAuth();
   
@@ -29,26 +25,14 @@ export const LoginForm = () => {
   });
 
   const handleSubmit = async (values: FormValues) => {
-    setLoginError(null);
-    setIsEmailNotConfirmed(false);
     setIsLoading(true);
     try {
-      console.log("Tentando login com:", values.email);
-      setEmailAddress(values.email);
       const success = await signIn(values.email, values.password);
-      
       if (!success) {
         setIsLoading(false);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Login error:", error);
-      setLoginError(error.message || "Ocorreu um erro durante o login. Tente novamente.");
-      
-      // Check if error is related to email confirmation
-      if (error.message && error.message.toLowerCase().includes("email not confirmed")) {
-        setIsEmailNotConfirmed(true);
-      }
-      
       setIsLoading(false);
     }
   };
@@ -57,25 +41,8 @@ export const LoginForm = () => {
     <div className="space-y-4 w-full max-w-md">
       <h1 className="text-2xl font-bold text-center mb-6">Entre na sua conta</h1>
       
-      {isEmailNotConfirmed && (
-        <Alert variant="warning" className="mb-4">
-          <Mail className="h-4 w-4" />
-          <AlertDescription>
-            <span className="font-medium">Email não confirmado.</span> Por favor, verifique sua caixa de entrada e confirme seu email antes de fazer login. 
-            <p className="mt-1 text-sm">Enviamos um link de confirmação para <strong>{emailAddress}</strong></p>
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      {loginError && !isEmailNotConfirmed && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{loginError}</AlertDescription>
-        </Alert>
-      )}
-      
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormFieldRHF
+        <FormField
           name="email"
           label="Email"
           placeholder="seu.email@exemplo.com"
@@ -85,7 +52,7 @@ export const LoginForm = () => {
           disabled={isLoading}
         />
         
-        <FormFieldRHF
+        <FormField
           name="password"
           label="Senha"
           placeholder="Sua senha"

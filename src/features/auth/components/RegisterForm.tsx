@@ -1,21 +1,20 @@
 
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { FormFieldRHF } from "@/features/auth/components/FormField";
-import { TermsCheckbox } from "@/features/auth/components/TermsCheckbox";
+import FormField from "@/features/auth/components/FormField";
+import TermsCheckbox from "@/features/auth/components/TermsCheckbox";
 import { registerFormSchema } from "@/features/auth/utils/formValidation";
 import { useAuth } from "@/hooks/useAuth";
-import { RegisterSuccessDialog } from "./RegisterSuccessDialog";
 
 export const RegisterForm = () => {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { signUp, showSuccessDialog, registeredEmail, closeSuccessDialog } = useAuth();
+  const { signUp } = useAuth();
 
   // Definir tipo do formulário usando o esquema Zod
   type FormValues = z.infer<typeof registerFormSchema>;
@@ -51,8 +50,8 @@ export const RegisterForm = () => {
     }
   };
 
-  const onCheckedChange = (checked: boolean) => {
-    setAcceptedTerms(checked);
+  const handleTermsChange = (event: FormEvent<HTMLInputElement>) => {
+    setAcceptedTerms(event.currentTarget.checked);
   };
 
   return (
@@ -62,7 +61,7 @@ export const RegisterForm = () => {
       </h1>
 
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormFieldRHF
+        <FormField
           name="name"
           label="Nome"
           placeholder="Seu nome completo"
@@ -71,7 +70,7 @@ export const RegisterForm = () => {
           disabled={isLoading}
         />
 
-        <FormFieldRHF
+        <FormField
           name="email"
           label="Email"
           placeholder="seu.email@exemplo.com"
@@ -81,7 +80,7 @@ export const RegisterForm = () => {
           disabled={isLoading}
         />
 
-        <FormFieldRHF
+        <FormField
           name="password"
           label="Senha"
           placeholder="Crie uma senha forte"
@@ -91,7 +90,7 @@ export const RegisterForm = () => {
           disabled={isLoading}
         />
 
-        <FormFieldRHF
+        <FormField
           name="confirmPassword"
           label="Confirmar Senha"
           placeholder="Confirme sua senha"
@@ -102,8 +101,9 @@ export const RegisterForm = () => {
         />
 
         <TermsCheckbox
-          acceptedTerms={acceptedTerms}
-          onCheckedChange={onCheckedChange}
+          onChange={handleTermsChange}
+          checked={acceptedTerms}
+          disabled={isLoading}
         />
 
         <Button
@@ -127,13 +127,6 @@ export const RegisterForm = () => {
           </p>
         </div>
       </form>
-
-      {/* Diálogo de sucesso */}
-      <RegisterSuccessDialog 
-        open={showSuccessDialog} 
-        onClose={closeSuccessDialog} 
-        email={registeredEmail} 
-      />
     </div>
   );
 };

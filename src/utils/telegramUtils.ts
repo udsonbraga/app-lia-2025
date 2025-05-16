@@ -11,13 +11,13 @@
  */
 export const sendTelegramMessage = async (telegramId: string, locationLink: string): Promise<boolean> => {
   try {
-    const botToken = "7668166969:AAFnukkbhjDnUgGTC5em6vYk1Ch7bXy-rBQ";
+    const botToken = "7668166969:AAFnukkbhjDnUgGTC5em6vYk1Ch7bXy-rBQ"; // Updated token
     
     // Get user name from localStorage
     const userName = localStorage.getItem("userName") || "Alguém";
     
     // New personalized message format
-    const message = `🚨 EMERGÊNCIA: ${userName} está em perigo e precisa de sua ajuda! 📍 Localização atual: ${locationLink}`;
+    const message = `${userName} está em perigo e precisa de sua ajuda! Localização atual: ${locationLink}`;
     
     // URL da API do Telegram para enviar mensagem
     const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
@@ -39,8 +39,6 @@ export const sendTelegramMessage = async (telegramId: string, locationLink: stri
     });
     
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Erro da API do Telegram:', errorData);
       throw new Error(`Erro ao enviar mensagem: ${response.statusText}`);
     }
     

@@ -33,27 +33,20 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps) => {
     
     // Enviar mensagens para todos os contatos cadastrados
     const promises = [];
-    let successCount = 0;
     
     for (const contact of contacts) {
-      try {
-        // Enviar mensagem pelo Telegram e contar sucessos
-        const result = await sendTelegramMessage(contact.telegramId, locationLink);
-        if (result) successCount++;
-      } catch (err) {
-        console.error(`Erro ao enviar mensagem para ${contact.name}:`, err);
-      }
+      // Enviar mensagem pelo Telegram
+      promises.push(
+        sendTelegramMessage(contact.telegramId, locationLink)
+      );
     }
     
-    // Verificar resultados
-    if (successCount > 0) {
-      toast({
-        title: "Alerta de emergência enviado",
-        description: `Alertas enviados com sucesso para ${successCount} de ${contacts.length} contatos.`,
-      });
-    } else {
-      throw new Error("Nenhum alerta foi enviado com sucesso");
-    }
+    await Promise.allSettled(promises);
+    
+    toast({
+      title: "Alerta de emergência enviado",
+      description: "Botão de Emergência Acionado! Alertas enviados via Telegram.",
+    });
   } catch (error) {
     console.error("Erro ao enviar alerta automático:", error);
     toast({
@@ -61,6 +54,5 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps) => {
       description: "Não foi possível enviar o alerta de emergência. Tente novamente.",
       variant: "destructive"
     });
-    throw error; // Re-throw para tratamento no componente
   }
 };

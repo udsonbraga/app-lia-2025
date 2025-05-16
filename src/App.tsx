@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "@/pages/Index";
 import Register from "@/pages/Register";
@@ -14,37 +14,15 @@ import Accessories from "@/pages/Accessories";
 import Clothing from "@/pages/Clothing";
 import "./App.css";
 
-const AuthCheck = () => {
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-  const location = useLocation();
-  
-  // Se estiver autenticado e tentando acessar login/register, redireciona para home
-  if (isAuthenticated && (location.pathname === '/login' || location.pathname === '/register')) {
-    return <Navigate to="/home" />;
-  }
-  
-  // Se não estiver autenticado e tentando acessar uma rota protegida, redireciona para login
-  if (!isAuthenticated && location.pathname !== '/login' && location.pathname !== '/register' && location.pathname !== '/') {
-    return <Navigate to="/login" state={{ from: location }} />;
-  }
-  
-  return null;
-};
-
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-  const location = useLocation();
-  
-  return isAuthenticated ? 
-    children : 
-    <Navigate to="/login" state={{ from: location }} />;
+  return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
 function App() {
   return (
     <Router>
       <div className="bg-white min-h-screen">
-        <AuthCheck />
         <Routes>
           <Route path="/" element={<LoadingScreen />} />
           <Route path="/login" element={<Login />} />

@@ -1,6 +1,4 @@
 
-import { z } from "zod";
-
 interface FormData {
   name: string;
   email: string;
@@ -45,19 +43,3 @@ export const validateForm = (formData: FormData): Partial<FormData> => {
 
   return errors;
 };
-
-// Add the missing form schemas
-export const registerFormSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
-  email: z.string().email("E-mail inválido"),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
-  confirmPassword: z.string().min(6, "Confirme sua senha")
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "As senhas não coincidem",
-  path: ["confirmPassword"]
-});
-
-export const loginFormSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(1, "Senha é obrigatória")
-});

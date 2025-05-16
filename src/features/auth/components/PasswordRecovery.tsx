@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { FormFieldRHF } from "./FormField";
+import FormField from "./FormField";
 import { supabase } from "@/integrations/supabase/client";
 
 const recoverySchema = z.object({
@@ -83,7 +83,7 @@ export const PasswordRecovery = () => {
             recuperação de senha.
           </p>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormFieldRHF
+            <FormField
               name="email"
               label="Email"
               placeholder="seu.email@exemplo.com"
