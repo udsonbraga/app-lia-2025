@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import FormField from "./FormField";
+import { FormField } from "./FormField";
 import { supabase } from "@/integrations/supabase/client";
 
 const recoverySchema = z.object({
@@ -91,6 +91,8 @@ export const PasswordRecovery = () => {
               register={form.register}
               error={form.formState.errors.email}
               disabled={isLoading}
+              value=""
+              onChange={() => {}}
             />
             <Button
               type="submit"

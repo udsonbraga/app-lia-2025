@@ -5,7 +5,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import FormField from "@/features/auth/components/FormField";
+import { FormField } from "@/features/auth/components/FormField";
 import { loginFormSchema } from "@/features/auth/utils/formValidation";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -50,6 +50,8 @@ export const LoginForm = () => {
           register={form.register}
           error={form.formState.errors.email}
           disabled={isLoading}
+          value=""
+          onChange={() => {}}
         />
         
         <FormField
@@ -60,6 +62,8 @@ export const LoginForm = () => {
           register={form.register}
           error={form.formState.errors.password}
           disabled={isLoading}
+          value=""
+          onChange={() => {}}
         />
         
         <div className="flex items-center justify-end">
