@@ -5,7 +5,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import FormField from "@/features/auth/components/FormField";
+import { FormField } from "@/features/auth/components/FormField";
 import TermsCheckbox from "@/features/auth/components/TermsCheckbox";
 import { registerFormSchema } from "@/features/auth/utils/formValidation";
 import { useAuth } from "@/hooks/useAuth";
