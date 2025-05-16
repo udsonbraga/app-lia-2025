@@ -1,5 +1,5 @@
 
-import { useState, FormEvent } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -9,12 +9,13 @@ import { FormFieldRHF } from "@/features/auth/components/FormField";
 import { TermsCheckbox } from "@/features/auth/components/TermsCheckbox";
 import { registerFormSchema } from "@/features/auth/utils/formValidation";
 import { useAuth } from "@/hooks/useAuth";
+import { RegisterSuccessDialog } from "./RegisterSuccessDialog";
 
 export const RegisterForm = () => {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { signUp } = useAuth();
+  const { signUp, showSuccessDialog, registeredEmail, closeSuccessDialog } = useAuth();
 
   // Definir tipo do formulário usando o esquema Zod
   type FormValues = z.infer<typeof registerFormSchema>;
@@ -126,6 +127,13 @@ export const RegisterForm = () => {
           </p>
         </div>
       </form>
+
+      {/* Diálogo de sucesso */}
+      <RegisterSuccessDialog 
+        open={showSuccessDialog} 
+        onClose={closeSuccessDialog} 
+        email={registeredEmail} 
+      />
     </div>
   );
 };

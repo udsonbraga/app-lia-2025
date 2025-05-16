@@ -16,7 +16,14 @@ export function useAuth() {
   const { signIn, isLoading: signInLoading, error: signInError } = useSignIn();
   
   // Obter funcionalidades de cadastro
-  const { signUp, isLoading: signUpLoading, error: signUpError } = useSignUp();
+  const { 
+    signUp, 
+    isLoading: signUpLoading, 
+    error: signUpError,
+    showSuccessDialog,
+    registeredEmail,
+    closeSuccessDialog
+  } = useSignUp();
   
   // Obter funcionalidades de logout
   const { signOut, isLoading: signOutLoading, error: signOutError } = useSignOut();
@@ -33,7 +40,10 @@ export function useAuth() {
     signUp,
     signOut,
     isLoading,
-    error
+    error,
+    showSuccessDialog,
+    registeredEmail,
+    closeSuccessDialog
   };
 }
 

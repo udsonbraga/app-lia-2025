@@ -11,6 +11,8 @@ import { cleanupAuthState } from "../utils/authStateUtils";
 export const useSignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -60,19 +62,11 @@ export const useSignUp = () => {
         return false;
       }
       
-      if (data.session) {
-        // Login automático após cadastro (se não precisar confirmar email)
-        localStorage.setItem('isAuthenticated', 'true');
-        navigate('/home');
-      } else {
-        // Provavelmente precisa confirmar email
-        toast({
-          title: "Conta criada com sucesso!",
-          description: "Verifique seu email para confirmar sua conta.",
-        });
-        navigate('/login');
-      }
+      // Em vez de navegar diretamente, mostrar o diálogo de sucesso
+      setRegisteredEmail(email);
+      setShowSuccessDialog(true);
       
+      // A navegação será tratada pelo diálogo após o fechamento
       return true;
     } catch (error: any) {
       console.error("Erro no processo de cadastro:", error);
@@ -88,10 +82,18 @@ export const useSignUp = () => {
       setIsLoading(false);
     }
   };
+  
+  const closeSuccessDialog = () => {
+    setShowSuccessDialog(false);
+    // Navegação é feita pelo componente de diálogo
+  };
 
   return {
     signUp,
     isLoading,
-    error
+    error,
+    showSuccessDialog,
+    registeredEmail,
+    closeSuccessDialog
   };
 };
