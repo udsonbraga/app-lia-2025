@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
@@ -22,29 +21,7 @@ export function useAuth() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Test database connection function
-  const testDatabaseConnection = async () => {
-    try {
-      console.log("Testing database connection...");
-      const { data, error } = await supabase.from('profiles').select('count').limit(1);
-      
-      if (error) {
-        console.error("Database connection error:", error);
-        return false;
-      }
-      
-      console.log("Database connection successful:", data);
-      return true;
-    } catch (error: any) {
-      console.error("Database connection test failed:", error.message);
-      return false;
-    }
-  };
-
   useEffect(() => {
-    // Test the database connection when the component mounts
-    testDatabaseConnection();
-    
     // Obter sessão atual na montagem inicial
     const getInitialSession = async () => {
       try {
@@ -294,7 +271,6 @@ export function useAuth() {
     ...state,
     signIn,
     signUp,
-    signOut,
-    testDatabaseConnection
+    signOut
   };
 }
