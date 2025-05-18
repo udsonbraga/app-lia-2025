@@ -1,25 +1,28 @@
 
 import { getCurrentPosition } from './geolocationUtils';
 import { sendTelegramMessage } from './telegramUtils';
-import { useToast } from "@/hooks/use-toast";
+import { toast as showToast } from "@/components/ui/use-toast";
 
 type EmergencyAlertProps = {
-  toast: ReturnType<typeof useToast>['toast'];
+  toast?: typeof showToast;
 };
 
 /**
  * Handles sending emergency alerts to configured contacts
  * @returns {Promise<boolean>} Returns true if alert was sent, false if no contacts configured
  */
-export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps): Promise<boolean> => {
+export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}): Promise<boolean> => {
   try {
+    // Get the toast function or use the imported one
+    const toastFn = toast || showToast;
+    
     // Obter contatos de emergência do localStorage
-    const safeContacts = localStorage.getItem("safeContacts");
+    const safeContacts = typeof window !== 'undefined' ? localStorage.getItem("safeContacts") : null;
     const contacts = safeContacts ? JSON.parse(safeContacts) : [];
     
     // Verificar se há contatos configurados
     if (contacts.length === 0) {
-      toast({
+      toastFn({
         title: "Contatos não configurados",
         description: "Por favor, configure pelo menos um contato de confiança nas configurações.",
         variant: "destructive"
@@ -44,7 +47,7 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps): Prom
     
     await Promise.allSettled(promises);
     
-    toast({
+    toastFn({
       title: "Alerta de emergência enviado",
       description: "Botão de Emergência Acionado! Alertas enviados via Telegram.",
     });
@@ -52,7 +55,8 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps): Prom
     return true;
   } catch (error) {
     console.error("Erro ao enviar alerta automático:", error);
-    toast({
+    const toastFn = toast || showToast;
+    toastFn({
       title: "Erro ao enviar alerta",
       description: "Não foi possível enviar o alerta de emergência. Tente novamente.",
       variant: "destructive"
