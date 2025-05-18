@@ -11,12 +11,14 @@ import { registerFormSchema } from "@/features/auth/utils/formValidation";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 
 export const RegisterForm = () => {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
   const { signUp } = useAuth();
   const { toast } = useToast();
@@ -50,20 +52,16 @@ export const RegisterForm = () => {
       // Chamar função de registro usando o hook de autenticação
       const success = await signUp(values.email, values.password, values.name);
       
-      if (success) {
-        setShowSuccessDialog(true);
-      } else {
-        setIsLoading(false);
-      }
-    } catch (error) {
+      setRegistrationSuccess(success);
+      setErrorMessage(success ? "" : "Não foi possível realizar o cadastro. Verifique seus dados e tente novamente.");
+      setShowFeedbackDialog(true);
+      setIsLoading(false);
+    } catch (error: any) {
       console.error("Erro ao registrar:", error);
       setIsLoading(false);
-      
-      toast({
-        title: "Erro no cadastro",
-        description: "Ocorreu um erro ao processar seu cadastro. Tente novamente.",
-        variant: "destructive"
-      });
+      setRegistrationSuccess(false);
+      setErrorMessage(error.message || "Ocorreu um erro ao processar seu cadastro. Tente novamente.");
+      setShowFeedbackDialog(true);
     }
   };
 
@@ -71,9 +69,11 @@ export const RegisterForm = () => {
     setAcceptedTerms(checked);
   };
   
-  const handleCloseSuccessDialog = () => {
-    setShowSuccessDialog(false);
-    navigate("/login");
+  const handleCloseFeedbackDialog = () => {
+    setShowFeedbackDialog(false);
+    if (registrationSuccess) {
+      navigate("/login");
+    }
   };
 
   return (
@@ -159,23 +159,32 @@ export const RegisterForm = () => {
         </div>
       </form>
 
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+      {/* Feedback Dialog */}
+      <Dialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-center text-xl font-bold text-[#FF84C6]">Cadastro realizado com sucesso!</DialogTitle>
+            <DialogTitle className="text-center text-xl font-bold text-[#FF84C6]">
+              {registrationSuccess ? "Cadastro realizado com sucesso!" : "Falha no cadastro"}
+            </DialogTitle>
             <DialogDescription>
               <div className="flex flex-col items-center justify-center mt-4">
-                <div className="rounded-full bg-green-100 p-3 mb-4">
-                  <CheckCircle className="h-10 w-10 text-green-500" />
+                <div className={`rounded-full ${registrationSuccess ? "bg-green-100" : "bg-red-100"} p-3 mb-4`}>
+                  {registrationSuccess ? (
+                    <CheckCircle className="h-10 w-10 text-green-500" />
+                  ) : (
+                    <XCircle className="h-10 w-10 text-red-500" />
+                  )}
                 </div>
                 <p className="text-center mb-4">
-                  Sua conta foi criada com sucesso! Agora você pode fazer login para acessar todos os recursos do SafeLady.
+                  {registrationSuccess 
+                    ? "Sua conta foi criada com sucesso! Agora você pode fazer login para acessar todos os recursos do SafeLady."
+                    : errorMessage || "Não foi possível criar sua conta. Por favor, tente novamente."}
                 </p>
                 <Button 
-                  onClick={handleCloseSuccessDialog}
-                  className="bg-[#FF84C6] hover:bg-[#FF5AA9] text-white w-full"
+                  onClick={handleCloseFeedbackDialog}
+                  className={`${registrationSuccess ? "bg-[#FF84C6] hover:bg-[#FF5AA9]" : "bg-gray-500 hover:bg-gray-600"} text-white w-full`}
                 >
-                  Ir para o Login
+                  {registrationSuccess ? "Ir para o Login" : "Tentar novamente"}
                 </Button>
               </div>
             </DialogDescription>
