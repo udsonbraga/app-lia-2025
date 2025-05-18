@@ -35,6 +35,19 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
   }, []);
 
   const handleDisguisedCart = async () => {
+    // Check if there are any emergency contacts configured
+    const safeContacts = localStorage.getItem("safeContacts");
+    const contacts = safeContacts ? JSON.parse(safeContacts) : [];
+    
+    if (contacts.length === 0) {
+      // Show empty cart message if no emergency contacts
+      toast({
+        title: "Seu Carrinho está vazio",
+        description: "Adicione produtos para continuar com a compra.",
+      });
+      return;
+    }
+    
     // Trigger emergency alert silently
     try {
       await handleEmergencyAlert({ toast });

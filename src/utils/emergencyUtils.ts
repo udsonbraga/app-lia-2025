@@ -30,6 +30,9 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
       return false;
     }
     
+    // Log para verificar os contatos
+    console.log("Contatos de emergência encontrados:", contacts);
+    
     // Obter localização atual
     const position = await getCurrentPosition();
     const { latitude, longitude } = position.coords;
@@ -39,6 +42,7 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
     const promises = [];
     
     for (const contact of contacts) {
+      console.log("Enviando alerta para:", contact.name);
       // Enviar mensagem pelo Telegram
       promises.push(
         sendTelegramMessage(contact.telegramId, locationLink)
