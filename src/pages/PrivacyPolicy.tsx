@@ -1,10 +1,26 @@
 
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const PrivacyPolicy = () => {
   const navigate = useNavigate();
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
+  
+  const handleAccept = () => {
+    if (acceptedTerms) {
+      setShowConfirmationDialog(true);
+    }
+  };
+  
+  const handleConfirmation = () => {
+    setShowConfirmationDialog(false);
+    navigate('/login');
+  };
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
@@ -70,16 +86,56 @@ const PrivacyPolicy = () => {
             </p>
           </div>
           
-          <div className="mt-8 flex justify-center">
+          <div className="mt-8">
+            <div className="flex items-center space-x-2 mb-6">
+              <Checkbox 
+                id="terms" 
+                checked={acceptedTerms}
+                onCheckedChange={(checked) => setAcceptedTerms(!!checked)}
+                className="border-gray-400"
+              />
+              <label
+                htmlFor="terms"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Li e concordo com a Política de Privacidade
+              </label>
+            </div>
+            
             <Button 
-              onClick={() => navigate(-1)}
-              className="bg-[#FF84C6] hover:bg-[#FF5AA9] text-white"
+              onClick={handleAccept}
+              className={`w-full bg-[#FF84C6] hover:bg-[#FF5AA9] text-white ${!acceptedTerms ? 'opacity-70 cursor-not-allowed' : ''}`}
+              disabled={!acceptedTerms}
             >
-              Voltar para o cadastro
+              Confirmar Leitura e Voltar
             </Button>
           </div>
         </div>
       </div>
+      
+      <Dialog open={showConfirmationDialog} onOpenChange={setShowConfirmationDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-bold text-[#FF84C6]">Termos Aceitos</DialogTitle>
+            <DialogDescription>
+              <div className="flex flex-col items-center justify-center mt-4">
+                <div className="rounded-full bg-green-100 p-3 mb-4">
+                  <CheckCircle className="h-10 w-10 text-green-500" />
+                </div>
+                <p className="text-center mb-4">
+                  Obrigado por aceitar nossa Política de Privacidade. Você será redirecionado para a página de login.
+                </p>
+                <Button 
+                  onClick={handleConfirmation}
+                  className="bg-[#FF84C6] hover:bg-[#FF5AA9] text-white w-full"
+                >
+                  Continuar
+                </Button>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
