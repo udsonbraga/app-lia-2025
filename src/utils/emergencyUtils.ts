@@ -52,6 +52,9 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
       description: "Botão de Emergência Acionado! Alertas enviados via Telegram.",
     });
     
+    // Registrar hora do envio
+    localStorage.setItem("lastEmergencyAlert", new Date().toISOString());
+    
     return true;
   } catch (error) {
     console.error("Erro ao enviar alerta automático:", error);

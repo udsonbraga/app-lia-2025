@@ -1,15 +1,17 @@
 
-import { Shield } from "lucide-react";
+import { AlertCircle, Bell, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { handleEmergencyAlert } from "@/utils/emergencyUtils";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function EmergencyButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [showNoContactsDialog, setShowNoContactsDialog] = useState(false);
+  const [alertSent, setAlertSent] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -22,6 +24,14 @@ export function EmergencyButton() {
       // Se não tiver contatos, mostra o diálogo
       if (hasContacts === false) {
         setShowNoContactsDialog(true);
+      } else if (hasContacts === true) {
+        // Se o alerta foi enviado com sucesso
+        setAlertSent(true);
+        
+        // Ocultar a notificação após 8 segundos
+        setTimeout(() => {
+          setAlertSent(false);
+        }, 8000);
       }
     } catch (error) {
       console.error("Erro ao enviar alerta de emergência:", error);
@@ -42,6 +52,18 @@ export function EmergencyButton() {
 
   return (
     <>
+      {alertSent && (
+        <div className="fixed top-4 inset-x-0 mx-auto max-w-md z-50 animate-fade-in">
+          <Alert className="border-green-500 bg-green-50 shadow-lg">
+            <Bell className="h-4 w-4 text-green-600" />
+            <AlertTitle className="text-green-700">Alerta enviado com sucesso!</AlertTitle>
+            <AlertDescription className="text-green-600">
+              Seus contatos foram notificados com sua localização atual.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+      
       <button
         onClick={handleEmergencyContact}
         disabled={isLoading}
