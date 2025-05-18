@@ -9,8 +9,9 @@ type EmergencyAlertProps = {
 
 /**
  * Handles sending emergency alerts to configured contacts
+ * @returns {Promise<boolean>} Returns true if alert was sent, false if no contacts configured
  */
-export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps) => {
+export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps): Promise<boolean> => {
   try {
     // Obter contatos de emergência do localStorage
     const safeContacts = localStorage.getItem("safeContacts");
@@ -23,7 +24,7 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps) => {
         description: "Por favor, configure pelo menos um contato de confiança nas configurações.",
         variant: "destructive"
       });
-      return;
+      return false;
     }
     
     // Obter localização atual
@@ -47,6 +48,8 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps) => {
       title: "Alerta de emergência enviado",
       description: "Botão de Emergência Acionado! Alertas enviados via Telegram.",
     });
+    
+    return true;
   } catch (error) {
     console.error("Erro ao enviar alerta automático:", error);
     toast({
@@ -54,5 +57,6 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps) => {
       description: "Não foi possível enviar o alerta de emergência. Tente novamente.",
       variant: "destructive"
     });
+    throw error;
   }
 };
