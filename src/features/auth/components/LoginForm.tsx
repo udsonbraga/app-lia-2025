@@ -63,7 +63,7 @@ export const LoginForm = () => {
         setIsLoading(false);
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Erro de login:", error);
       setIsLoading(false);
     }
   };
