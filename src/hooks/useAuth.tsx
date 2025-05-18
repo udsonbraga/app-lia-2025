@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
@@ -206,12 +207,14 @@ export function useAuth() {
         error: null
       }));
       
+      // Success toast notification - will show alongside the dialog
       toast({
         title: "Conta criada com sucesso!",
         description: "Bem-vinda ao SafeLady.",
       });
       
-      navigate('/home');
+      // IMPORTANT: Removed the navigate('/home') line to allow the dialog to show
+      // The dialog will handle navigation to login page when closed
       localStorage.setItem('isAuthenticated', 'true');
       return true;
     } catch (error: any) {

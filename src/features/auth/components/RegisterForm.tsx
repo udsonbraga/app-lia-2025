@@ -54,8 +54,12 @@ export const RegisterForm = () => {
       
       setRegistrationSuccess(success);
       setErrorMessage(success ? "" : "Não foi possível realizar o cadastro. Verifique seus dados e tente novamente.");
+      
+      // Importante: mostrar o diálogo antes de qualquer navegação
       setShowFeedbackDialog(true);
       setIsLoading(false);
+      
+      // Removido o navigate para login daqui - agora só ocorre ao fechar o diálogo
     } catch (error: any) {
       console.error("Erro ao registrar:", error);
       setIsLoading(false);
@@ -160,7 +164,12 @@ export const RegisterForm = () => {
       </form>
 
       {/* Feedback Dialog */}
-      <Dialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog}>
+      <Dialog open={showFeedbackDialog} onOpenChange={(open) => {
+        if (!open && registrationSuccess) {
+          navigate("/login");
+        }
+        setShowFeedbackDialog(open);
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-center text-xl font-bold text-[#FF84C6]">
