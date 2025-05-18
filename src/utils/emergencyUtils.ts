@@ -17,7 +17,7 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
     const toastFn = toast || showToast;
     
     // Obter contatos de emergência do localStorage
-    const safeContacts = typeof window !== 'undefined' ? localStorage.getItem("safeContacts") : null;
+    const safeContacts = localStorage.getItem("safeContacts");
     const contacts = safeContacts ? JSON.parse(safeContacts) : [];
     
     // Verificar se há contatos configurados

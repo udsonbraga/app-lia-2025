@@ -1,19 +1,17 @@
 
-"use client";
-
 import { Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { handleEmergencyAlert } from "@/utils/emergencyUtils";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 
 export function EmergencyButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [showNoContactsDialog, setShowNoContactsDialog] = useState(false);
   const { toast } = useToast();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleEmergencyContact = async () => {
     setIsLoading(true);
@@ -39,7 +37,7 @@ export function EmergencyButton() {
 
   const handleAddContact = () => {
     setShowNoContactsDialog(false);
-    router.push("/safe-contact");
+    navigate("/safe-contact");
   };
 
   return (
@@ -70,7 +68,7 @@ export function EmergencyButton() {
           <DialogHeader>
             <DialogTitle>Contatos não configurados</DialogTitle>
             <DialogDescription>
-              Para usar o botão de emergência, é necessário cadastrar pelo menos um contato de confiança que receberá os alertes.
+              Para usar o botão de emergência, é necessário cadastrar pelo menos um contato de confiança que receberá os alertas.
             </DialogDescription>
           </DialogHeader>
           
