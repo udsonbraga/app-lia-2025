@@ -32,7 +32,7 @@ export function TermsCheckbox({ acceptedTerms, onCheckedChange, disabled }: Term
           href="#" 
           onClick={(e) => {
             e.preventDefault();
-            navigate('/help');
+            navigate('/privacy-policy');
           }}
           className="text-xs text-[#8B5CF6] underline flex items-center gap-1"
         >

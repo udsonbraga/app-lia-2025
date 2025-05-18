@@ -9,12 +9,17 @@ import { FormField } from "@/features/auth/components/FormField";
 import { TermsCheckbox } from "@/features/auth/components/TermsCheckbox";
 import { registerFormSchema } from "@/features/auth/utils/formValidation";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { CheckCircle } from "lucide-react";
 
 export const RegisterForm = () => {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const navigate = useNavigate();
   const { signUp } = useAuth();
+  const { toast } = useToast();
 
   // Definir tipo do formulário usando o esquema Zod
   type FormValues = z.infer<typeof registerFormSchema>;
@@ -31,7 +36,11 @@ export const RegisterForm = () => {
 
   const handleSubmit = async (values: FormValues) => {
     if (!acceptedTerms) {
-      // Mostrar erro se os termos não foram aceitos
+      toast({
+        title: "Termos não aceitos",
+        description: "Você precisa aceitar a Política de Privacidade para continuar.",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -41,17 +50,30 @@ export const RegisterForm = () => {
       // Chamar função de registro usando o hook de autenticação
       const success = await signUp(values.email, values.password, values.name);
       
-      if (!success) {
+      if (success) {
+        setShowSuccessDialog(true);
+      } else {
         setIsLoading(false);
       }
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("Erro ao registrar:", error);
       setIsLoading(false);
+      
+      toast({
+        title: "Erro no cadastro",
+        description: "Ocorreu um erro ao processar seu cadastro. Tente novamente.",
+        variant: "destructive"
+      });
     }
   };
 
   const handleTermsChange = (checked: boolean) => {
     setAcceptedTerms(checked);
+  };
+  
+  const handleCloseSuccessDialog = () => {
+    setShowSuccessDialog(false);
+    navigate("/login");
   };
 
   return (
@@ -136,6 +158,30 @@ export const RegisterForm = () => {
           </p>
         </div>
       </form>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-bold text-[#FF84C6]">Cadastro realizado com sucesso!</DialogTitle>
+            <DialogDescription>
+              <div className="flex flex-col items-center justify-center mt-4">
+                <div className="rounded-full bg-green-100 p-3 mb-4">
+                  <CheckCircle className="h-10 w-10 text-green-500" />
+                </div>
+                <p className="text-center mb-4">
+                  Sua conta foi criada com sucesso! Agora você pode fazer login para acessar todos os recursos do SafeLady.
+                </p>
+                <Button 
+                  onClick={handleCloseSuccessDialog}
+                  className="bg-[#FF84C6] hover:bg-[#FF5AA9] text-white w-full"
+                >
+                  Ir para o Login
+                </Button>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

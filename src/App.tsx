@@ -12,6 +12,7 @@ import { LoadingScreen } from "./components/LoadingScreen";
 import Help from "@/pages/Help";
 import Accessories from "@/pages/Accessories";
 import Clothing from "@/pages/Clothing";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import "./App.css";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -27,6 +28,7 @@ function App() {
           <Route path="/" element={<LoadingScreen />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route
             path="/home"
             element={
