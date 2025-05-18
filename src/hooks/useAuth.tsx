@@ -22,7 +22,29 @@ export function useAuth() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Test database connection function
+  const testDatabaseConnection = async () => {
+    try {
+      console.log("Testing database connection...");
+      const { data, error } = await supabase.from('profiles').select('count').limit(1);
+      
+      if (error) {
+        console.error("Database connection error:", error);
+        return false;
+      }
+      
+      console.log("Database connection successful:", data);
+      return true;
+    } catch (error: any) {
+      console.error("Database connection test failed:", error.message);
+      return false;
+    }
+  };
+
   useEffect(() => {
+    // Test the database connection when the component mounts
+    testDatabaseConnection();
+    
     // Obter sessão atual na montagem inicial
     const getInitialSession = async () => {
       try {
@@ -72,9 +94,43 @@ export function useAuth() {
     };
   }, []);
 
+  // Clean up all Supabase auth related data
+  const cleanupAuthState = () => {
+    // Remove standard auth tokens
+    localStorage.removeItem('supabase.auth.token');
+    
+    // Remove all Supabase auth keys from localStorage
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Remove from sessionStorage if in use
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+    
+    // Remove other auth related items
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userName');
+  };
+
   const signIn = async (email: string, password: string) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     try {
+      // Clean up existing auth state
+      cleanupAuthState();
+      
+      // Attempt global sign out
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+      }
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -134,6 +190,9 @@ export function useAuth() {
   const signUp = async (email: string, password: string, name: string) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     try {
+      // Clean up existing auth state
+      cleanupAuthState();
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -197,6 +256,9 @@ export function useAuth() {
   const signOut = async () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     try {
+      // Clean up existing auth state
+      cleanupAuthState();
+      
       const { error } = await supabase.auth.signOut();
 
       if (error) {
@@ -207,9 +269,6 @@ export function useAuth() {
         }));
         return false;
       }
-
-      // Remover tokens de autenticação
-      localStorage.removeItem('isAuthenticated');
       
       setState(prev => ({
         ...prev,
@@ -235,6 +294,7 @@ export function useAuth() {
     ...state,
     signIn,
     signUp,
-    signOut
+    signOut,
+    testDatabaseConnection
   };
 }

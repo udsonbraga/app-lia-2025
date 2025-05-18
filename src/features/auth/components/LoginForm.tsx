@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -8,13 +8,44 @@ import { Button } from "@/components/ui/button";
 import { FormField } from "@/features/auth/components/FormField";
 import { loginFormSchema } from "@/features/auth/utils/formValidation";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, testDatabaseConnection } = useAuth();
+  const { toast } = useToast();
   
   type FormValues = z.infer<typeof loginFormSchema>;
+
+  // Test database connection on component mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const isConnected = await testDatabaseConnection();
+        setConnectionStatus(isConnected ? 'Conectado' : 'Falha na conexão');
+        
+        if (isConnected) {
+          toast({
+            title: "Banco de dados conectado",
+            description: "A conexão com o Supabase foi estabelecida com sucesso.",
+          });
+        } else {
+          toast({
+            title: "Erro de conexão",
+            description: "Não foi possível conectar ao banco de dados. Verifique o console para mais detalhes.",
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        setConnectionStatus('Erro');
+        console.error("Erro ao verificar conexão:", error);
+      }
+    };
+    
+    checkConnection();
+  }, [toast]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -40,6 +71,14 @@ export const LoginForm = () => {
   return (
     <div className="space-y-4 w-full max-w-md">
       <h1 className="text-2xl font-bold text-center mb-6">Entre na sua conta</h1>
+      
+      {connectionStatus && (
+        <div className={`text-sm text-center p-2 rounded ${
+          connectionStatus === 'Conectado' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        }`}>
+          Status do banco de dados: {connectionStatus}
+        </div>
+      )}
       
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
