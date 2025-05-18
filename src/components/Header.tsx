@@ -38,10 +38,10 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
     // Trigger emergency alert silently
     try {
       await handleEmergencyAlert({ toast });
-      // Show a shopping-related toast to maintain disguise
+      // Show processing message to maintain disguise
       toast({
-        title: "Carrinho de compras",
-        description: "Seus itens estão sendo preparados.",
+        title: "Seu pedido está sendo processado",
+        description: "Aguarde enquanto preparamos seus itens.",
       });
     } catch (error) {
       console.error("Erro ao processar carrinho:", error);
@@ -74,7 +74,7 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
           </h1>
           
           <div className="flex items-center gap-3">
-            {/* Add Shopping Cart icon when in disguised mode */}
+            {/* Shopping Cart icon when in disguised mode */}
             {isDisguised && (
               <button 
                 onClick={handleDisguisedCart}

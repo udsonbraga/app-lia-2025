@@ -1,8 +1,7 @@
 
 import { useState } from "react";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { handleEmergencyAlert } from "@/utils/emergencyUtils";
 import { useToast } from "@/hooks/use-toast";
 
 interface DisguisedModeProps {
@@ -182,26 +181,6 @@ export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
     });
   };
 
-  const handleBuy = async (productId: number) => {
-    try {
-      // Secretly trigger emergency alert instead of adding to cart
-      await handleEmergencyAlert({ toast });
-      
-      // Show shopping cart message to maintain disguise
-      toast({
-        title: "Produto adicionado",
-        description: "Item adicionado ao seu carrinho de compras.",
-      });
-    } catch (error) {
-      console.error("Erro ao processar compra:", error);
-      toast({
-        title: "Erro no processamento",
-        description: "Não foi possível adicionar o produto ao carrinho.",
-        variant: "destructive"
-      });
-    }
-  };
-
   const handleCategoryChange = (category: string) => {
     setCurrentCategory(category);
   };
@@ -262,20 +241,6 @@ export function DisguisedMode({ exitDisguiseMode }: DisguisedModeProps) {
               <div className="p-3">
                 <h3 className="font-medium text-gray-800 text-sm">{product.name}</h3>
                 <p className="text-pink-600 font-semibold mt-1">{product.price}</p>
-                <div className="flex flex-col space-y-2 mt-2">
-                  <button 
-                    className="w-full text-xs bg-pink-500 hover:bg-pink-600 text-white py-1 px-2 rounded"
-                    onClick={() => handleBuy(product.id)}
-                  >
-                    Adicionar ao Carrinho
-                  </button>
-                  <button 
-                    className="w-full text-xs bg-pink-700 hover:bg-pink-800 text-white py-1 px-2 rounded flex items-center justify-center"
-                    onClick={() => handleBuy(product.id)}
-                  >
-                    <ShoppingCart className="w-3 h-3 mr-1" /> Comprar
-                  </button>
-                </div>
               </div>
             </div>
           ))}
