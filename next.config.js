@@ -3,12 +3,11 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  transpilePackages: [],
+  output: 'standalone',
   images: {
     domains: [],
   },
-  // Use the existing public directory from the Vite project
-  // This will ensure compatibility with existing assets
+  // Use the existing public directory
   experimental: {
     appDir: true,
   }
