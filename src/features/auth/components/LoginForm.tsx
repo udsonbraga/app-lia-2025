@@ -9,9 +9,12 @@ import { FormField } from "@/features/auth/components/FormField";
 import { loginFormSchema } from "@/features/auth/utils/formValidation";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
 export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { signIn } = useAuth();
   const { toast } = useToast();
@@ -28,13 +31,16 @@ export const LoginForm = () => {
 
   const handleSubmit = async (values: FormValues) => {
     setIsLoading(true);
+    setLoginError(null);
     try {
       const success = await signIn(values.email, values.password);
       if (!success) {
+        setLoginError("Não foi possível fazer login. Verifique suas credenciais e tente novamente.");
         setIsLoading(false);
       }
     } catch (error) {
       console.error("Erro de login:", error);
+      setLoginError("Ocorreu um erro durante o login. Por favor, tente novamente mais tarde.");
       setIsLoading(false);
     }
   };
@@ -42,6 +48,14 @@ export const LoginForm = () => {
   return (
     <div className="space-y-4 w-full max-w-md">
       <h1 className="text-2xl font-bold text-center mb-6">Entre na sua conta</h1>
+      
+      {loginError && (
+        <Alert variant="destructive" className="mb-4">
+          <ExclamationTriangleIcon className="h-4 w-4" />
+          <AlertTitle>Erro no login</AlertTitle>
+          <AlertDescription>{loginError}</AlertDescription>
+        </Alert>
+      )}
       
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField

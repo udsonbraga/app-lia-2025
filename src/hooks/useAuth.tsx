@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
@@ -115,15 +114,28 @@ export function useAuth() {
       });
 
       if (error) {
+        let errorMessage = "Verifique suas credenciais e tente novamente.";
+        
+        // Mensagens de erro específicas com base no código de erro
+        if (error.message.includes("Invalid login credentials")) {
+          errorMessage = "Credenciais inválidas. Verifique seu email e senha.";
+        } else if (error.message.includes("Email not confirmed")) {
+          errorMessage = "Email não confirmado. Verifique sua caixa de entrada.";
+        } else if (error.message.includes("User not found")) {
+          errorMessage = "Usuário não encontrado. Verifique seu email ou registre-se.";
+        } else if (error.message.includes("Invalid email")) {
+          errorMessage = "Email inválido. Verifique o formato do email.";
+        }
+        
         toast({
           title: "Erro ao fazer login",
-          description: "Verifique seus dados e tente novamente.",
+          description: errorMessage,
           variant: "destructive"
         });
         
         setState(prev => ({
           ...prev,
-          error: error.message,
+          error: errorMessage,
           isLoading: false
         }));
         return false;
@@ -150,9 +162,11 @@ export function useAuth() {
       
       return false;
     } catch (error: any) {
+      const errorMessage = "Ocorreu um erro ao processar sua solicitação.";
+      
       toast({
         title: "Erro de sistema",
-        description: "Ocorreu um erro ao processar sua solicitação.",
+        description: errorMessage,
         variant: "destructive"
       });
       
