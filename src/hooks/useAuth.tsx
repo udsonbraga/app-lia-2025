@@ -1,13 +1,12 @@
 
 import { useState, useEffect } from "react";
-import { Session, User } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthState } from "@/features/auth/types/auth";
+import type { AuthState } from "@/features/auth/types/auth";
 import { useAuthService } from "@/features/auth/services/authService";
 import { useToast } from "@/hooks/use-toast";
 
-export { AuthState };
+export type { AuthState };
 
 export function useAuth() {
   const [state, setState] = useState<AuthState>({
