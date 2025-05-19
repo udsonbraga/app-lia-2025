@@ -44,9 +44,11 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
     for (const contact of contacts) {
       console.log("Enviando alerta para:", contact.name);
       // Enviar mensagem pelo Telegram
-      promises.push(
-        sendTelegramMessage(contact.telegramId, locationLink)
-      );
+      if (contact.telegramId) {
+        promises.push(
+          sendTelegramMessage(contact.telegramId, locationLink)
+        );
+      }
     }
     
     await Promise.allSettled(promises);
