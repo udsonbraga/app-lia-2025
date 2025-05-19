@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { LoginLayout } from "@/features/auth/components/LoginLayout";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 import { SkeletonLoadingScreen } from "@/components/SkeletonLoadingScreen";
@@ -22,9 +22,7 @@ const Login = () => {
 
   return (
     <LoginLayout>
-      <div>
-        <LoginForm />
-      </div>
+      <LoginForm />
     </LoginLayout>
   );
 };
