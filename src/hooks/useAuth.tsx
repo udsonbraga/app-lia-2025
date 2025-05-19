@@ -1,15 +1,13 @@
+
 import { useState, useEffect } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { AuthState } from "@/features/auth/types/auth";
+import { useAuthService } from "@/features/auth/services/authService";
 import { useToast } from "@/hooks/use-toast";
 
-export interface AuthState {
-  user: User | null;
-  session: Session | null;
-  isLoading: boolean;
-  error: string | null;
-}
+export { AuthState };
 
 export function useAuth() {
   const [state, setState] = useState<AuthState>({
@@ -18,7 +16,9 @@ export function useAuth() {
     isLoading: true,
     error: null,
   });
+  
   const navigate = useNavigate();
+  const authService = useAuthService();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -71,108 +71,26 @@ export function useAuth() {
     };
   }, []);
 
-  // Clean up all Supabase auth related data
-  const cleanupAuthState = () => {
-    // Remove standard auth tokens
-    localStorage.removeItem('supabase.auth.token');
-    
-    // Remove all Supabase auth keys from localStorage
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    
-    // Remove from sessionStorage if in use
-    Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        sessionStorage.removeItem(key);
-      }
-    });
-    
-    // Remove other auth related items
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userName');
-  };
-
   const signIn = async (email: string, password: string) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
-    try {
-      // Clean up existing auth state
-      cleanupAuthState();
-      
-      // Attempt global sign out
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        let errorMessage = "Verifique suas credenciais e tente novamente.";
-        
-        // Mensagens de erro específicas com base no código de erro
-        if (error.message.includes("Invalid login credentials")) {
-          errorMessage = "Credenciais inválidas. Verifique seu email e senha.";
-        } else if (error.message.includes("Email not confirmed")) {
-          errorMessage = "Email não confirmado. Verifique sua caixa de entrada.";
-        } else if (error.message.includes("User not found")) {
-          errorMessage = "Usuário não encontrado. Verifique seu email ou registre-se.";
-        } else if (error.message.includes("Invalid email")) {
-          errorMessage = "Email inválido. Verifique o formato do email.";
-        }
-        
-        toast({
-          title: "Erro ao fazer login",
-          description: errorMessage,
-          variant: "destructive"
-        });
-        
-        setState(prev => ({
-          ...prev,
-          error: errorMessage,
-          isLoading: false
-        }));
-        return false;
-      }
-
+    
+    const result = await authService.signIn(email, password);
+    
+    if (result.success && result.data) {
       setState(prev => ({
         ...prev,
-        user: data.user,
-        session: data.session,
+        user: result.data.user,
+        session: result.data.session,
         isLoading: false,
         error: null
       }));
       
-      // Verificar se o usuário está autenticado
-      if (data.user) {
-        localStorage.setItem('isAuthenticated', 'true');
-        navigate('/home');
-        toast({
-          title: "Login realizado com sucesso",
-          description: `Bem-vinda de volta!`,
-        });
-        return true;
-      }
-      
-      return false;
-    } catch (error: any) {
-      const errorMessage = "Ocorreu um erro ao processar sua solicitação.";
-      
-      toast({
-        title: "Erro de sistema",
-        description: errorMessage,
-        variant: "destructive"
-      });
-      
+      navigate('/home');
+      return true;
+    } else {
       setState(prev => ({
         ...prev,
-        error: error.message,
+        error: result.error || "Erro ao fazer login",
         isLoading: false
       }));
       return false;
@@ -181,66 +99,22 @@ export function useAuth() {
 
   const signUp = async (email: string, password: string, name: string) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
-    try {
-      // Clean up existing auth state
-      cleanupAuthState();
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name
-          },
-        }
-      });
-
-      if (error) {
-        toast({
-          title: "Erro ao criar conta",
-          description: "Verifique seus dados e tente novamente.",
-          variant: "destructive"
-        });
-        
-        setState(prev => ({
-          ...prev,
-          error: error.message,
-          isLoading: false
-        }));
-        return false;
-      }
-
-      // Armazenar o nome do usuário para uso em todo o aplicativo
-      localStorage.setItem('userName', name);
-
+    
+    const result = await authService.signUp(email, password, name);
+    
+    if (result.success && result.data) {
       setState(prev => ({
         ...prev,
-        user: data.user,
-        session: data.session,
+        user: result.data.user,
+        session: result.data.session,
         isLoading: false,
         error: null
       }));
-      
-      // Success toast notification - will show alongside the dialog
-      toast({
-        title: "Conta criada com sucesso!",
-        description: "Bem-vinda ao SafeLady.",
-      });
-      
-      // IMPORTANT: Removed the navigate('/home') line to allow the dialog to show
-      // The dialog will handle navigation to login page when closed
-      localStorage.setItem('isAuthenticated', 'true');
       return true;
-    } catch (error: any) {
-      toast({
-        title: "Erro de sistema",
-        description: "Ocorreu um erro ao processar sua solicitação.",
-        variant: "destructive"
-      });
-      
+    } else {
       setState(prev => ({
         ...prev,
-        error: error.message,
+        error: result.error || "Erro ao criar conta",
         isLoading: false
       }));
       return false;
@@ -249,21 +123,10 @@ export function useAuth() {
 
   const signOut = async () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
-    try {
-      // Clean up existing auth state
-      cleanupAuthState();
-      
-      const { error } = await supabase.auth.signOut();
-
-      if (error) {
-        setState(prev => ({
-          ...prev,
-          error: error.message,
-          isLoading: false
-        }));
-        return false;
-      }
-      
+    
+    const result = await authService.signOut();
+    
+    if (result.success) {
       setState(prev => ({
         ...prev,
         user: null,
@@ -274,10 +137,10 @@ export function useAuth() {
       
       navigate('/login');
       return true;
-    } catch (error: any) {
+    } else {
       setState(prev => ({
         ...prev,
-        error: error.message,
+        error: result.error || "Erro ao sair",
         isLoading: false
       }));
       return false;
