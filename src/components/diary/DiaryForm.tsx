@@ -55,9 +55,12 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
     const newEntry: DiaryEntry = {
       id: Date.now().toString(),
       text,
+      title: text.substring(0, 50), // Use first 50 chars of text as title
+      date: new Date(), // Set current date as the diary entry date
       attachments: attachmentData,
-      location: location || "Não informado",
+      location: location || null,
       createdAt: new Date(),
+      tags: [], // Initialize with empty tags array
     };
 
     onSave(newEntry);
