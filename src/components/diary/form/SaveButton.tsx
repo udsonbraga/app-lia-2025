@@ -21,7 +21,7 @@ const SaveButton = ({ onClick, isSaving }: SaveButtonProps) => {
       ) : (
         <>
           <Save className="h-5 w-5" />
-          Salvar
+          Salvar Relato
         </>
       )}
     </Button>

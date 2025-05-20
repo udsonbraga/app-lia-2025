@@ -1,7 +1,18 @@
 
+import { useState } from "react";
 import { format } from "date-fns";
 import { Trash2, FileDown, MapPin } from "lucide-react";
 import { DiaryEntry } from "@/types/diary";
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle 
+} from "@/components/ui/alert-dialog";
 
 interface DiaryEntryListProps {
   entries: DiaryEntry[];
@@ -10,6 +21,22 @@ interface DiaryEntryListProps {
 }
 
 const DiaryEntryList = ({ entries, onDelete, onExportPDF }: DiaryEntryListProps) => {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
+
+  const handleDeleteClick = (id: string) => {
+    setEntryToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (entryToDelete) {
+      onDelete(entryToDelete);
+      setEntryToDelete(null);
+    }
+    setDeleteDialogOpen(false);
+  };
+
   if (entries.length === 0) {
     return null;
   }
@@ -33,7 +60,7 @@ const DiaryEntryList = ({ entries, onDelete, onExportPDF }: DiaryEntryListProps)
                   <FileDown className="h-5 w-5" />
                 </button>
                 <button
-                  onClick={() => onDelete(entry.id)}
+                  onClick={() => handleDeleteClick(entry.id)}
                   className="p-1 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
                   title="Remover relato"
                 >
@@ -81,6 +108,27 @@ const DiaryEntryList = ({ entries, onDelete, onExportPDF }: DiaryEntryListProps)
           </div>
         ))}
       </div>
+
+      {/* Diálogo de confirmação para exclusão */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deseja excluir este relato?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O relato será removido permanentemente do seu diário.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Sim, excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

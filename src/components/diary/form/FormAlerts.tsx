@@ -23,8 +23,11 @@ const FormAlerts = ({ errors, saveSuccess }: FormAlertsProps) => {
       
       {saveSuccess && (
         <Alert className="bg-green-50 border border-green-200 rounded-lg">
-          <AlertTitle className="text-green-700">Relato salvo com sucesso!</AlertTitle>
-          <AlertDescription className="text-green-600">
+          <div className="flex items-center">
+            <Check className="h-5 w-5 text-green-600 mr-2" />
+            <AlertTitle className="text-green-700">Relato salvo com sucesso!</AlertTitle>
+          </div>
+          <AlertDescription className="text-green-600 ml-7">
             Suas anotações foram registradas no diário seguro.
           </AlertDescription>
         </Alert>

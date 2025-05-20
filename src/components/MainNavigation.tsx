@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, BookOpen, Phone, MessageSquare } from "lucide-react";
@@ -15,6 +16,7 @@ export function MainNavigation() {
   const [feedbackType, setFeedbackType] = useState("sugestão");
   const [feedbackContent, setFeedbackContent] = useState("");
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [feedbackSuccess, setFeedbackSuccess] = useState(false);
 
   const handleSubmitFeedback = async () => {
     if (!feedbackContent.trim()) {
@@ -53,7 +55,13 @@ export function MainNavigation() {
       });
       
       setFeedbackContent("");
-      setFeedbackOpen(false);
+      setFeedbackSuccess(true);
+      
+      // Resetar o estado de sucesso após 3 segundos
+      setTimeout(() => {
+        setFeedbackOpen(false);
+        setFeedbackSuccess(false);
+      }, 3000);
     } catch (error) {
       console.error("Erro completo:", error);
       toast({
@@ -109,7 +117,11 @@ export function MainNavigation() {
       </button>
 
       {/* Feedback Dialog */}
-      <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
+      <Dialog open={feedbackOpen} onOpenChange={(open) => {
+        if (!feedbackSuccess) {
+          setFeedbackOpen(open);
+        }
+      }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Envie seu feedback</DialogTitle>
@@ -118,56 +130,70 @@ export function MainNavigation() {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="feedback-type" className="text-right">
-                Tipo
-              </Label>
-              <select
-                id="feedback-type"
-                value={feedbackType}
-                onChange={(e) => setFeedbackType(e.target.value)}
-                className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="sugestão">Sugestão</option>
-                <option value="crítica">Crítica</option>
-                <option value="elogio">Elogio</option>
-                <option value="bug">Reportar problema</option>
-                <option value="outro">Outro</option>
-              </select>
+          {feedbackSuccess ? (
+            <div className="py-6 flex flex-col items-center justify-center">
+              <div className="bg-green-100 rounded-full p-3 mb-4">
+                <MessageSquare className="h-10 w-10 text-green-500" />
+              </div>
+              <h3 className="text-xl font-bold text-green-600 mb-2">Registro enviado!</h3>
+              <p className="text-center text-gray-600">
+                Obrigado por compartilhar sua opinião conosco. Seu feedback nos ajuda a melhorar!
+              </p>
             </div>
-            
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="feedback-content" className="text-right">
-                Mensagem
-              </Label>
-              <Textarea
-                id="feedback-content"
-                value={feedbackContent}
-                onChange={(e) => setFeedbackContent(e.target.value)}
-                placeholder="Digite aqui sua mensagem..."
-                className="col-span-3 resize-none"
-                rows={4}
-              />
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setFeedbackOpen(false)}
-              disabled={feedbackSubmitting}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleSubmitFeedback}
-              disabled={feedbackSubmitting}
-              className="bg-[#FF84C6] hover:bg-[#FF5AA9]"
-            >
-              {feedbackSubmitting ? "Enviando..." : "Enviar feedback"}
-            </Button>
-          </DialogFooter>
+          ) : (
+            <>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="feedback-type" className="text-right">
+                    Tipo
+                  </Label>
+                  <select
+                    id="feedback-type"
+                    value={feedbackType}
+                    onChange={(e) => setFeedbackType(e.target.value)}
+                    className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="sugestão">Sugestão</option>
+                    <option value="crítica">Crítica</option>
+                    <option value="elogio">Elogio</option>
+                    <option value="bug">Reportar problema</option>
+                    <option value="outro">Outro</option>
+                  </select>
+                </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="feedback-content" className="text-right">
+                    Mensagem
+                  </Label>
+                  <Textarea
+                    id="feedback-content"
+                    value={feedbackContent}
+                    onChange={(e) => setFeedbackContent(e.target.value)}
+                    placeholder="Digite aqui sua mensagem..."
+                    className="col-span-3 resize-none"
+                    rows={4}
+                  />
+                </div>
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setFeedbackOpen(false)}
+                  disabled={feedbackSubmitting}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={handleSubmitFeedback}
+                  disabled={feedbackSubmitting}
+                  className="bg-[#FF84C6] hover:bg-[#FF5AA9]"
+                >
+                  {feedbackSubmitting ? "Enviando..." : "Enviar feedback"}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
