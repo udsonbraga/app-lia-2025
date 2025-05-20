@@ -1,6 +1,8 @@
 
 import { User, Phone, MessageSquare, Trash2, Pencil } from "lucide-react";
 import { SafeContact } from "@/features/support-network/types";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 interface ContactListProps {
   contacts: SafeContact[];
@@ -9,6 +11,19 @@ interface ContactListProps {
 }
 
 const ContactList = ({ contacts, onRemoveContact, onEditContact }: ContactListProps) => {
+  const [contactToDelete, setContactToDelete] = useState<string | null>(null);
+
+  const handleDeleteClick = (id: string) => {
+    setContactToDelete(id);
+  };
+
+  const confirmDelete = () => {
+    if (contactToDelete) {
+      onRemoveContact(contactToDelete);
+      setContactToDelete(null);
+    }
+  };
+
   if (contacts.length === 0) {
     return (
       <div className="text-center py-8 mb-4">
@@ -57,7 +72,7 @@ const ContactList = ({ contacts, onRemoveContact, onEditContact }: ContactListPr
               </button>
             )}
             <button
-              onClick={() => onRemoveContact(contact.id)}
+              onClick={() => handleDeleteClick(contact.id)}
               className="p-1 hover:bg-red-50 rounded-full"
               aria-label="Remover contato"
             >
@@ -66,6 +81,23 @@ const ContactList = ({ contacts, onRemoveContact, onEditContact }: ContactListPr
           </div>
         </div>
       ))}
+
+      <AlertDialog open={!!contactToDelete} onOpenChange={(open) => !open && setContactToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este contato? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Não</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-500 text-white hover:bg-red-600">
+              Sim, excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
