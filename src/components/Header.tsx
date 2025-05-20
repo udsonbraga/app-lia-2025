@@ -7,7 +7,7 @@ import { ArrowLeft, UserCircle, Store, ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { handleEmergencyAlert } from "@/utils/emergencyUtils";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 interface HeaderProps {
   isDisguised: boolean;
@@ -18,7 +18,6 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
   const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>("");
-  const { toast } = useToast();
 
   useEffect(() => {
     // Get user avatar and name from localStorage
@@ -38,11 +37,12 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
     // Show processing message immediately when clicked
     console.log("Cart icon clicked, showing toast notification");
     
-    // Force immediate toast display
+    // Use the direct toast function import for more reliable toast display
     toast({
       title: "Seu pedido está sendo processado",
       description: "Aguarde enquanto preparamos seus itens.",
-      duration: 3000, // Show for 3 seconds
+      duration: 3000,
+      variant: "default",
     });
     
     // Check if there are any emergency contacts configured
@@ -55,7 +55,7 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
         toast({
           title: "Seu Carrinho está vazio",
           description: "Adicione produtos para continuar com a compra.",
-          duration: 3000, // Show for 3 seconds
+          duration: 3000,
         });
       }, 2000); // Show this message after a delay to not override the processing message
       return;

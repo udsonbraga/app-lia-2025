@@ -28,79 +28,81 @@ function genId() {
   return count.toString();
 }
 
+// Create a global array to store toasts
 const toasts: ToasterToast[] = [];
 
-const useToast = () => {
+// Create a standalone toast function that can be imported directly
+export const toast: ToastActionType = (props) => {
+  const id = genId();
+  const duration = props.duration || TOAST_REMOVE_DELAY;
+
+  const newToast: ToasterToast = {
+    ...props,
+    id,
+    open: true,
+    onOpenChange: (open) => {
+      if (!open) {
+        // Mark toast as closed
+        const index = toasts.findIndex(t => t.id === id);
+        if (index !== -1) {
+          toasts[index].open = false;
+        }
+      }
+    },
+  };
+
+  // Add toast to the array
+  toasts.push(newToast);
+  console.log("Toast created:", newToast);
+  console.log("Current toasts:", toasts);
+
+  // Set timeout to close the toast
+  setTimeout(() => {
+    const index = toasts.findIndex(t => t.id === id);
+    if (index !== -1) {
+      toasts[index].open = false;
+      console.log("Toast closed:", id);
+    }
+  }, duration);
+
+  // Set timeout to remove the toast from the array
+  setTimeout(() => {
+    const index = toasts.findIndex(t => t.id === id);
+    if (index !== -1) {
+      toasts.splice(index, 1);
+      console.log("Toast removed from array:", id);
+    }
+  }, duration + 1000);
+
+  return {
+    id,
+    dismiss: () => {
+      const index = toasts.findIndex(t => t.id === id);
+      if (index !== -1) {
+        toasts[index].open = false;
+      }
+    },
+    update: (props: Partial<Omit<ToasterToast, "id">>) => {
+      const index = toasts.findIndex(t => t.id === id);
+      if (index !== -1) {
+        toasts[index] = { ...toasts[index], ...props };
+      }
+    },
+  };
+};
+
+// Create a custom hook to access toasts array and actions
+export const useToast = () => {
   return {
     toasts,
     toast,
     dismiss: (toastId?: string) => {
       if (toastId) {
-        toasts.forEach(t => {
-          if (t.id === toastId) {
-            t.open = false;
-          }
-        });
+        const index = toasts.findIndex(t => t.id === toastId);
+        if (index !== -1) {
+          toasts[index].open = false;
+        }
       }
     },
   };
 };
-
-const toast: ToastActionType = props => {
-  const id = genId();
-
-  const update = (props: ToasterToast) => {
-    toasts.forEach(t => {
-      if (t.id === id) {
-        t.title = props.title;
-        t.description = props.description;
-        t.action = props.action;
-        t.variant = props.variant;
-      }
-    });
-  };
-
-  const dismiss = () => {
-    toasts.forEach(t => {
-      if (t.id === id) {
-        t.open = false;
-      }
-    });
-  };
-
-  const duration = props.duration || TOAST_REMOVE_DELAY;
-
-  toasts.push({
-    ...props,
-    id,
-    open: true,
-    onOpenChange: open => {
-      if (!open) {
-        dismiss();
-      }
-    },
-  });
-
-  setTimeout(() => {
-    toasts.forEach(t => {
-      if (t.id === id) {
-        t.open = false;
-      }
-    });
-  }, duration);
-
-  setTimeout(() => {
-    toasts.splice(
-      toasts.findIndex(t => t.id === id),
-      1
-    );
-  }, duration + 1000);
-
-  return {
-    id,
-    dismiss,
-    update,
-  };
-};
-
-export { useToast, toast };
