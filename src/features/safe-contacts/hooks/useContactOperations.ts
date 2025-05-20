@@ -17,6 +17,11 @@ interface ContactOperationsProps {
   setShowPremiumDialog: (show: boolean) => void;
 }
 
+// Função auxiliar para gerar UUIDs compatíveis com Supabase
+const generateUUID = () => {
+  return crypto.randomUUID();
+};
+
 export const useContactOperations = ({
   contacts,
   setContacts,
@@ -64,9 +69,10 @@ export const useContactOperations = ({
         return;
       }
 
+      // Usar UUID para o ID do contato
       const newContactWithId = {
         ...newContact,
-        id: Date.now().toString(),
+        id: generateUUID(),
       };
 
       setContacts([...contacts, newContactWithId]);
@@ -95,7 +101,14 @@ export const useContactOperations = ({
                 is_primary: newContactWithId.relationship === 'Primário'
               });
             
-            if (!error) {
+            if (error) {
+              console.error("Error saving contact to Supabase:", error);
+              toast({
+                title: "Erro ao sincronizar",
+                description: "Não foi possível salvar o contato na nuvem. Verifique sua conexão.",
+                variant: "destructive"
+              });
+            } else {
               toast({
                 title: "Sincronizado com a nuvem",
                 description: "Seu contato também foi salvo na sua conta para acesso em outros dispositivos.",
@@ -167,3 +180,4 @@ export const useContactOperations = ({
     upgradeToPremium
   };
 };
+

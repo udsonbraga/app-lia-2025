@@ -21,6 +21,14 @@ export const sendTelegramMessage = async (telegramId: string): Promise<boolean> 
     // URL da API do Telegram para enviar mensagem
     const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
     
+    // Verificar se o telegramId é válido
+    if (!telegramId || telegramId.trim() === "") {
+      console.error("ID do Telegram inválido");
+      return false;
+    }
+    
+    console.log("Tentando enviar mensagem para Telegram ID:", telegramId);
+    
     // Preparar o corpo da requisição
     const requestBody = {
       chat_id: telegramId,
@@ -37,12 +45,14 @@ export const sendTelegramMessage = async (telegramId: string): Promise<boolean> 
       body: JSON.stringify(requestBody),
     });
     
+    const data = await response.json();
+    
     if (!response.ok) {
-      throw new Error(`Erro ao enviar mensagem: ${response.statusText}`);
+      console.error(`Erro ao enviar mensagem: ${response.statusText}`, data);
+      return false;
     }
     
-    const data = await response.json();
-    console.log('Mensagem enviada com sucesso:', data);
+    console.log('Mensagem enviada com sucesso para Telegram ID:', telegramId, data);
     return true;
   } catch (error) {
     console.error('Erro ao enviar mensagem via Telegram:', error);

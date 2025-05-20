@@ -16,23 +16,28 @@ export const useSupabaseSync = (contacts: SafeContact[], setContacts: (contacts:
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user?.id) {
         try {
-          // For each contact, try to upsert to emergency_contacts table
+          // Para cada contato, tente atualizar na tabela emergency_contacts
           contacts.forEach(async (contact) => {
-            const { error } = await supabase
-              .from('emergency_contacts')
-              .upsert({
-                id: contact.id,
-                user_id: session.user.id,
-                name: contact.name,
-                phone: contact.phone,
-                telegram_id: contact.telegramId,
-                is_primary: contact.relationship === 'Primário'
-              });
-            
-            if (error) {
-              console.error("Error saving contact to Supabase:", error);
+            // Verificar se o ID do contato é um UUID válido
+            if (contact.id && contact.id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
+              const { error } = await supabase
+                .from('emergency_contacts')
+                .upsert({
+                  id: contact.id,
+                  user_id: session.user.id,
+                  name: contact.name,
+                  phone: contact.phone,
+                  telegram_id: contact.telegramId,
+                  is_primary: contact.relationship === 'Primário'
+                });
+              
+              if (error) {
+                console.error("Error saving contact to Supabase:", error);
+              } else {
+                console.log("Contact saved to Supabase successfully:", contact.id);
+              }
             } else {
-              console.log("Contact saved to Supabase successfully");
+              console.warn("Skipping contact with invalid UUID:", contact.id);
             }
           });
         } catch (error) {
