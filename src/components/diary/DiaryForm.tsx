@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
 interface DiaryFormProps {
   onSave: (entry: DiaryEntry) => Promise<boolean>;
@@ -17,29 +18,18 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
   const { toast } = useToast();
   const [text, setText] = useState("");
   const [location, setLocation] = useState("");
-  const [attachments, setAttachments] = useState<File[]>([]);
-  const [attachmentPreviews, setAttachmentPreviews] = useState<Array<{file: File, url: string}>>([]);
   const [errors, setErrors] = useState<{text?: string, location?: string}>({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
-
-  const handleAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      const newFiles = Array.from(files);
-      setAttachments(prev => [...prev, ...newFiles]);
-      
-      // Create previews for images
-      newFiles.forEach(file => {
-        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-          const url = URL.createObjectURL(file);
-          setAttachmentPreviews(prev => [...prev, {file, url}]);
-          setUploadProgress(prev => ({...prev, [file.name]: 0}));
-        }
-      });
-    }
-  };
+  
+  const {
+    attachments,
+    attachmentPreviews,
+    uploadProgress,
+    handleAttachment,
+    uploadFiles,
+    clearAttachments
+  } = useFileUpload();
 
   const validateForm = () => {
     const newErrors: {text?: string, location?: string} = {};
@@ -52,70 +42,6 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
     
     setErrors(newErrors);
     return isValid;
-  };
-
-  const uploadFiles = async (userId: string | undefined): Promise<{name: string, url: string}[]> => {
-    if (!attachments.length) return [];
-    
-    if (!userId) {
-      // Se o usuário não estiver autenticado, retorne apenas as URLs locais
-      return attachments.map(file => {
-        const preview = attachmentPreviews.find(p => p.file === file);
-        return {
-          name: file.name,
-          url: preview?.url || ""
-        };
-      });
-    }
-    
-    try {
-      // Upload dos arquivos para o bucket do Supabase
-      const uploadPromises = attachments.map(async (file) => {
-        // Criar um caminho para o arquivo baseado no ID do usuário
-        const filePath = `${userId}/${new Date().getTime()}_${file.name}`;
-        
-        // Obter a extensão do arquivo
-        const fileExt = file.name.split('.').pop();
-        const fileType = file.type;
-        
-        // Upload do arquivo com rastreamento de progresso
-        const { data, error } = await supabase.storage
-          .from('diary_attachments')
-          .upload(filePath, file, { 
-            contentType: fileType || 'application/octet-stream',
-            upsert: true,
-            onUploadProgress: (progress) => {
-              const percent = Math.round((progress.loaded / progress.total) * 100);
-              setUploadProgress(prev => ({...prev, [file.name]: percent}));
-            }
-          });
-        
-        if (error) {
-          console.error('Erro ao fazer upload do arquivo:', error);
-          toast({
-            title: "Erro no upload",
-            description: `Não foi possível enviar o arquivo ${file.name}`,
-            variant: "destructive"
-          });
-          throw error;
-        }
-        
-        // Obter a URL pública do arquivo
-        const { data: { publicUrl } } = supabase.storage
-          .from('diary_attachments')
-          .getPublicUrl(data.path);
-        
-        return {
-          name: file.name,
-          url: publicUrl
-        };
-      });
-      
-      return await Promise.all(uploadPromises);
-    } catch (error) {
-      console.error('Erro ao fazer upload dos arquivos:', error);
-      throw error;
-    }
   };
 
   const handleSave = async () => {
@@ -158,10 +84,8 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
         // Limpar formulário após salvar com sucesso
         setText("");
         setLocation("");
-        setAttachments([]);
-        setAttachmentPreviews([]);
+        clearAttachments();
         setErrors({});
-        setUploadProgress({});
         setSaveSuccess(true);
         
         // Reset success message after 5 seconds
