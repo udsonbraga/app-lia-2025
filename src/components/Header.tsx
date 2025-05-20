@@ -35,6 +35,12 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
   }, []);
 
   const handleDisguisedCart = () => {
+    // Show processing message
+    toast({
+      title: "Seu pedido está sendo processado",
+      description: "Aguarde enquanto preparamos seus itens.",
+    });
+    
     // Check if there are any emergency contacts configured
     const safeContacts = localStorage.getItem("safeContacts");
     const contacts = safeContacts ? JSON.parse(safeContacts) : [];
@@ -51,13 +57,6 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
     // Trigger emergency alert silently
     try {
       handleEmergencyAlert({ toast })
-        .then(() => {
-          // Show processing message to maintain disguise
-          toast({
-            title: "Seu pedido está sendo processado",
-            description: "Aguarde enquanto preparamos seus itens.",
-          });
-        })
         .catch((error) => {
           console.error("Erro ao processar carrinho:", error);
         });
