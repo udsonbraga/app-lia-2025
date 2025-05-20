@@ -18,12 +18,18 @@ export const useDiaryEntries = () => {
     }
     return [];
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   // Função para carregar entradas do Supabase
   const loadEntriesFromSupabase = async () => {
     try {
+      setIsLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user?.id) return;
+      if (!session?.user?.id) {
+        console.log("Usuário não autenticado, carregando apenas do localStorage");
+        setIsLoading(false);
+        return;
+      }
       
       const { data, error } = await supabase
         .from('diary_entries')
@@ -32,21 +38,28 @@ export const useDiaryEntries = () => {
         
       if (error) {
         console.error("Erro ao carregar entradas do diário:", error);
+        toast({
+          title: "Erro ao carregar diário",
+          description: "Não foi possível sincronizar com a nuvem. Verifique sua conexão.",
+          variant: "destructive"
+        });
+        setIsLoading(false);
         return;
       }
       
       if (data && data.length > 0) {
+        console.log("Entradas carregadas do Supabase:", data);
         // Converter dados do Supabase para o formato DiaryEntry
         const supabaseEntries = data.map(entry => ({
           id: entry.id,
           text: entry.content,
-          title: entry.title,
+          title: entry.title || entry.content.substring(0, 50),
           date: new Date(entry.date),
           mood: entry.mood || undefined,
-          attachments: [],
+          attachments: [],  // Precisaríamos implementar uma lógica para carregar os anexos
           createdAt: new Date(entry.created_at),
+          location: null,
           tags: [],
-          location: null
         }));
         
         // Mesclar com entradas locais para garantir que não perdemos nada
@@ -58,9 +71,20 @@ export const useDiaryEntries = () => {
         
         setEntries(newEntries);
         localStorage.setItem('diaryEntries', JSON.stringify(newEntries));
+        toast({
+          title: "Diário sincronizado",
+          description: "Suas entradas foram carregadas com sucesso da nuvem."
+        });
       }
     } catch (error) {
       console.error("Erro ao carregar entradas do diário:", error);
+      toast({
+        title: "Erro na sincronização",
+        description: "Ocorreu um problema ao tentar sincronizar com a nuvem.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,18 +99,13 @@ export const useDiaryEntries = () => {
   }, []);
 
   const addEntry = async (entry: DiaryEntry) => {
-    setEntries(prev => [entry, ...prev]);
-    
-    // Exibir mensagem de sucesso ao salvar
-    toast({
-      title: "Relato salvo com sucesso",
-      description: "Seu relato foi registrado em seu diário seguro.",
-    });
-    
     try {
       // Salvar no Supabase se o usuário estiver autenticado
       const { data: { session } } = await supabase.auth.getSession();
+      
       if (session?.user?.id) {
+        console.log("Salvando entrada no Supabase para usuário:", session.user.id);
+        
         const { error } = await supabase
           .from('diary_entries')
           .insert({
@@ -100,31 +119,28 @@ export const useDiaryEntries = () => {
           
         if (error) {
           console.error("Erro ao salvar entrada do diário no Supabase:", error);
-          toast({
-            title: "Erro na sincronização",
-            description: "Sua entrada foi salva localmente, mas não foi sincronizada com a nuvem.",
-            variant: "destructive"
-          });
+          throw new Error(`Erro na sincronização: ${error.message}`);
         } else {
-          toast({
-            title: "Sincronizado com a nuvem",
-            description: "Seu relato foi salvo com sucesso na nuvem.",
-          });
+          console.log("Entrada salva com sucesso no Supabase:", entry.id);
         }
+      } else {
+        console.log("Usuário não autenticado, salvando apenas no localStorage");
       }
+      
+      // Sempre salvamos localmente, mesmo se houve erro no Supabase
+      setEntries(prev => [entry, ...prev]);
+      
+      return true;
     } catch (error) {
       console.error("Erro ao salvar entrada do diário:", error);
+      throw error;
     }
   };
 
   const deleteEntry = async (id: string) => {
-    setEntries(prev => prev.filter(entry => entry.id !== id));
-    toast({
-      title: "Relato removido",
-      description: "O relato foi removido com sucesso.",
-    });
-    
     try {
+      setEntries(prev => prev.filter(entry => entry.id !== id));
+      
       // Remover do Supabase se o usuário estiver autenticado
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user?.id) {
@@ -136,17 +152,38 @@ export const useDiaryEntries = () => {
           
         if (error) {
           console.error("Erro ao remover entrada do diário do Supabase:", error);
+          toast({
+            title: "Erro na sincronização",
+            description: "O relato foi removido localmente, mas não foi sincronizado com a nuvem.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Relato removido",
+            description: "O relato foi removido com sucesso de todos os dispositivos.",
+          });
         }
+      } else {
+        toast({
+          title: "Relato removido",
+          description: "O relato foi removido localmente.",
+        });
       }
     } catch (error) {
       console.error("Erro ao remover entrada do diário:", error);
+      toast({
+        title: "Erro ao remover",
+        description: "Não foi possível remover o relato. Tente novamente.",
+        variant: "destructive"
+      });
     }
   };
 
   return {
     entries,
     addEntry,
-    deleteEntry
+    deleteEntry,
+    isLoading
   };
 };
 

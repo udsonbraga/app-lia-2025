@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DiaryEntry } from "@/types/diary";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface DiaryFormProps {
   onSave: (entry: DiaryEntry) => void;
@@ -16,6 +18,8 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
   const [location, setLocation] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
   const [attachmentPreviews, setAttachmentPreviews] = useState<Array<{file: File, url: string}>>([]);
+  const [errors, setErrors] = useState<{text?: string, location?: string}>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -33,50 +37,89 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
     }
   };
 
-  const handleSave = () => {
+  const validateForm = () => {
+    const newErrors: {text?: string, location?: string} = {};
+    let isValid = true;
+    
     if (!text.trim()) {
+      newErrors.text = "Por favor, descreva o ocorrido";
+      isValid = false;
+    }
+    
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleSave = async () => {
+    if (!validateForm()) {
       toast({
-        title: "Erro ao salvar",
-        description: "O texto não pode estar vazio.",
+        title: "Campos pendentes",
+        description: "Preencha todos os campos obrigatórios marcados.",
         variant: "destructive",
       });
       return;
     }
 
-    // Create structured attachment data with URLs for images
-    const attachmentData = attachments.map(file => {
-      const preview = attachmentPreviews.find(p => p.file === file);
-      return {
-        name: file.name,
-        url: preview?.url || undefined
+    setIsSaving(true);
+
+    try {
+      // Create structured attachment data with URLs for images
+      const attachmentData = attachments.map(file => {
+        const preview = attachmentPreviews.find(p => p.file === file);
+        return {
+          name: file.name,
+          url: preview?.url || undefined
+        };
+      });
+
+      const newEntry: DiaryEntry = {
+        id: Date.now().toString(),
+        text,
+        title: text.substring(0, 50), // Use first 50 chars of text as title
+        date: new Date(), // Set current date as the diary entry date
+        attachments: attachmentData,
+        location: location || null,
+        createdAt: new Date(),
+        tags: [], // Initialize with empty tags array
       };
-    });
 
-    const newEntry: DiaryEntry = {
-      id: Date.now().toString(),
-      text,
-      title: text.substring(0, 50), // Use first 50 chars of text as title
-      date: new Date(), // Set current date as the diary entry date
-      attachments: attachmentData,
-      location: location || null,
-      createdAt: new Date(),
-      tags: [], // Initialize with empty tags array
-    };
+      // Salvar na base de dados
+      await onSave(newEntry);
+      
+      // Limpar formulário após salvar com sucesso
+      setText("");
+      setLocation("");
+      setAttachments([]);
+      setAttachmentPreviews([]);
+      setErrors({});
 
-    onSave(newEntry);
-    setText("");
-    setLocation("");
-    setAttachments([]);
-    setAttachmentPreviews([]);
-
-    toast({
-      title: "Diário salvo",
-      description: "Suas anotações foram salvas com sucesso.",
-    });
+      toast({
+        title: "Diário salvo com sucesso",
+        description: "Suas anotações foram registradas no diário seguro.",
+      });
+    } catch (error) {
+      console.error("Erro ao salvar diário:", error);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar suas anotações. Por favor, tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <div className="space-y-6">
+      {Object.values(errors).some(error => error) && (
+        <Alert variant="destructive">
+          <AlertTitle>Campos pendentes</AlertTitle>
+          <AlertDescription>
+            Por favor, preencha os campos obrigatórios para prosseguir.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="space-y-4">
         <div>
           <label htmlFor="location" className="block text-sm font-medium text-gray-700">
@@ -95,16 +138,20 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
         </div>
 
         <div>
-          <label htmlFor="diary-text" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="diary-text" className="block text-sm font-medium text-gray-700 flex items-center">
             Descreva o Ocorrido
+            <span className="text-red-500 ml-1">*</span>
           </label>
-          <textarea
+          <Textarea
             id="diary-text"
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Escreva seus pensamentos aqui..."
-            className="w-full h-48 p-4 mt-1 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+            className={`w-full h-48 p-4 mt-1 rounded-lg border ${errors.text ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:ring-red-500'}`}
           />
+          {errors.text && (
+            <p className="text-red-500 text-xs mt-1">{errors.text}</p>
+          )}
         </div>
       </div>
 
@@ -163,10 +210,19 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
 
       <Button
         onClick={handleSave}
+        disabled={isSaving}
         className="w-full flex items-center justify-center gap-2 bg-[#FF84C6] hover:bg-[#ff6cb7] text-white"
       >
-        <Save className="h-5 w-5" />
-        Salvar
+        {isSaving ? (
+          <>
+            <span className="animate-pulse">Salvando...</span>
+          </>
+        ) : (
+          <>
+            <Save className="h-5 w-5" />
+            Salvar
+          </>
+        )}
       </Button>
     </div>
   );

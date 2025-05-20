@@ -8,13 +8,14 @@ import { generateDiaryEntryPDF } from "@/utils/pdfGenerator";
 import { useDiaryEntries } from "@/hooks/useDiaryEntries";
 import { DiaryEntry } from "@/types/diary";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Diary = () => {
   const { toast } = useToast();
-  const { entries, addEntry, deleteEntry } = useDiaryEntries();
+  const { entries, addEntry, deleteEntry, isLoading } = useDiaryEntries();
   const [userName, setUserName] = useState<string>("");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [authLoading, setAuthLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const storedName = localStorage.getItem("userName");
@@ -24,10 +25,10 @@ const Diary = () => {
     
     // Verificar se o usuário está autenticado
     const checkAuth = async () => {
-      setIsLoading(true);
+      setAuthLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session?.user);
-      setIsLoading(false);
+      setAuthLoading(false);
     };
     
     checkAuth();
@@ -41,21 +42,46 @@ const Diary = () => {
     });
   };
 
+  const handleSaveDiary = async (entry: DiaryEntry) => {
+    try {
+      await addEntry(entry);
+      toast({
+        title: "Diário salvo com sucesso",
+        description: "Seu relato foi registrado e está guardado com segurança.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar o diário. Por favor, tente novamente.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 to-white">
       <DiaryHeader />
 
       <div className="container mx-auto px-4 pt-20 pb-20">
         <div className="max-w-2xl mx-auto space-y-6">
-          {!isAuthenticated && !isLoading && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
-              <p className="text-amber-700 text-sm">
+          {!authLoading && !isAuthenticated && (
+            <Alert variant="warning" className="bg-amber-50 border border-amber-200 rounded-lg">
+              <AlertDescription className="text-amber-700 text-sm">
                 Você não está logado. Para sincronizar seus relatos com a nuvem e acessá-los em qualquer dispositivo, faça login.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {isLoading && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-700 text-sm flex items-center">
+                <span className="mr-2 h-4 w-4 rounded-full bg-blue-600 opacity-75 animate-ping inline-block"></span>
+                Sincronizando seu diário...
               </p>
             </div>
           )}
           
-          <DiaryForm onSave={addEntry} />
+          <DiaryForm onSave={handleSaveDiary} />
           <DiaryEntryList 
             entries={entries} 
             onDelete={deleteEntry} 
