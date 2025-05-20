@@ -65,7 +65,7 @@ const Diary = () => {
       <div className="container mx-auto px-4 pt-20 pb-20">
         <div className="max-w-2xl mx-auto space-y-6">
           {!authLoading && !isAuthenticated && (
-            <Alert variant="warning" className="bg-amber-50 border border-amber-200 rounded-lg">
+            <Alert variant="destructive" className="bg-amber-50 border border-amber-200 rounded-lg">
               <AlertDescription className="text-amber-700 text-sm">
                 Você não está logado. Para sincronizar seus relatos com a nuvem e acessá-los em qualquer dispositivo, faça login.
               </AlertDescription>

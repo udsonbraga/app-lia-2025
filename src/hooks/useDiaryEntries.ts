@@ -106,10 +106,12 @@ export const useDiaryEntries = () => {
       if (session?.user?.id) {
         console.log("Salvando entrada no Supabase para usuário:", session.user.id);
         
+        // Garantindo que estamos usando um UUID válido e não um timestamp
+        // O ideal é usar o UUID gerado pelo próprio Supabase
         const { error } = await supabase
           .from('diary_entries')
           .insert({
-            id: entry.id,
+            // Removemos o campo id para que o Supabase gere automaticamente o UUID
             user_id: session.user.id,
             title: entry.title || entry.text.substring(0, 50),
             content: entry.text,
@@ -121,7 +123,7 @@ export const useDiaryEntries = () => {
           console.error("Erro ao salvar entrada do diário no Supabase:", error);
           throw new Error(`Erro na sincronização: ${error.message}`);
         } else {
-          console.log("Entrada salva com sucesso no Supabase:", entry.id);
+          console.log("Entrada salva com sucesso no Supabase");
         }
       } else {
         console.log("Usuário não autenticado, salvando apenas no localStorage");
