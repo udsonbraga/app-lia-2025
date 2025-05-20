@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface DiaryFormProps {
-  onSave: (entry: DiaryEntry) => void;
+  onSave: (entry: DiaryEntry) => Promise<boolean>;
 }
 
 const DiaryForm = ({ onSave }: DiaryFormProps) => {
@@ -20,6 +20,7 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
   const [attachmentPreviews, setAttachmentPreviews] = useState<Array<{file: File, url: string}>>([]);
   const [errors, setErrors] = useState<{text?: string, location?: string}>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const handleAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -61,6 +62,7 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
     }
 
     setIsSaving(true);
+    setSaveSuccess(false);
 
     try {
       // Create structured attachment data with URLs for images
@@ -81,22 +83,26 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
         location: location || null,
         createdAt: new Date(),
         tags: [], // Initialize with empty tags array
+        mood: undefined,
       };
 
       // Salvar na base de dados
-      await onSave(newEntry);
+      const success = await onSave(newEntry);
       
-      // Limpar formulário após salvar com sucesso
-      setText("");
-      setLocation("");
-      setAttachments([]);
-      setAttachmentPreviews([]);
-      setErrors({});
-
-      toast({
-        title: "Diário salvo com sucesso",
-        description: "Suas anotações foram registradas no diário seguro.",
-      });
+      if (success) {
+        // Limpar formulário após salvar com sucesso
+        setText("");
+        setLocation("");
+        setAttachments([]);
+        setAttachmentPreviews([]);
+        setErrors({});
+        setSaveSuccess(true);
+        
+        // Reset success message after 5 seconds
+        setTimeout(() => {
+          setSaveSuccess(false);
+        }, 5000);
+      }
     } catch (error) {
       console.error("Erro ao salvar diário:", error);
       toast({
@@ -116,6 +122,15 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
           <AlertTitle>Campos pendentes</AlertTitle>
           <AlertDescription>
             Por favor, preencha os campos obrigatórios para prosseguir.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {saveSuccess && (
+        <Alert className="bg-green-50 border border-green-200 rounded-lg">
+          <AlertTitle className="text-green-700">Relato salvo com sucesso!</AlertTitle>
+          <AlertDescription className="text-green-600">
+            Suas anotações foram registradas no diário seguro.
           </AlertDescription>
         </Alert>
       )}

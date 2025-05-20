@@ -100,14 +100,28 @@ export const useDiaryEntries = () => {
 
   const addEntry = async (entry: DiaryEntry) => {
     try {
+      // Salvar localmente primeiro para garantir resposta rápida ao usuário
+      setEntries(prev => [entry, ...prev]);
+      
       // Salvar no Supabase se o usuário estiver autenticado
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user?.id) {
         console.log("Salvando entrada no Supabase para usuário:", session.user.id);
         
-        // Garantindo que estamos usando um UUID válido e não um timestamp
-        // O ideal é usar o UUID gerado pelo próprio Supabase
+        // Uploads de imagens para o Storage, se houver
+        const attachmentsWithUrls = [...entry.attachments];
+        
+        // Se houver anexos com URLs de objeto locais, precisaríamos fazer upload para o Storage
+        // Aqui, estamos apenas registrando no console onde as fotos são salvas
+        if (entry.attachments && entry.attachments.length > 0) {
+          console.log("Anexos detectados:", entry.attachments.length);
+          console.log("Fotos são salvas em: localStorage (URLs de objeto) e como referências no Supabase");
+          
+          // Nota: Para implementação completa, precisaríamos fazer upload das imagens para o Storage
+          // e depois obter as URLs permanentes para salvar junto com a entrada
+        }
+        
         const { error } = await supabase
           .from('diary_entries')
           .insert({
@@ -128,9 +142,6 @@ export const useDiaryEntries = () => {
       } else {
         console.log("Usuário não autenticado, salvando apenas no localStorage");
       }
-      
-      // Sempre salvamos localmente, mesmo se houve erro no Supabase
-      setEntries(prev => [entry, ...prev]);
       
       return true;
     } catch (error) {
