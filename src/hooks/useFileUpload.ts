@@ -76,14 +76,8 @@ export const useFileUpload = () => {
           .upload(filePath, file, { 
             contentType: fileType || 'application/octet-stream',
             upsert: true,
-          }, {
-            // Opções do evento de progresso como segundo parâmetro
-            onProgress: (progress) => {
-              const percent = Math.round((progress.loaded / progress.total) * 100);
-              setUploadProgress(prev => ({...prev, [file.name]: percent}));
-            }
           });
-        
+          
         if (error) {
           console.error('Erro ao fazer upload do arquivo:', error);
           toast({
@@ -93,6 +87,9 @@ export const useFileUpload = () => {
           });
           throw error;
         }
+        
+        // Atualizar o progresso para 100% quando o upload for concluído
+        setUploadProgress(prev => ({...prev, [file.name]: 100}));
         
         // Obter a URL pública do arquivo
         const { data: { publicUrl } } = supabase.storage
