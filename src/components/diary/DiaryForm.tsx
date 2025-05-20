@@ -7,6 +7,7 @@ import { DiaryEntry } from "@/types/diary";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DiaryFormProps {
   onSave: (entry: DiaryEntry) => Promise<boolean>;
@@ -21,6 +22,7 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
   const [errors, setErrors] = useState<{text?: string, location?: string}>({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
 
   const handleAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -33,6 +35,7 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
         if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
           const url = URL.createObjectURL(file);
           setAttachmentPreviews(prev => [...prev, {file, url}]);
+          setUploadProgress(prev => ({...prev, [file.name]: 0}));
         }
       });
     }
@@ -51,6 +54,70 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
     return isValid;
   };
 
+  const uploadFiles = async (userId: string | undefined): Promise<{name: string, url: string}[]> => {
+    if (!attachments.length) return [];
+    
+    if (!userId) {
+      // Se o usuário não estiver autenticado, retorne apenas as URLs locais
+      return attachments.map(file => {
+        const preview = attachmentPreviews.find(p => p.file === file);
+        return {
+          name: file.name,
+          url: preview?.url || ""
+        };
+      });
+    }
+    
+    try {
+      // Upload dos arquivos para o bucket do Supabase
+      const uploadPromises = attachments.map(async (file) => {
+        // Criar um caminho para o arquivo baseado no ID do usuário
+        const filePath = `${userId}/${new Date().getTime()}_${file.name}`;
+        
+        // Obter a extensão do arquivo
+        const fileExt = file.name.split('.').pop();
+        const fileType = file.type;
+        
+        // Upload do arquivo com rastreamento de progresso
+        const { data, error } = await supabase.storage
+          .from('diary_attachments')
+          .upload(filePath, file, { 
+            contentType: fileType || 'application/octet-stream',
+            upsert: true,
+            onUploadProgress: (progress) => {
+              const percent = Math.round((progress.loaded / progress.total) * 100);
+              setUploadProgress(prev => ({...prev, [file.name]: percent}));
+            }
+          });
+        
+        if (error) {
+          console.error('Erro ao fazer upload do arquivo:', error);
+          toast({
+            title: "Erro no upload",
+            description: `Não foi possível enviar o arquivo ${file.name}`,
+            variant: "destructive"
+          });
+          throw error;
+        }
+        
+        // Obter a URL pública do arquivo
+        const { data: { publicUrl } } = supabase.storage
+          .from('diary_attachments')
+          .getPublicUrl(data.path);
+        
+        return {
+          name: file.name,
+          url: publicUrl
+        };
+      });
+      
+      return await Promise.all(uploadPromises);
+    } catch (error) {
+      console.error('Erro ao fazer upload dos arquivos:', error);
+      throw error;
+    }
+  };
+
   const handleSave = async () => {
     if (!validateForm()) {
       toast({
@@ -65,21 +132,19 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
     setSaveSuccess(false);
 
     try {
-      // Create structured attachment data with URLs for images
-      const attachmentData = attachments.map(file => {
-        const preview = attachmentPreviews.find(p => p.file === file);
-        return {
-          name: file.name,
-          url: preview?.url || undefined
-        };
-      });
-
+      // Verificar se o usuário está autenticado
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      
+      // Fazer upload dos anexos e obter as URLs permanentes
+      const uploadedAttachments = await uploadFiles(userId);
+      
       const newEntry: DiaryEntry = {
         id: Date.now().toString(),
         text,
         title: text.substring(0, 50), // Use first 50 chars of text as title
         date: new Date(), // Set current date as the diary entry date
-        attachments: attachmentData,
+        attachments: uploadedAttachments,
         location: location || null,
         createdAt: new Date(),
         tags: [], // Initialize with empty tags array
@@ -96,6 +161,7 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
         setAttachments([]);
         setAttachmentPreviews([]);
         setErrors({});
+        setUploadProgress({});
         setSaveSuccess(true);
         
         // Reset success message after 5 seconds
@@ -203,6 +269,14 @@ const DiaryForm = ({ onSave }: DiaryFormProps) => {
                     className="h-40 w-full object-cover rounded mb-2" 
                   />
                   <p className="text-xs text-gray-600 truncate">{preview.file.name}</p>
+                  {uploadProgress[preview.file.name] > 0 && uploadProgress[preview.file.name] < 100 && (
+                    <div className="w-full bg-gray-200 h-1 mt-1 rounded-full">
+                      <div 
+                        className="bg-blue-500 h-1 rounded-full" 
+                        style={{ width: `${uploadProgress[preview.file.name]}%` }}
+                      ></div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

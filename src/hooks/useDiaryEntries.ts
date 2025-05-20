@@ -49,17 +49,49 @@ export const useDiaryEntries = () => {
       
       if (data && data.length > 0) {
         console.log("Entradas carregadas do Supabase:", data);
+        
         // Converter dados do Supabase para o formato DiaryEntry
-        const supabaseEntries = data.map(entry => ({
-          id: entry.id,
-          text: entry.content,
-          title: entry.title || entry.content.substring(0, 50),
-          date: new Date(entry.date),
-          mood: entry.mood || undefined,
-          attachments: [],  // Precisaríamos implementar uma lógica para carregar os anexos
-          createdAt: new Date(entry.created_at),
-          location: null,
-          tags: [],
+        const supabaseEntries = await Promise.all(data.map(async entry => {
+          // Buscar anexos do Storage se houver
+          let attachments = [];
+          
+          try {
+            // Buscar arquivos do Storage associados a esta entrada do diário
+            const { data: storageFiles, error: storageError } = await supabase.storage
+              .from('diary_attachments')
+              .list(`${session.user.id}`, {
+                search: entry.id
+              });
+              
+            if (storageError) {
+              console.error("Erro ao buscar anexos do Storage:", storageError);
+            } else if (storageFiles) {
+              attachments = storageFiles.map(file => {
+                const { data: { publicUrl } } = supabase.storage
+                  .from('diary_attachments')
+                  .getPublicUrl(`${session.user.id}/${file.name}`);
+                  
+                return {
+                  name: file.name,
+                  url: publicUrl
+                };
+              });
+            }
+          } catch (fileError) {
+            console.error("Erro ao processar anexos:", fileError);
+          }
+          
+          return {
+            id: entry.id,
+            text: entry.content,
+            title: entry.title || entry.content.substring(0, 50),
+            date: new Date(entry.date),
+            mood: entry.mood || undefined,
+            attachments: attachments,
+            createdAt: new Date(entry.created_at),
+            location: null,
+            tags: [],
+          };
         }));
         
         // Mesclar com entradas locais para garantir que não perdemos nada
@@ -109,23 +141,22 @@ export const useDiaryEntries = () => {
       if (session?.user?.id) {
         console.log("Salvando entrada no Supabase para usuário:", session.user.id);
         
-        // Uploads de imagens para o Storage, se houver
-        const attachmentsWithUrls = [...entry.attachments];
-        
-        // Se houver anexos com URLs de objeto locais, precisaríamos fazer upload para o Storage
-        // Aqui, estamos apenas registrando no console onde as fotos são salvas
+        // Se houver anexos com URLs permanentes do Storage
+        let supabaseAttachments = [];
         if (entry.attachments && entry.attachments.length > 0) {
           console.log("Anexos detectados:", entry.attachments.length);
-          console.log("Fotos são salvas em: localStorage (URLs de objeto) e como referências no Supabase");
           
-          // Nota: Para implementação completa, precisaríamos fazer upload das imagens para o Storage
-          // e depois obter as URLs permanentes para salvar junto com a entrada
+          // Os anexos já foram carregados no Storage pelo DiaryForm
+          // Precisamos apenas armazenar a referência
+          supabaseAttachments = entry.attachments.map(attachment => ({
+            url: attachment.url,
+            name: attachment.name
+          }));
         }
         
         const { error } = await supabase
           .from('diary_entries')
           .insert({
-            // Removemos o campo id para que o Supabase gere automaticamente o UUID
             user_id: session.user.id,
             title: entry.title || entry.text.substring(0, 50),
             content: entry.text,
@@ -157,6 +188,34 @@ export const useDiaryEntries = () => {
       // Remover do Supabase se o usuário estiver autenticado
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user?.id) {
+        // Primeiro, encontre a entrada para obter info dos anexos
+        const entryToDelete = entries.find(e => e.id === id);
+        
+        // Se houver anexos, remova-os do Storage
+        if (entryToDelete?.attachments && entryToDelete.attachments.length > 0) {
+          // Extrair apenas os caminhos dos arquivos das URLs
+          const filesToDelete = entryToDelete.attachments
+            .filter(a => a.url && a.url.includes('diary_attachments'))
+            .map(a => {
+              // Extrair o caminho do arquivo da URL
+              const url = new URL(a.url);
+              const pathParts = url.pathname.split('/');
+              // Remova 'storage/v1/object/public/diary_attachments/' do caminho
+              return pathParts.slice(pathParts.length - 2).join('/');
+            });
+
+          if (filesToDelete.length > 0) {
+            const { error: deleteStorageError } = await supabase.storage
+              .from('diary_attachments')
+              .remove(filesToDelete);
+              
+            if (deleteStorageError) {
+              console.error("Erro ao remover anexos do Storage:", deleteStorageError);
+            }
+          }
+        }
+        
+        // Remover a entrada do banco de dados
         const { error } = await supabase
           .from('diary_entries')
           .delete()

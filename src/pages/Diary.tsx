@@ -9,6 +9,7 @@ import { useDiaryEntries } from "@/hooks/useDiaryEntries";
 import { DiaryEntry } from "@/types/diary";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CloudCheck } from "lucide-react";
 
 const Diary = () => {
   const { toast } = useToast();
@@ -71,7 +72,20 @@ const Diary = () => {
             <Alert className="bg-amber-50 border border-amber-200 rounded-lg">
               <AlertDescription className="text-amber-700 text-sm">
                 Você não está logado. Para sincronizar seus relatos com a nuvem e acessá-los em qualquer dispositivo, faça login.
+                <br />
+                <span className="font-bold">Importante:</span> Imagens anexadas só serão armazenadas permanentemente quando você estiver logado.
               </AlertDescription>
+            </Alert>
+          )}
+          
+          {!authLoading && isAuthenticated && (
+            <Alert className="bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center">
+                <CloudCheck className="h-5 w-5 text-green-600 mr-2" />
+                <AlertDescription className="text-green-700 text-sm">
+                  Você está conectado. As imagens anexadas serão armazenadas na nuvem e sincronizadas entre seus dispositivos.
+                </AlertDescription>
+              </div>
             </Alert>
           )}
           
