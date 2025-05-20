@@ -3,21 +3,25 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-interface FileAttachment {
+export interface FileAttachment {
   file: File;
   url: string;
 }
 
-interface UploadedAttachment {
+export interface UploadedAttachment {
   name: string;
   url: string;
+}
+
+export interface UploadProgress {
+  [key: string]: number;
 }
 
 export const useFileUpload = () => {
   const { toast } = useToast();
   const [attachments, setAttachments] = useState<File[]>([]);
   const [attachmentPreviews, setAttachmentPreviews] = useState<FileAttachment[]>([]);
-  const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress>({});
 
   const handleAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
