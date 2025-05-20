@@ -18,9 +18,7 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copy the build output from the previous stage
-COPY --from=build /app/.next/standalone/. /app/
-COPY --from=build /app/.next/static /app/.next/static
-COPY --from=build /app/public /app/public
+COPY --from=build /app/dist /usr/share/nginx/html
 
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
