@@ -37,14 +37,16 @@ export const useDiaryEntries = () => {
       
       if (data && data.length > 0) {
         // Converter dados do Supabase para o formato DiaryEntry
-        const supabaseEntries: DiaryEntry[] = data.map(entry => ({
+        const supabaseEntries = data.map(entry => ({
           id: entry.id,
+          text: entry.content,
           title: entry.title,
-          content: entry.content,
           date: new Date(entry.date),
           mood: entry.mood || undefined,
-          tags: [], // Não estamos armazenando tags no Supabase ainda
-          location: null // Não estamos armazenando localização no Supabase ainda
+          attachments: [],
+          createdAt: new Date(entry.created_at),
+          tags: [],
+          location: null
         }));
         
         // Mesclar com entradas locais para garantir que não perdemos nada
@@ -75,6 +77,12 @@ export const useDiaryEntries = () => {
   const addEntry = async (entry: DiaryEntry) => {
     setEntries(prev => [entry, ...prev]);
     
+    // Exibir mensagem de sucesso ao salvar
+    toast({
+      title: "Relato salvo com sucesso",
+      description: "Seu relato foi registrado em seu diário seguro.",
+    });
+    
     try {
       // Salvar no Supabase se o usuário estiver autenticado
       const { data: { session } } = await supabase.auth.getSession();
@@ -84,8 +92,8 @@ export const useDiaryEntries = () => {
           .insert({
             id: entry.id,
             user_id: session.user.id,
-            title: entry.title,
-            content: entry.content,
+            title: entry.title || entry.text.substring(0, 50),
+            content: entry.text,
             date: entry.date.toISOString().split('T')[0],
             mood: entry.mood || null
           });
@@ -96,6 +104,11 @@ export const useDiaryEntries = () => {
             title: "Erro na sincronização",
             description: "Sua entrada foi salva localmente, mas não foi sincronizada com a nuvem.",
             variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Sincronizado com a nuvem",
+            description: "Seu relato foi salvo com sucesso na nuvem.",
           });
         }
       }
