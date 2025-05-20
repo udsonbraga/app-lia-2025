@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { SafeContact, UserPremiumStatus } from "@/features/support-network/types";
 import { useToast } from "@/hooks/use-toast";
@@ -146,12 +145,43 @@ export const useSafeContacts = () => {
 
       setContacts([...contacts, newContactWithId]);
       
+      // Feedback mais detalhado ao adicionar contato
       toast({
-        title: "Contato adicionado",
-        description: "Contato de segurança adicionado com sucesso.",
+        title: "Contato adicionado com sucesso!",
+        description: `${newContact.name} foi adicionado(a) como seu contato de confiança. ${newContact.telegramId ? 'Alertas serão enviados via Telegram.' : 'Adicione um ID do Telegram para enviar alertas.'}`,
       });
       
       console.log("Novo contato adicionado:", newContactWithId);
+      
+      // Salvar automaticamente na nuvem se estiver logado
+      const saveToSupabase = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id) {
+          try {
+            const { error } = await supabase
+              .from('emergency_contacts')
+              .insert({
+                id: newContactWithId.id,
+                user_id: session.user.id,
+                name: newContactWithId.name,
+                phone: newContactWithId.phone,
+                telegram_id: newContactWithId.telegramId,
+                is_primary: newContactWithId.relationship === 'Primário'
+              });
+            
+            if (!error) {
+              toast({
+                title: "Sincronizado com a nuvem",
+                description: "Seu contato também foi salvo na sua conta para acesso em outros dispositivos.",
+              });
+            }
+          } catch (error) {
+            console.error("Error in Supabase operation:", error);
+          }
+        }
+      };
+      
+      saveToSupabase();
     }
 
     // Reset form

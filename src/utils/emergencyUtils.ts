@@ -1,5 +1,4 @@
 
-import { getCurrentPosition } from './geolocationUtils';
 import { sendTelegramMessage } from './telegramUtils';
 import { toast as showToast } from "@/components/ui/use-toast";
 
@@ -33,11 +32,6 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
     // Log para verificar os contatos
     console.log("Contatos de emergência encontrados:", contacts);
     
-    // Obter localização atual
-    const position = await getCurrentPosition();
-    const { latitude, longitude } = position.coords;
-    const locationLink = `https://maps.google.com/?q=${latitude},${longitude}`;
-    
     // Enviar mensagens para todos os contatos cadastrados
     const promises = [];
     
@@ -46,7 +40,7 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
       // Enviar mensagem pelo Telegram
       if (contact.telegramId) {
         promises.push(
-          sendTelegramMessage(contact.telegramId, locationLink)
+          sendTelegramMessage(contact.telegramId)
         );
       }
     }
