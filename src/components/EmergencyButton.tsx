@@ -3,7 +3,7 @@ import { AlertCircle, Bell, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { handleEmergencyAlert } from "@/utils/emergencyUtils";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -43,11 +43,6 @@ export function EmergencyButton() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleAddContact = () => {
-    setShowNoContactsDialog(false);
-    navigate("/safe-contact");
   };
 
   return (
@@ -90,31 +85,13 @@ export function EmergencyButton() {
           <DialogHeader>
             <DialogTitle>Contatos não configurados</DialogTitle>
             <DialogDescription>
-              Para usar o botão de emergência, é necessário cadastrar pelo menos um contato de confiança que receberá os alertas.
+              Adicione um contato de Confiança para receber o alerta.
             </DialogDescription>
           </DialogHeader>
           
           <div className="text-center py-4">
             <Shield className="w-16 h-16 text-safelady mx-auto mb-4" />
-            <p className="text-gray-600 mb-4">
-              O botão de emergência envia sua localização para seus contatos cadastrados.
-            </p>
           </div>
-          
-          <DialogFooter className="sm:justify-center gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowNoContactsDialog(false)}
-            >
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleAddContact}
-              className="bg-safelady hover:bg-safelady/90"
-            >
-              Cadastrar Contato
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

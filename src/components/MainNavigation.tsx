@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, BookOpen, Phone, MessageSquare } from "lucide-react";
@@ -6,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function MainNavigation() {
   const navigate = useNavigate();
@@ -30,16 +29,23 @@ export function MainNavigation() {
     setFeedbackSubmitting(true);
     
     try {
-      // Simulate sending feedback
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Obter a sessão atual do usuário
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
       
-      // In a real app, you would save this feedback to a database
-      console.log("Feedback submitted:", {
-        type: feedbackType,
-        content: feedbackContent,
-        date: new Date().toISOString(),
-        user: localStorage.getItem('userName') || 'Anônimo'
-      });
+      // Inserir o feedback no banco de dados
+      const { error } = await supabase
+        .from('user_feedback')
+        .insert({
+          feedback_type: feedbackType,
+          content: feedbackContent,
+          user_id: userId || null // Permite feedback anônimo
+        });
+        
+      if (error) {
+        console.error("Erro ao salvar feedback:", error);
+        throw error;
+      }
       
       toast({
         title: "Feedback enviado",
@@ -49,6 +55,7 @@ export function MainNavigation() {
       setFeedbackContent("");
       setFeedbackOpen(false);
     } catch (error) {
+      console.error("Erro completo:", error);
       toast({
         title: "Erro ao enviar",
         description: "Não foi possível enviar seu feedback. Tente novamente mais tarde.",
