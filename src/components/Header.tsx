@@ -36,9 +36,13 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
 
   const handleDisguisedCart = () => {
     // Show processing message immediately when clicked
+    console.log("Cart icon clicked, showing toast notification");
+    
+    // Force immediate toast display
     toast({
       title: "Seu pedido está sendo processado",
       description: "Aguarde enquanto preparamos seus itens.",
+      duration: 3000, // Show for 3 seconds
     });
     
     // Check if there are any emergency contacts configured
@@ -51,6 +55,7 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
         toast({
           title: "Seu Carrinho está vazio",
           description: "Adicione produtos para continuar com a compra.",
+          duration: 3000, // Show for 3 seconds
         });
       }, 2000); // Show this message after a delay to not override the processing message
       return;

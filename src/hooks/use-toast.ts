@@ -13,10 +13,11 @@ export type ToasterToast = {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   variant?: "default" | "destructive";
+  duration?: number;
 };
 
 const TOAST_LIMIT = 5;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_REMOVE_DELAY = 5000;
 
 type ToastActionType = (props: Omit<ToasterToast, "id">) => void;
 
@@ -67,6 +68,8 @@ const toast: ToastActionType = props => {
     });
   };
 
+  const duration = props.duration || TOAST_REMOVE_DELAY;
+
   toasts.push({
     ...props,
     id,
@@ -79,11 +82,19 @@ const toast: ToastActionType = props => {
   });
 
   setTimeout(() => {
+    toasts.forEach(t => {
+      if (t.id === id) {
+        t.open = false;
+      }
+    });
+  }, duration);
+
+  setTimeout(() => {
     toasts.splice(
       toasts.findIndex(t => t.id === id),
       1
     );
-  }, TOAST_REMOVE_DELAY);
+  }, duration + 1000);
 
   return {
     id,
