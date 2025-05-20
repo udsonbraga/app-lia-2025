@@ -35,7 +35,7 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
   }, []);
 
   const handleDisguisedCart = () => {
-    // Show processing message
+    // Show processing message immediately when clicked
     toast({
       title: "Seu pedido está sendo processado",
       description: "Aguarde enquanto preparamos seus itens.",
@@ -47,10 +47,12 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
     
     if (contacts.length === 0) {
       // Show empty cart message if no emergency contacts
-      toast({
-        title: "Seu Carrinho está vazio",
-        description: "Adicione produtos para continuar com a compra.",
-      });
+      setTimeout(() => {
+        toast({
+          title: "Seu Carrinho está vazio",
+          description: "Adicione produtos para continuar com a compra.",
+        });
+      }, 2000); // Show this message after a delay to not override the processing message
       return;
     }
     
