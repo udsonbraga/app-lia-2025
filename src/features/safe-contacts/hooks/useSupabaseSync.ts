@@ -3,19 +3,19 @@ import { useEffect } from "react";
 import { SafeContact } from "@/features/support-network/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export const useSupabaseSync = (contacts: SafeContact[], setContacts: (contacts: SafeContact[]) => void) => {
   const { toast } = useToast();
+  const { user, session } = useAuth();
 
   // Load contacts from Supabase on mount
   useEffect(() => {
     const loadContactsFromSupabase = async () => {
       console.log("=== LOADING CONTACTS FROM SUPABASE ===");
+      console.log("Auth state:", { hasUser: !!user, hasSession: !!session, userId: user?.id });
       
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log("Session check for contacts:", { hasSession: !!session, userId: session?.user?.id });
-        
         if (session?.user?.id) {
           console.log("User authenticated, loading contacts from Supabase...");
           
@@ -85,12 +85,13 @@ export const useSupabaseSync = (contacts: SafeContact[], setContacts: (contacts:
     };
     
     loadContactsFromSupabase();
-  }, [setContacts, toast]);
+  }, [user, session, setContacts, toast]);
 
   // Sync contacts to Supabase when they change
   useEffect(() => {
     console.log("=== SYNCING CONTACTS ===");
     console.log("Contacts to sync:", contacts.length);
+    console.log("Auth state for sync:", { hasUser: !!user, hasSession: !!session, userId: user?.id });
     
     // Always save to localStorage first
     localStorage.setItem("safeContacts", JSON.stringify(contacts));
@@ -98,9 +99,6 @@ export const useSupabaseSync = (contacts: SafeContact[], setContacts: (contacts:
     // Try to save to Supabase if user is logged in
     const saveToSupabase = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log("Session check for sync:", { hasSession: !!session, userId: session?.user?.id });
-        
         if (session?.user?.id) {
           console.log("User authenticated, syncing to Supabase...");
           
@@ -149,7 +147,7 @@ export const useSupabaseSync = (contacts: SafeContact[], setContacts: (contacts:
     if (contacts.length > 0) {
       saveToSupabase();
     }
-  }, [contacts, toast]);
+  }, [contacts, user, session, toast]);
 
   return { toast };
 };
