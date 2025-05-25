@@ -1,9 +1,39 @@
 
-version: '3'
+version: '3.8'
 
 services:
-  app:
-    build: .
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - FRONTEND_URL=http://localhost:8080
+      - SUPABASE_URL=https://mgyefnqelwzcglbbigzv.supabase.co
+      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1neWVmbnFlbHd6Y2dsYmJpZ3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcyNjY1NDAsImV4cCI6MjA2Mjg0MjU0MH0.kJglaITMULB3amV26q_BhSVJzDxaNZA0DBaxpMjloW0
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      - VITE_API_URL=http://localhost:3001/api
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  default:
+    driver: bridge
