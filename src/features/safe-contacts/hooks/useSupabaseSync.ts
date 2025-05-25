@@ -7,19 +7,109 @@ import { useToast } from "@/hooks/use-toast";
 export const useSupabaseSync = (contacts: SafeContact[], setContacts: (contacts: SafeContact[]) => void) => {
   const { toast } = useToast();
 
+  // Load contacts from Supabase on mount
+  useEffect(() => {
+    const loadContactsFromSupabase = async () => {
+      console.log("=== LOADING CONTACTS FROM SUPABASE ===");
+      
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("Session check for contacts:", { hasSession: !!session, userId: session?.user?.id });
+        
+        if (session?.user?.id) {
+          console.log("User authenticated, loading contacts from Supabase...");
+          
+          const { data, error } = await supabase
+            .from('emergency_contacts')
+            .select('*')
+            .eq('user_id', session.user.id);
+          
+          if (error) {
+            console.error("Error loading contacts from Supabase:", error);
+            toast({
+              title: "Erro ao carregar contatos",
+              description: "Não foi possível carregar seus contatos da nuvem.",
+              variant: "destructive"
+            });
+          } else if (data && data.length > 0) {
+            console.log("Contacts loaded from Supabase:", data.length, "contacts");
+            // Convert Supabase format to app format
+            const formattedContacts = data.map(contact => ({
+              id: contact.id,
+              name: contact.name,
+              phone: contact.phone,
+              telegramId: contact.telegram_id || "",
+              relationship: contact.is_primary ? "Primário" : "Secundário"
+            }));
+            setContacts(formattedContacts);
+            
+            toast({
+              title: "Contatos sincronizados",
+              description: `${data.length} contato(s) carregado(s) da nuvem.`,
+            });
+          } else {
+            console.log("No contacts found in Supabase, checking localStorage...");
+            // Se não há contatos no Supabase, carregar do localStorage
+            const localContacts = localStorage.getItem("safeContacts");
+            if (localContacts) {
+              const parsedContacts = JSON.parse(localContacts);
+              console.log("Loaded contacts from localStorage:", parsedContacts.length, "contacts");
+              setContacts(parsedContacts);
+            }
+          }
+        } else {
+          console.log("User not authenticated, loading from localStorage only");
+          // User not logged in, load from localStorage
+          const localContacts = localStorage.getItem("safeContacts");
+          if (localContacts) {
+            const parsedContacts = JSON.parse(localContacts);
+            console.log("Loaded contacts from localStorage (not authenticated):", parsedContacts.length, "contacts");
+            setContacts(parsedContacts);
+          }
+          
+          toast({
+            title: "Modo offline",
+            description: "Você não está logado. Para sincronizar seus contatos com a nuvem, faça login.",
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        console.error("Error in loadContactsFromSupabase:", error);
+        // Fallback to localStorage on error
+        const localContacts = localStorage.getItem("safeContacts");
+        if (localContacts) {
+          const parsedContacts = JSON.parse(localContacts);
+          setContacts(parsedContacts);
+        }
+      }
+    };
+    
+    loadContactsFromSupabase();
+  }, [setContacts, toast]);
+
   // Sync contacts to Supabase when they change
   useEffect(() => {
+    console.log("=== SYNCING CONTACTS ===");
+    console.log("Contacts to sync:", contacts.length);
+    
+    // Always save to localStorage first
     localStorage.setItem("safeContacts", JSON.stringify(contacts));
     
     // Try to save to Supabase if user is logged in
     const saveToSupabase = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.id) {
-        try {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log("Session check for sync:", { hasSession: !!session, userId: session?.user?.id });
+        
+        if (session?.user?.id) {
+          console.log("User authenticated, syncing to Supabase...");
+          
           // Para cada contato, tente atualizar na tabela emergency_contacts
-          contacts.forEach(async (contact) => {
+          for (const contact of contacts) {
             // Verificar se o ID do contato é um UUID válido
             if (contact.id && contact.id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
+              console.log("Syncing contact to Supabase:", contact.id, contact.name);
+              
               const { error } = await supabase
                 .from('emergency_contacts')
                 .upsert({
@@ -39,51 +129,27 @@ export const useSupabaseSync = (contacts: SafeContact[], setContacts: (contacts:
             } else {
               console.warn("Skipping contact with invalid UUID:", contact.id);
             }
-          });
-        } catch (error) {
-          console.error("Error in Supabase operation:", error);
-        }
-      } else {
-        console.log("User not logged in, contacts saved only to localStorage");
-      }
-    };
-    
-    saveToSupabase();
-  }, [contacts]);
-
-  // Load contacts from Supabase on mount
-  useEffect(() => {
-    const loadContactsFromSupabase = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.id) {
-        try {
-          const { data, error } = await supabase
-            .from('emergency_contacts')
-            .select('*')
-            .eq('user_id', session.user.id);
-          
-          if (error) {
-            console.error("Error loading contacts from Supabase:", error);
-          } else if (data && data.length > 0) {
-            console.log("Contacts loaded from Supabase:", data);
-            // Convert Supabase format to app format
-            const formattedContacts = data.map(contact => ({
-              id: contact.id,
-              name: contact.name,
-              phone: contact.phone,
-              telegramId: contact.telegram_id || "",
-              relationship: contact.is_primary ? "Primário" : "Secundário"
-            }));
-            setContacts(formattedContacts);
           }
-        } catch (error) {
-          console.error("Error in Supabase load operation:", error);
+          
+          if (contacts.length > 0) {
+            toast({
+              title: "Contatos sincronizados",
+              description: "Seus contatos foram salvos na nuvem com sucesso.",
+            });
+          }
+        } else {
+          console.log("User not logged in, contacts saved only to localStorage");
         }
+      } catch (error) {
+        console.error("Error in Supabase sync operation:", error);
       }
     };
     
-    loadContactsFromSupabase();
-  }, [setContacts]);
+    // Only sync if there are contacts to sync
+    if (contacts.length > 0) {
+      saveToSupabase();
+    }
+  }, [contacts, toast]);
 
   return { toast };
 };
