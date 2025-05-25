@@ -23,7 +23,6 @@ export const RegisterForm = () => {
   const { signUp } = useAuth();
   const { toast } = useToast();
 
-  // Definir tipo do formulário usando o esquema Zod
   type FormValues = z.infer<typeof registerFormSchema>;
 
   const form = useForm<FormValues>({
@@ -37,6 +36,8 @@ export const RegisterForm = () => {
   });
 
   const handleSubmit = async (values: FormValues) => {
+    console.log("Form submitted with values:", { ...values, password: "***", confirmPassword: "***" });
+
     if (!acceptedTerms) {
       toast({
         title: "Termos não aceitos",
@@ -47,25 +48,35 @@ export const RegisterForm = () => {
     }
 
     setIsLoading(true);
+    setErrorMessage("");
 
     try {
-      // Chamar função de registro usando o hook de autenticação
+      console.log("Calling signUp function...");
       const success = await signUp(values.email, values.password, values.name);
       
-      setRegistrationSuccess(success);
-      setErrorMessage(success ? "" : "Não foi possível realizar o cadastro. Verifique seus dados e tente novamente.");
+      console.log("SignUp result:", success);
       
-      // Importante: mostrar o diálogo antes de qualquer navegação
+      if (success) {
+        setRegistrationSuccess(true);
+        setErrorMessage("");
+        toast({
+          title: "Sucesso!",
+          description: "Conta criada com sucesso!",
+        });
+      } else {
+        setRegistrationSuccess(false);
+        setErrorMessage("Não foi possível realizar o cadastro. Verifique seus dados e tente novamente.");
+      }
+      
       setShowFeedbackDialog(true);
-      setIsLoading(false);
       
-      // Removido o navigate para login daqui - agora só ocorre ao fechar o diálogo
     } catch (error: any) {
-      console.error("Erro ao registrar:", error);
-      setIsLoading(false);
+      console.error("Registration error:", error);
       setRegistrationSuccess(false);
       setErrorMessage(error.message || "Ocorreu um erro ao processar seu cadastro. Tente novamente.");
       setShowFeedbackDialog(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -163,43 +174,39 @@ export const RegisterForm = () => {
         </div>
       </form>
 
-      {/* Feedback Dialog */}
-      <Dialog open={showFeedbackDialog} onOpenChange={(open) => {
-        if (!open && registrationSuccess) {
-          navigate("/login");
-        }
-        setShowFeedbackDialog(open);
-      }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-center text-xl font-bold text-[#FF84C6]">
-              {registrationSuccess ? "Cadastro realizado com sucesso!" : "Falha no cadastro"}
-            </DialogTitle>
-            <DialogDescription>
-              <div className="flex flex-col items-center justify-center mt-4">
-                <div className={`rounded-full ${registrationSuccess ? "bg-green-100" : "bg-red-100"} p-3 mb-4`}>
-                  {registrationSuccess ? (
-                    <CheckCircle className="h-10 w-10 text-green-500" />
-                  ) : (
-                    <XCircle className="h-10 w-10 text-red-500" />
-                  )}
+      {showFeedbackDialog && (
+        <Dialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl font-bold text-[#FF84C6]">
+                {registrationSuccess ? "Cadastro realizado com sucesso!" : "Falha no cadastro"}
+              </DialogTitle>
+              <DialogDescription asChild>
+                <div className="flex flex-col items-center justify-center mt-4">
+                  <div className={`rounded-full ${registrationSuccess ? "bg-green-100" : "bg-red-100"} p-3 mb-4`}>
+                    {registrationSuccess ? (
+                      <CheckCircle className="h-10 w-10 text-green-500" />
+                    ) : (
+                      <XCircle className="h-10 w-10 text-red-500" />
+                    )}
+                  </div>
+                  <p className="text-center mb-4 text-gray-700">
+                    {registrationSuccess 
+                      ? "Sua conta foi criada com sucesso! Agora você pode fazer login para acessar todos os recursos do SafeLady."
+                      : errorMessage || "Não foi possível criar sua conta. Por favor, tente novamente."}
+                  </p>
+                  <Button 
+                    onClick={handleCloseFeedbackDialog}
+                    className={`${registrationSuccess ? "bg-[#FF84C6] hover:bg-[#FF5AA9]" : "bg-gray-500 hover:bg-gray-600"} text-white w-full`}
+                  >
+                    {registrationSuccess ? "Ir para o Login" : "Tentar novamente"}
+                  </Button>
                 </div>
-                <p className="text-center mb-4">
-                  {registrationSuccess 
-                    ? "Sua conta foi criada com sucesso! Agora você pode fazer login para acessar todos os recursos do SafeLady."
-                    : errorMessage || "Não foi possível criar sua conta. Por favor, tente novamente."}
-                </p>
-                <Button 
-                  onClick={handleCloseFeedbackDialog}
-                  className={`${registrationSuccess ? "bg-[#FF84C6] hover:bg-[#FF5AA9]" : "bg-gray-500 hover:bg-gray-600"} text-white w-full`}
-                >
-                  {registrationSuccess ? "Ir para o Login" : "Tentar novamente"}
-                </Button>
-              </div>
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
