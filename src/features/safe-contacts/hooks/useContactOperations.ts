@@ -17,11 +17,6 @@ interface ContactOperationsProps {
   setShowPremiumDialog: (show: boolean) => void;
 }
 
-// Função auxiliar para gerar UUIDs compatíveis com Supabase
-const generateUUID = () => {
-  return crypto.randomUUID();
-};
-
 export const useContactOperations = ({
   contacts,
   setContacts,
@@ -78,95 +73,90 @@ export const useContactOperations = ({
         return;
       }
 
-      // Usar UUID para o ID do contato
       const newContactWithId = {
         ...newContact,
-        id: generateUUID(),
+        id: crypto.randomUUID(),
       };
 
       console.log("New contact with ID:", newContactWithId);
 
+      // Update local state first
       setContacts([...contacts, newContactWithId]);
       
-      // Feedback mais detalhado ao adicionar contato
-      toast({
-        title: "Contato adicionado com sucesso!",
-        description: `${newContact.name} foi adicionado(a) como seu contato de confiança. ${newContact.telegramId ? 'Alertas serão enviados via Telegram.' : 'Adicione um ID do Telegram para enviar alertas.'}`,
-      });
+      // Save to localStorage
+      const updatedContacts = [...contacts, newContactWithId];
+      localStorage.setItem("safeContacts", JSON.stringify(updatedContacts));
       
-      console.log("✅ Contact added to local state, now saving to Supabase...");
+      console.log("✅ Contact added to local state and localStorage");
       
-      // Salvar automaticamente na nuvem se estiver logado
-      const saveToSupabase = async () => {
-        console.log("=== SAVING TO SUPABASE ===");
+      // Try to save to Supabase
+      console.log("=== SAVING TO SUPABASE ===");
+      
+      try {
+        console.log("Checking authentication...");
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.log("Session check result:", { 
+          hasSession: !!session, 
+          userId: session?.user?.id, 
+          sessionError 
+        });
         
-        try {
-          console.log("Checking authentication...");
-          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-          console.log("Session check result:", { 
-            hasSession: !!session, 
-            userId: session?.user?.id, 
-            sessionError 
-          });
+        if (session?.user?.id) {
+          console.log("✅ User is authenticated, proceeding with Supabase save");
+          console.log("User ID:", session.user.id);
           
-          if (session?.user?.id) {
-            console.log("✅ User is authenticated, proceeding with Supabase save");
-            console.log("User ID:", session.user.id);
-            
-            const contactData = {
-              id: newContactWithId.id,
-              user_id: session.user.id,
-              name: newContactWithId.name,
-              phone: newContactWithId.phone,
-              telegram_id: newContactWithId.telegramId || null,
-              is_primary: newContactWithId.relationship === 'Primário'
-            };
-            
-            console.log("Contact data to insert:", contactData);
-            
-            const { data, error } = await supabase
-              .from('emergency_contacts')
-              .insert(contactData);
-            
-            console.log("Supabase insert result:", { data, error });
-            
-            if (error) {
-              console.error("❌ Error saving contact to Supabase:", error);
-              console.error("Error details:", error.message, error.code, error.details);
-              toast({
-                title: "Erro ao sincronizar",
-                description: "Não foi possível salvar o contato na nuvem. Verifique sua conexão.",
-                variant: "destructive"
-              });
-            } else {
-              console.log("✅ Contact saved successfully to Supabase!");
-              toast({
-                title: "Sincronizado com a nuvem",
-                description: "Seu contato também foi salvo na sua conta para acesso em outros dispositivos.",
-              });
-            }
-          } else {
-            console.log("❌ User not authenticated, contact only saved locally");
-            console.log("Session details:", { session, hasUser: !!session?.user });
+          const contactData = {
+            id: newContactWithId.id,
+            user_id: session.user.id,
+            name: newContactWithId.name,
+            phone: newContactWithId.phone,
+            telegram_id: newContactWithId.telegramId || null,
+            is_primary: newContactWithId.relationship === 'Primário'
+          };
+          
+          console.log("Contact data to insert:", contactData);
+          
+          const { data, error } = await supabase
+            .from('emergency_contacts')
+            .insert(contactData)
+            .select();
+          
+          console.log("Supabase insert result:", { data, error });
+          
+          if (error) {
+            console.error("❌ Error saving contact to Supabase:", error);
+            console.error("Error details:", error.message, error.code, error.details);
             toast({
-              title: "Contato salvo localmente",
-              description: "Para sincronizar com a nuvem, faça login na sua conta.",
-              variant: "default"
+              title: "Erro ao sincronizar",
+              description: "Não foi possível salvar o contato na nuvem. Verifique sua conexão.",
+              variant: "destructive"
+            });
+          } else {
+            console.log("✅ Contact saved successfully to Supabase!");
+            console.log("Data returned from Supabase:", data);
+            toast({
+              title: "Contato salvo com sucesso!",
+              description: "Contato foi salvo na nuvem e estará disponível em outros dispositivos.",
             });
           }
-        } catch (error) {
-          console.error("❌ Error in Supabase save operation:", error);
-          console.error("Full error details:", error);
+        } else {
+          console.log("❌ User not authenticated, contact only saved locally");
+          console.log("Session details:", { session, hasUser: !!session?.user });
           toast({
-            title: "Erro na sincronização",
-            description: "Houve um problema ao salvar na nuvem, mas o contato foi salvo localmente.",
-            variant: "destructive"
+            title: "Contato salvo localmente",
+            description: "Para sincronizar com a nuvem, faça login na sua conta.",
+            variant: "default"
           });
         }
-      };
-      
-      // Execute save to Supabase
-      await saveToSupabase();
+      } catch (error) {
+        console.error("❌ Error in Supabase save operation:", error);
+        console.error("Full error details:", error);
+        toast({
+          title: "Erro na sincronização",
+          description: "Houve um problema ao salvar na nuvem, mas o contato foi salvo localmente.",
+          variant: "destructive"
+        });
+      }
     }
 
     // Reset form
@@ -200,7 +190,12 @@ export const useContactOperations = ({
     console.log("=== REMOVE CONTACT ===");
     console.log("Contact ID to remove:", id);
     
-    setContacts(contacts.filter((contact) => contact.id !== id));
+    const updatedContacts = contacts.filter((contact) => contact.id !== id);
+    setContacts(updatedContacts);
+    
+    // Update localStorage
+    localStorage.setItem("safeContacts", JSON.stringify(updatedContacts));
+    
     toast({
       title: "Contato removido",
       description: "Contato de segurança removido com sucesso.",
@@ -223,7 +218,6 @@ export const useContactOperations = ({
 
   const upgradeToPremium = () => {
     console.log("=== UPGRADE TO PREMIUM ===");
-    // Redirect to Google when premium subscription is clicked
     window.open("https://www.google.com", "_blank");
     setShowPremiumDialog(false);
     

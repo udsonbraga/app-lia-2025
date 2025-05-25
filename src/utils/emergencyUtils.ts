@@ -15,23 +15,85 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
   console.log("=== EMERGENCY ALERT TRIGGERED ===");
   
   try {
-    // Get the toast function or use the imported one
     const toastFn = toast || showToast;
     
-    // Obter contatos de emergência do localStorage
-    const safeContacts = localStorage.getItem("safeContacts");
-    const contacts = safeContacts ? JSON.parse(safeContacts) : [];
-    console.log("Emergency contacts from localStorage:", contacts);
+    // Primeiro verificar se o usuário está autenticado
+    console.log("=== CHECKING AUTHENTICATION ===");
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    console.log("Auth state:", { 
+      hasSession: !!session, 
+      userId: session?.user?.id, 
+      sessionError 
+    });
     
-    // Verificar se há contatos configurados
-    if (contacts.length === 0) {
-      console.log("❌ No emergency contacts configured");
-      toastFn({
-        title: "Contatos não configurados",
-        description: "Por favor, configure pelo menos um contato de confiança nas configurações.",
-        variant: "destructive"
-      });
-      return false;
+    let contacts = [];
+    
+    if (session?.user?.id) {
+      console.log("✅ User authenticated, checking Supabase for contacts");
+      
+      // Buscar contatos no Supabase primeiro
+      try {
+        const { data: supabaseContacts, error } = await supabase
+          .from('emergency_contacts')
+          .select('*')
+          .eq('user_id', session.user.id);
+        
+        console.log("Supabase contacts query result:", { data: supabaseContacts, error });
+        
+        if (error) {
+          console.error("❌ Error fetching contacts from Supabase:", error);
+          toastFn({
+            title: "Erro ao verificar contatos",
+            description: "Não foi possível verificar seus contatos na nuvem.",
+            variant: "destructive"
+          });
+          return false;
+        }
+        
+        if (supabaseContacts && supabaseContacts.length > 0) {
+          console.log("✅ Found contacts in Supabase:", supabaseContacts.length);
+          // Converter formato do Supabase para formato do app
+          contacts = supabaseContacts.map(contact => ({
+            id: contact.id,
+            name: contact.name,
+            phone: contact.phone,
+            telegramId: contact.telegram_id || "",
+            relationship: contact.is_primary ? "Primário" : "Secundário"
+          }));
+        } else {
+          console.log("⚠️ No contacts found in Supabase for authenticated user");
+          toastFn({
+            title: "Nenhum contato encontrado",
+            description: "Configure pelo menos um contato de confiança nas configurações.",
+            variant: "destructive"
+          });
+          return false;
+        }
+      } catch (supabaseError) {
+        console.error("❌ Error in Supabase query:", supabaseError);
+        toastFn({
+          title: "Erro ao verificar contatos",
+          description: "Não foi possível verificar seus contatos na nuvem.",
+          variant: "destructive"
+        });
+        return false;
+      }
+    } else {
+      console.log("❌ User not authenticated, checking localStorage");
+      // Fallback para localStorage se não estiver logado
+      const safeContacts = localStorage.getItem("safeContacts");
+      contacts = safeContacts ? JSON.parse(safeContacts) : [];
+      console.log("Emergency contacts from localStorage:", contacts);
+      
+      if (contacts.length === 0) {
+        console.log("❌ No emergency contacts configured");
+        toastFn({
+          title: "Contatos não configurados",
+          description: "Por favor, configure pelo menos um contato de confiança nas configurações.",
+          variant: "destructive"
+        });
+        return false;
+      }
     }
     
     console.log("✅ Emergency contacts found:", contacts.length);
@@ -41,11 +103,12 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
     
     for (const contact of contacts) {
       console.log("Sending alert to contact:", contact.name, contact.id);
-      // Enviar mensagem pelo Telegram
+      
       if (contact.telegramId) {
         console.log("Sending Telegram message to:", contact.telegramId);
         const sent = await sendTelegramMessage(contact.telegramId);
         console.log("Telegram message result:", sent);
+        
         if (sent) {
           notifiedContacts.push(contact.id);
           console.log("✅ Contact notified successfully:", contact.id);
@@ -59,20 +122,11 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
     
     console.log("Contacts notified:", notifiedContacts);
     
-    // Verificar autenticação APÓS enviar as mensagens
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    console.log("Emergency alert - Auth check:", { 
-      hasSession: !!session, 
-      userId: session?.user?.id,
-      sessionError 
-    });
-    
     // Salvar o alerta no banco de dados se estiver autenticado
     if (session?.user) {
       console.log("✅ User authenticated, saving alert to database");
       
       try {
-        // Obter localização atual
         const locationData = await getCurrentPosition();
         console.log("Location data obtained:", locationData);
         
@@ -86,10 +140,10 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
         
         console.log("Alert data to insert:", alertData);
         
-        // Inserir registro do alerta no banco de dados
         const { data, error } = await supabase
           .from('emergency_alerts')
-          .insert(alertData);
+          .insert(alertData)
+          .select();
           
         console.log("Database insert result:", { data, error });
           
@@ -98,10 +152,10 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
           console.error("Error details:", error.message, error.code, error.details);
         } else {
           console.log("✅ Alert saved successfully to database");
+          console.log("Alert data saved:", data);
         }
       } catch (dbError) {
         console.error("❌ Error in database operation:", dbError);
-        // Continuar mesmo se houver erro no banco de dados
       }
     } else {
       console.log("❌ User not authenticated, alert not saved to database");
@@ -111,10 +165,9 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
     
     toastFn({
       title: "Alerta de emergência enviado",
-      description: "Botão de Emergência Acionado! Alertas enviados via Telegram.",
+      description: `Alertas enviados para ${notifiedContacts.length} contato(s) via Telegram.`,
     });
     
-    // Registrar hora do envio
     localStorage.setItem("lastEmergencyAlert", new Date().toISOString());
     console.log("Last emergency alert timestamp saved");
     
@@ -132,7 +185,6 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
   }
 };
 
-// Função auxiliar para obter a localização atual
 const getCurrentPosition = (): Promise<{ latitude: number; longitude: number } | null> => {
   console.log("Getting current position...");
   
@@ -154,7 +206,6 @@ const getCurrentPosition = (): Promise<{ latitude: number; longitude: number } |
       },
       (error) => {
         console.log("❌ Error getting location:", error);
-        // Em caso de erro ou permissão negada
         resolve(null);
       },
       { 

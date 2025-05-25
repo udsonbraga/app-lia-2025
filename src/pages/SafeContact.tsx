@@ -15,6 +15,7 @@ import PasswordDialog from "@/components/safe-contact/PasswordDialog";
 const SafeContactPage = () => {
   const navigate = useNavigate();
   const { isDisguised } = useDisguiseMode();
+  const { toast } = useToast();
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [password, setPassword] = useState("");
   
@@ -53,7 +54,7 @@ const SafeContactPage = () => {
     if (password === savedPassword) {
       navigate('/home');
     } else {
-      useToast().toast({
+      toast({
         title: "Senha incorreta",
         description: "A senha fornecida não está correta.",
         variant: "destructive",
