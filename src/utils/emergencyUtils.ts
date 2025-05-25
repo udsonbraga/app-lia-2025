@@ -18,14 +18,6 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
     // Get the toast function or use the imported one
     const toastFn = toast || showToast;
     
-    // Verificar autenticação primeiro
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    console.log("Emergency alert - Auth check:", { 
-      hasSession: !!session, 
-      userId: session?.user?.id,
-      sessionError 
-    });
-    
     // Obter contatos de emergência do localStorage
     const safeContacts = localStorage.getItem("safeContacts");
     const contacts = safeContacts ? JSON.parse(safeContacts) : [];
@@ -66,6 +58,14 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
     }
     
     console.log("Contacts notified:", notifiedContacts);
+    
+    // Verificar autenticação APÓS enviar as mensagens
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    console.log("Emergency alert - Auth check:", { 
+      hasSession: !!session, 
+      userId: session?.user?.id,
+      sessionError 
+    });
     
     // Salvar o alerta no banco de dados se estiver autenticado
     if (session?.user) {
