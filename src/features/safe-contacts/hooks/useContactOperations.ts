@@ -37,8 +37,14 @@ export const useContactOperations = ({
 }: ContactOperationsProps) => {
   const { toast } = useToast();
 
-  const handleAddContact = () => {
+  const handleAddContact = async () => {
+    console.log("=== HANDLE ADD CONTACT ===");
+    console.log("New contact data:", newContact);
+    console.log("Is editing:", isEditing);
+    console.log("Editing contact ID:", editingContactId);
+    
     if (!newContact.name || !newContact.phone || !newContact.relationship) {
+      console.log("❌ Validation failed - missing fields");
       toast({
         title: "Campos obrigatórios",
         description: "Preencha pelo menos o nome, telefone e parentesco para adicionar um contato.",
@@ -48,6 +54,7 @@ export const useContactOperations = ({
     }
 
     if (isEditing && editingContactId) {
+      console.log("✅ Updating existing contact");
       // Update existing contact
       setContacts(contacts.map((contact) => 
         contact.id === editingContactId 
@@ -63,8 +70,10 @@ export const useContactOperations = ({
         description: "Contato de segurança atualizado com sucesso.",
       });
     } else {
+      console.log("✅ Adding new contact");
       // Add new contact
       if (contacts.length >= premiumStatus.maxContacts) {
+        console.log("❌ Premium limit reached");
         setShowPremiumDialog(true);
         return;
       }
@@ -75,6 +84,8 @@ export const useContactOperations = ({
         id: generateUUID(),
       };
 
+      console.log("New contact with ID:", newContactWithId);
+
       setContacts([...contacts, newContactWithId]);
       
       // Feedback mais detalhado ao adicionar contato
@@ -83,44 +94,79 @@ export const useContactOperations = ({
         description: `${newContact.name} foi adicionado(a) como seu contato de confiança. ${newContact.telegramId ? 'Alertas serão enviados via Telegram.' : 'Adicione um ID do Telegram para enviar alertas.'}`,
       });
       
-      console.log("Novo contato adicionado:", newContactWithId);
+      console.log("✅ Contact added to local state, now saving to Supabase...");
       
       // Salvar automaticamente na nuvem se estiver logado
       const saveToSupabase = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user?.id) {
-          try {
-            const { error } = await supabase
+        console.log("=== SAVING TO SUPABASE ===");
+        
+        try {
+          console.log("Checking authentication...");
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          console.log("Session check result:", { 
+            hasSession: !!session, 
+            userId: session?.user?.id, 
+            sessionError 
+          });
+          
+          if (session?.user?.id) {
+            console.log("✅ User is authenticated, proceeding with Supabase save");
+            console.log("User ID:", session.user.id);
+            
+            const contactData = {
+              id: newContactWithId.id,
+              user_id: session.user.id,
+              name: newContactWithId.name,
+              phone: newContactWithId.phone,
+              telegram_id: newContactWithId.telegramId || null,
+              is_primary: newContactWithId.relationship === 'Primário'
+            };
+            
+            console.log("Contact data to insert:", contactData);
+            
+            const { data, error } = await supabase
               .from('emergency_contacts')
-              .insert({
-                id: newContactWithId.id,
-                user_id: session.user.id,
-                name: newContactWithId.name,
-                phone: newContactWithId.phone,
-                telegram_id: newContactWithId.telegramId,
-                is_primary: newContactWithId.relationship === 'Primário'
-              });
+              .insert(contactData);
+            
+            console.log("Supabase insert result:", { data, error });
             
             if (error) {
-              console.error("Error saving contact to Supabase:", error);
+              console.error("❌ Error saving contact to Supabase:", error);
+              console.error("Error details:", error.message, error.code, error.details);
               toast({
                 title: "Erro ao sincronizar",
                 description: "Não foi possível salvar o contato na nuvem. Verifique sua conexão.",
                 variant: "destructive"
               });
             } else {
+              console.log("✅ Contact saved successfully to Supabase!");
               toast({
                 title: "Sincronizado com a nuvem",
                 description: "Seu contato também foi salvo na sua conta para acesso em outros dispositivos.",
               });
             }
-          } catch (error) {
-            console.error("Error in Supabase operation:", error);
+          } else {
+            console.log("❌ User not authenticated, contact only saved locally");
+            console.log("Session details:", { session, hasUser: !!session?.user });
+            toast({
+              title: "Contato salvo localmente",
+              description: "Para sincronizar com a nuvem, faça login na sua conta.",
+              variant: "default"
+            });
           }
+        } catch (error) {
+          console.error("❌ Error in Supabase save operation:", error);
+          console.error("Full error details:", error);
+          toast({
+            title: "Erro na sincronização",
+            description: "Houve um problema ao salvar na nuvem, mas o contato foi salvo localmente.",
+            variant: "destructive"
+          });
         }
       };
       
-      saveToSupabase();
+      // Execute save to Supabase
+      await saveToSupabase();
     }
 
     // Reset form
@@ -131,9 +177,14 @@ export const useContactOperations = ({
       relationship: "",
     });
     setIsAdding(false);
+    
+    console.log("=== ADD CONTACT COMPLETED ===");
   };
 
   const handleEditContact = (contact: SafeContact) => {
+    console.log("=== EDIT CONTACT ===");
+    console.log("Contact to edit:", contact);
+    
     setNewContact({
       name: contact.name,
       phone: contact.phone,
@@ -146,6 +197,9 @@ export const useContactOperations = ({
   };
 
   const handleRemoveContact = (id: string) => {
+    console.log("=== REMOVE CONTACT ===");
+    console.log("Contact ID to remove:", id);
+    
     setContacts(contacts.filter((contact) => contact.id !== id));
     toast({
       title: "Contato removido",
@@ -154,14 +208,21 @@ export const useContactOperations = ({
   };
 
   const handleNewContactClick = () => {
+    console.log("=== NEW CONTACT CLICK ===");
+    console.log("Current contacts count:", contacts.length);
+    console.log("Max contacts allowed:", premiumStatus.maxContacts);
+    
     if (contacts.length >= premiumStatus.maxContacts) {
+      console.log("❌ Premium limit reached, showing premium dialog");
       setShowPremiumDialog(true);
     } else {
+      console.log("✅ Adding new contact allowed");
       setIsAdding(true);
     }
   };
 
   const upgradeToPremium = () => {
+    console.log("=== UPGRADE TO PREMIUM ===");
     // Redirect to Google when premium subscription is clicked
     window.open("https://www.google.com", "_blank");
     setShowPremiumDialog(false);

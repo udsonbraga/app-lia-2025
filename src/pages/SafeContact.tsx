@@ -36,9 +36,14 @@ const SafeContactPage = () => {
   } = useSafeContacts();
 
   const handleNavigateBack = () => {
+    console.log("=== BACK BUTTON CLICKED ===");
+    console.log("Is disguised mode:", isDisguised);
+    
     if (isDisguised) {
+      console.log("Disguised mode active, showing password dialog");
       setShowPasswordDialog(true);
     } else {
+      console.log("Normal mode, navigating to /home");
       navigate('/home');
     }
   };
