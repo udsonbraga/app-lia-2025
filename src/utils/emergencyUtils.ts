@@ -17,38 +17,53 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
   try {
     const toastFn = toast || showToast;
     
-    // First try to load contacts from database
-    console.log("=== CHECKING FOR CONTACTS IN DATABASE ===");
+    // Check if user is authenticated first
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+    
+    console.log("=== CHECKING FOR CONTACTS ===");
+    console.log("User authenticated:", !!userId);
+    
     let contacts = [];
     
-    try {
-      const { data, error } = await supabase
-        .from('emergency_contacts')
-        .select('*')
-        .order('created_at', { ascending: false });
+    if (userId) {
+      // Try to load contacts from database if user is authenticated
+      try {
+        console.log("=== LOADING FROM DATABASE ===");
+        const { data, error } = await supabase
+          .from('emergency_contacts')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        console.log("Database error, falling back to localStorage:", error);
-        throw error;
-      }
+        if (error) {
+          console.log("Database error, falling back to localStorage:", error);
+          throw error;
+        }
 
-      if (data && data.length > 0) {
-        // Convert database format to app format
-        contacts = data.map(contact => ({
-          id: contact.id,
-          name: contact.name,
-          phone: contact.phone,
-          telegramId: contact.telegram_id || '',
-          relationship: 'Contato'
-        }));
-        console.log("Emergency contacts from database:", contacts);
-      } else {
-        console.log("No contacts found in database, checking localStorage");
-        throw new Error("No contacts in database");
+        if (data && data.length > 0) {
+          // Convert database format to app format
+          contacts = data.map(contact => ({
+            id: contact.id,
+            name: contact.name,
+            phone: contact.phone,
+            telegramId: contact.telegram_id || '',
+            relationship: 'Contato'
+          }));
+          console.log("Emergency contacts from database:", contacts);
+        } else {
+          console.log("No contacts found in database, checking localStorage");
+          throw new Error("No contacts in database");
+        }
+      } catch (dbError) {
+        // Fallback to localStorage if database fails
+        console.log("=== FALLBACK TO LOCALSTORAGE ===");
+        const safeContacts = localStorage.getItem("safeContacts");
+        contacts = safeContacts ? JSON.parse(safeContacts) : [];
+        console.log("Emergency contacts from localStorage:", contacts);
       }
-    } catch (dbError) {
-      // Fallback to localStorage if database fails
-      console.log("=== FALLBACK TO LOCALSTORAGE ===");
+    } else {
+      // User not authenticated, use localStorage only
+      console.log("=== USER NOT AUTHENTICATED - USING LOCALSTORAGE ===");
       const safeContacts = localStorage.getItem("safeContacts");
       contacts = safeContacts ? JSON.parse(safeContacts) : [];
       console.log("Emergency contacts from localStorage:", contacts);

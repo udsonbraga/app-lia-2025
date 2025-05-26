@@ -13,6 +13,20 @@ export const useSupabaseSync = (contacts: SafeContact[], setContacts: (contacts:
       console.log("=== LOADING CONTACTS FROM DATABASE ===");
       
       try {
+        // Check if user is authenticated
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user?.id) {
+          console.log("User not authenticated, loading from localStorage only");
+          // Load from localStorage as fallback
+          const localContacts = localStorage.getItem("safeContacts");
+          if (localContacts) {
+            const parsedContacts = JSON.parse(localContacts);
+            console.log("Loaded contacts from localStorage:", parsedContacts.length, "contacts");
+            setContacts(parsedContacts);
+          }
+          return;
+        }
+        
         const { data, error } = await supabase
           .from('emergency_contacts')
           .select('*')
@@ -79,11 +93,20 @@ export const useSupabaseSync = (contacts: SafeContact[], setContacts: (contacts:
       console.log("Contacts to save:", contacts.length);
       
       try {
-        // First, delete all existing contacts to avoid duplicates
+        // Check if user is authenticated
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user?.id) {
+          console.log("User not authenticated, saving only to localStorage");
+          localStorage.setItem("safeContacts", JSON.stringify(contacts));
+          console.log("✅ Contacts saved to localStorage");
+          return;
+        }
+
+        // First, delete all existing contacts for this user to avoid duplicates
         await supabase
           .from('emergency_contacts')
           .delete()
-          .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
+          .eq('user_id', session.user.id);
 
         // Then insert the new contacts
         const contactsToInsert = contacts.map(contact => ({
@@ -91,7 +114,7 @@ export const useSupabaseSync = (contacts: SafeContact[], setContacts: (contacts:
           name: contact.name,
           phone: contact.phone,
           telegram_id: contact.telegramId,
-          user_id: '00000000-0000-0000-0000-000000000000' // Placeholder user_id since we're not using auth
+          user_id: session.user.id // Use the actual authenticated user's ID
         }));
 
         const { error } = await supabase
