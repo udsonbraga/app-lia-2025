@@ -1,6 +1,5 @@
 
 import { SafeContact } from "@/features/support-network/types";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface ContactOperationsProps {
@@ -80,83 +79,17 @@ export const useContactOperations = ({
 
       console.log("New contact with ID:", newContactWithId);
 
-      // Update local state first
-      setContacts([...contacts, newContactWithId]);
-      
-      // Save to localStorage
+      // Update local state and save to localStorage
       const updatedContacts = [...contacts, newContactWithId];
+      setContacts(updatedContacts);
       localStorage.setItem("safeContacts", JSON.stringify(updatedContacts));
       
       console.log("✅ Contact added to local state and localStorage");
       
-      // Try to save to Supabase
-      console.log("=== SAVING TO SUPABASE ===");
-      
-      try {
-        console.log("Checking authentication...");
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        console.log("Session check result:", { 
-          hasSession: !!session, 
-          userId: session?.user?.id, 
-          sessionError 
-        });
-        
-        if (session?.user?.id) {
-          console.log("✅ User is authenticated, proceeding with Supabase save");
-          console.log("User ID:", session.user.id);
-          
-          const contactData = {
-            id: newContactWithId.id,
-            user_id: session.user.id,
-            name: newContactWithId.name,
-            phone: newContactWithId.phone,
-            telegram_id: newContactWithId.telegramId || null,
-            is_primary: newContactWithId.relationship === 'Primário'
-          };
-          
-          console.log("Contact data to insert:", contactData);
-          
-          const { data, error } = await supabase
-            .from('emergency_contacts')
-            .insert(contactData)
-            .select();
-          
-          console.log("Supabase insert result:", { data, error });
-          
-          if (error) {
-            console.error("❌ Error saving contact to Supabase:", error);
-            console.error("Error details:", error.message, error.code, error.details);
-            toast({
-              title: "Erro ao sincronizar",
-              description: "Não foi possível salvar o contato na nuvem. Verifique sua conexão.",
-              variant: "destructive"
-            });
-          } else {
-            console.log("✅ Contact saved successfully to Supabase!");
-            console.log("Data returned from Supabase:", data);
-            toast({
-              title: "Contato salvo com sucesso!",
-              description: "Contato foi salvo na nuvem e estará disponível em outros dispositivos.",
-            });
-          }
-        } else {
-          console.log("❌ User not authenticated, contact only saved locally");
-          console.log("Session details:", { session, hasUser: !!session?.user });
-          toast({
-            title: "Contato salvo localmente",
-            description: "Para sincronizar com a nuvem, faça login na sua conta.",
-            variant: "default"
-          });
-        }
-      } catch (error) {
-        console.error("❌ Error in Supabase save operation:", error);
-        console.error("Full error details:", error);
-        toast({
-          title: "Erro na sincronização",
-          description: "Houve um problema ao salvar na nuvem, mas o contato foi salvo localmente.",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Contato adicionado com sucesso!",
+        description: "Contato foi salvo localmente.",
+      });
     }
 
     // Reset form

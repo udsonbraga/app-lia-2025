@@ -1,7 +1,6 @@
 
 import { sendTelegramMessage } from './telegramUtils';
 import { toast as showToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 type EmergencyAlertProps = {
   toast?: typeof showToast;
@@ -17,83 +16,20 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
   try {
     const toastFn = toast || showToast;
     
-    // Primeiro verificar se o usuário está autenticado
-    console.log("=== CHECKING AUTHENTICATION ===");
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    console.log("Auth state:", { 
-      hasSession: !!session, 
-      userId: session?.user?.id, 
-      sessionError 
-    });
+    // Carregar contatos do localStorage
+    console.log("=== CHECKING FOR CONTACTS ===");
+    const safeContacts = localStorage.getItem("safeContacts");
+    const contacts = safeContacts ? JSON.parse(safeContacts) : [];
+    console.log("Emergency contacts from localStorage:", contacts);
     
-    let contacts = [];
-    
-    if (session?.user?.id) {
-      console.log("✅ User authenticated, checking Supabase for contacts");
-      
-      // Buscar contatos no Supabase primeiro
-      try {
-        const { data: supabaseContacts, error } = await supabase
-          .from('emergency_contacts')
-          .select('*')
-          .eq('user_id', session.user.id);
-        
-        console.log("Supabase contacts query result:", { data: supabaseContacts, error });
-        
-        if (error) {
-          console.error("❌ Error fetching contacts from Supabase:", error);
-          toastFn({
-            title: "Erro ao verificar contatos",
-            description: "Não foi possível verificar seus contatos na nuvem.",
-            variant: "destructive"
-          });
-          return false;
-        }
-        
-        if (supabaseContacts && supabaseContacts.length > 0) {
-          console.log("✅ Found contacts in Supabase:", supabaseContacts.length);
-          // Converter formato do Supabase para formato do app
-          contacts = supabaseContacts.map(contact => ({
-            id: contact.id,
-            name: contact.name,
-            phone: contact.phone,
-            telegramId: contact.telegram_id || "",
-            relationship: contact.is_primary ? "Primário" : "Secundário"
-          }));
-        } else {
-          console.log("⚠️ No contacts found in Supabase for authenticated user");
-          toastFn({
-            title: "Nenhum contato encontrado",
-            description: "Configure pelo menos um contato de confiança nas configurações.",
-            variant: "destructive"
-          });
-          return false;
-        }
-      } catch (supabaseError) {
-        console.error("❌ Error in Supabase query:", supabaseError);
-        toastFn({
-          title: "Erro ao verificar contatos",
-          description: "Não foi possível verificar seus contatos na nuvem.",
-          variant: "destructive"
-        });
-        return false;
-      }
-    } else {
-      console.log("❌ User not authenticated, checking localStorage");
-      // Fallback para localStorage se não estiver logado
-      const safeContacts = localStorage.getItem("safeContacts");
-      contacts = safeContacts ? JSON.parse(safeContacts) : [];
-      console.log("Emergency contacts from localStorage:", contacts);
-      
-      if (contacts.length === 0) {
-        console.log("❌ No emergency contacts configured");
-        toastFn({
-          title: "Contatos não configurados",
-          description: "Por favor, configure pelo menos um contato de confiança nas configurações.",
-          variant: "destructive"
-        });
-        return false;
-      }
+    if (contacts.length === 0) {
+      console.log("❌ No emergency contacts configured");
+      toastFn({
+        title: "Contatos não configurados",
+        description: "Por favor, configure pelo menos um contato de confiança nas configurações.",
+        variant: "destructive",
+      });
+      return false;
     }
     
     console.log("✅ Emergency contacts found:", contacts.length);
@@ -121,46 +57,6 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
     }
     
     console.log("Contacts notified:", notifiedContacts);
-    
-    // Salvar o alerta no banco de dados se estiver autenticado
-    if (session?.user) {
-      console.log("✅ User authenticated, saving alert to database");
-      
-      try {
-        const locationData = await getCurrentPosition();
-        console.log("Location data obtained:", locationData);
-        
-        const alertData = {
-          user_id: session.user.id,
-          alert_type: 'button_press',
-          location_data: locationData,
-          contacts_notified: notifiedContacts,
-          resolved: false
-        };
-        
-        console.log("Alert data to insert:", alertData);
-        
-        const { data, error } = await supabase
-          .from('emergency_alerts')
-          .insert(alertData)
-          .select();
-          
-        console.log("Database insert result:", { data, error });
-          
-        if (error) {
-          console.error("❌ Error saving alert to database:", error);
-          console.error("Error details:", error.message, error.code, error.details);
-        } else {
-          console.log("✅ Alert saved successfully to database");
-          console.log("Alert data saved:", data);
-        }
-      } catch (dbError) {
-        console.error("❌ Error in database operation:", dbError);
-      }
-    } else {
-      console.log("❌ User not authenticated, alert not saved to database");
-    }
-    
     console.log("✅ Emergency alert process completed");
     
     toastFn({
@@ -183,36 +79,4 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
     });
     throw error;
   }
-};
-
-const getCurrentPosition = (): Promise<{ latitude: number; longitude: number } | null> => {
-  console.log("Getting current position...");
-  
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) {
-      console.log("❌ Geolocation not supported");
-      resolve(null);
-      return;
-    }
-    
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const location = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
-        };
-        console.log("✅ Location obtained:", location);
-        resolve(location);
-      },
-      (error) => {
-        console.log("❌ Error getting location:", error);
-        resolve(null);
-      },
-      { 
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0
-      }
-    );
-  });
 };
