@@ -5,8 +5,6 @@ import Index from "@/pages/Index";
 import Register from "@/pages/Register";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/NotFound";
-import Diary from "@/pages/Diary";
-import SafeContact from "@/pages/SafeContact";
 import SupportNetwork from "@/pages/SupportNetwork";
 import { LoadingScreen } from "./components/LoadingScreen";
 import Help from "@/pages/Help";
@@ -34,22 +32,6 @@ function App() {
             element={
               <PrivateRoute>
                 <Index />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/diary"
-            element={
-              <PrivateRoute>
-                <Diary />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/safe-contact"
-            element={
-              <PrivateRoute>
-                <SafeContact />
               </PrivateRoute>
             }
           />
