@@ -15,6 +15,8 @@ export const useSupabaseSync = () => {
         return currentEntries;
       }
       
+      console.log("Carregando entradas do Supabase para usuário:", session.user.id);
+      
       const { data, error } = await supabase
         .from('diary_entries')
         .select('*')
@@ -31,7 +33,7 @@ export const useSupabaseSync = () => {
       }
       
       if (data && data.length > 0) {
-        console.log("Entradas carregadas do Supabase:", data);
+        console.log("Entradas carregadas do Supabase:", data.length);
         
         // Converter dados do Supabase para o formato DiaryEntry
         const supabaseEntries = await Promise.all(data.map(async entry => {
@@ -54,13 +56,13 @@ export const useSupabaseSync = () => {
         // Mesclar com entradas locais para garantir que não perdemos nada
         const localEntryIds = currentEntries.map(e => e.id);
         const newEntries = [
-          ...currentEntries,
-          ...supabaseEntries.filter(e => !localEntryIds.includes(e.id))
+          ...currentEntries.filter(e => !data.some(se => se.id === e.id)), // Manter entradas locais não sincronizadas
+          ...supabaseEntries
         ];
         
         toast({
           title: "Diário sincronizado",
-          description: "Suas entradas foram carregadas com sucesso da nuvem."
+          description: `${data.length} entradas carregadas da nuvem.`
         });
         
         return newEntries;
@@ -124,23 +126,54 @@ export const useSupabaseSync = () => {
       
       console.log("Salvando entrada no Supabase para usuário:", userId);
       
-      const { error } = await supabase
+      // Verificar se a entrada já existe
+      const { data: existingEntry } = await supabase
         .from('diary_entries')
-        .insert({
-          id: entry.id,
-          user_id: userId,
-          title: entry.title || entry.text.substring(0, 50),
-          content: entry.text,
-          date: entry.date.toISOString().split('T')[0],
-          mood: entry.mood || null
-        });
+        .select('id')
+        .eq('id', entry.id)
+        .single();
+      
+      if (existingEntry) {
+        // Atualizar entrada existente
+        const { error } = await supabase
+          .from('diary_entries')
+          .update({
+            title: entry.title || entry.text.substring(0, 50),
+            content: entry.text,
+            date: entry.date.toISOString().split('T')[0],
+            mood: entry.mood || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', entry.id)
+          .eq('user_id', userId);
+          
+        if (error) {
+          console.error("Erro ao atualizar entrada do diário no Supabase:", error);
+          throw new Error(`Erro na sincronização: ${error.message}`);
+        }
         
-      if (error) {
-        console.error("Erro ao salvar entrada do diário no Supabase:", error);
-        throw new Error(`Erro na sincronização: ${error.message}`);
+        console.log("Entrada atualizada com sucesso no Supabase");
+      } else {
+        // Criar nova entrada
+        const { error } = await supabase
+          .from('diary_entries')
+          .insert({
+            id: entry.id,
+            user_id: userId,
+            title: entry.title || entry.text.substring(0, 50),
+            content: entry.text,
+            date: entry.date.toISOString().split('T')[0],
+            mood: entry.mood || null
+          });
+          
+        if (error) {
+          console.error("Erro ao salvar entrada do diário no Supabase:", error);
+          throw new Error(`Erro na sincronização: ${error.message}`);
+        }
+        
+        console.log("Entrada salva com sucesso no Supabase");
       }
       
-      console.log("Entrada salva com sucesso no Supabase");
       return true;
     } catch (error) {
       console.error("Erro ao salvar entrada do diário:", error);
@@ -156,16 +189,15 @@ export const useSupabaseSync = () => {
         return false;
       }
       
+      console.log("Removendo entrada do Supabase:", id);
+      
       // Se houver anexos, remova-os do Storage
       if (entryToDelete?.attachments && entryToDelete.attachments.length > 0) {
-        // Extrair apenas os caminhos dos arquivos das URLs
         const filesToDelete = entryToDelete.attachments
           .filter(a => a.url && a.url.includes('diary_attachments'))
           .map(a => {
-            // Extrair o caminho do arquivo da URL
             const url = new URL(a.url);
             const pathParts = url.pathname.split('/');
-            // Remova 'storage/v1/object/public/diary_attachments/' do caminho
             return pathParts.slice(pathParts.length - 2).join('/');
           });
 
@@ -192,6 +224,7 @@ export const useSupabaseSync = () => {
         return false;
       }
       
+      console.log("Entrada removida com sucesso do Supabase");
       return true;
     } catch (error) {
       console.error("Erro ao remover entrada do diário:", error);
