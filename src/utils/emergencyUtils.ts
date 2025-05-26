@@ -1,6 +1,7 @@
 
 import { sendTelegramMessage } from './telegramUtils';
 import { toast as showToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 type EmergencyAlertProps = {
   toast?: typeof showToast;
@@ -16,11 +17,42 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
   try {
     const toastFn = toast || showToast;
     
-    // Carregar contatos do localStorage
-    console.log("=== CHECKING FOR CONTACTS ===");
-    const safeContacts = localStorage.getItem("safeContacts");
-    const contacts = safeContacts ? JSON.parse(safeContacts) : [];
-    console.log("Emergency contacts from localStorage:", contacts);
+    // First try to load contacts from database
+    console.log("=== CHECKING FOR CONTACTS IN DATABASE ===");
+    let contacts = [];
+    
+    try {
+      const { data, error } = await supabase
+        .from('emergency_contacts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.log("Database error, falling back to localStorage:", error);
+        throw error;
+      }
+
+      if (data && data.length > 0) {
+        // Convert database format to app format
+        contacts = data.map(contact => ({
+          id: contact.id,
+          name: contact.name,
+          phone: contact.phone,
+          telegramId: contact.telegram_id || '',
+          relationship: 'Contato'
+        }));
+        console.log("Emergency contacts from database:", contacts);
+      } else {
+        console.log("No contacts found in database, checking localStorage");
+        throw new Error("No contacts in database");
+      }
+    } catch (dbError) {
+      // Fallback to localStorage if database fails
+      console.log("=== FALLBACK TO LOCALSTORAGE ===");
+      const safeContacts = localStorage.getItem("safeContacts");
+      contacts = safeContacts ? JSON.parse(safeContacts) : [];
+      console.log("Emergency contacts from localStorage:", contacts);
+    }
     
     if (contacts.length === 0) {
       console.log("❌ No emergency contacts configured");

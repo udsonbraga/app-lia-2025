@@ -2,42 +2,139 @@
 import { useEffect } from "react";
 import { SafeContact } from "@/features/support-network/types";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useSupabaseSync = (contacts: SafeContact[], setContacts: (contacts: SafeContact[]) => void) => {
   const { toast } = useToast();
 
-  // Load contacts from localStorage on mount
+  // Load contacts from database on mount
   useEffect(() => {
-    const loadContactsFromLocalStorage = () => {
-      console.log("=== LOADING CONTACTS FROM LOCALSTORAGE ===");
+    const loadContactsFromDatabase = async () => {
+      console.log("=== LOADING CONTACTS FROM DATABASE ===");
       
       try {
+        const { data, error } = await supabase
+          .from('emergency_contacts')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error("Error loading contacts from database:", error);
+          // Fallback to localStorage if database fails
+          const localContacts = localStorage.getItem("safeContacts");
+          if (localContacts) {
+            const parsedContacts = JSON.parse(localContacts);
+            console.log("Loaded contacts from localStorage fallback:", parsedContacts.length, "contacts");
+            setContacts(parsedContacts);
+          }
+          return;
+        }
+
+        if (data && data.length > 0) {
+          // Convert database format to app format
+          const formattedContacts = data.map(contact => ({
+            id: contact.id,
+            name: contact.name,
+            phone: contact.phone,
+            telegramId: contact.telegram_id || '',
+            relationship: 'Contato' // Default relationship since it's not in the database schema
+          }));
+          
+          console.log("Loaded contacts from database:", formattedContacts.length, "contacts");
+          setContacts(formattedContacts);
+          
+          // Also save to localStorage for backup
+          localStorage.setItem("safeContacts", JSON.stringify(formattedContacts));
+        } else {
+          console.log("No contacts found in database");
+          // Try to load from localStorage as fallback
+          const localContacts = localStorage.getItem("safeContacts");
+          if (localContacts) {
+            const parsedContacts = JSON.parse(localContacts);
+            console.log("Loaded contacts from localStorage:", parsedContacts.length, "contacts");
+            setContacts(parsedContacts);
+          }
+        }
+      } catch (error) {
+        console.error("❌ Error loading contacts from database:", error);
+        // Fallback to localStorage
         const localContacts = localStorage.getItem("safeContacts");
         if (localContacts) {
           const parsedContacts = JSON.parse(localContacts);
-          console.log("Loaded contacts from localStorage:", parsedContacts.length, "contacts");
+          console.log("Loaded contacts from localStorage fallback:", parsedContacts.length, "contacts");
           setContacts(parsedContacts);
-        } else {
-          console.log("No contacts found in localStorage");
         }
-      } catch (error) {
-        console.error("❌ Error loading contacts from localStorage:", error);
       }
     };
     
-    loadContactsFromLocalStorage();
+    loadContactsFromDatabase();
   }, [setContacts]);
 
-  // Save contacts to localStorage when they change
+  // Save contacts to database when they change
   useEffect(() => {
-    console.log("=== SAVING CONTACTS TO LOCALSTORAGE ===");
-    console.log("Contacts to save:", contacts.length);
-    console.log("Contacts data:", contacts);
-    
-    // Save to localStorage
-    localStorage.setItem("safeContacts", JSON.stringify(contacts));
-    console.log("✅ Contacts saved to localStorage");
-  }, [contacts]);
+    const saveContactsToDatabase = async () => {
+      if (contacts.length === 0) return;
+      
+      console.log("=== SAVING CONTACTS TO DATABASE ===");
+      console.log("Contacts to save:", contacts.length);
+      
+      try {
+        // First, delete all existing contacts to avoid duplicates
+        await supabase
+          .from('emergency_contacts')
+          .delete()
+          .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
+
+        // Then insert the new contacts
+        const contactsToInsert = contacts.map(contact => ({
+          id: contact.id,
+          name: contact.name,
+          phone: contact.phone,
+          telegram_id: contact.telegramId,
+          user_id: '00000000-0000-0000-0000-000000000000' // Placeholder user_id since we're not using auth
+        }));
+
+        const { error } = await supabase
+          .from('emergency_contacts')
+          .insert(contactsToInsert);
+
+        if (error) {
+          console.error("❌ Error saving contacts to database:", error);
+          toast({
+            title: "Erro ao salvar",
+            description: "Não foi possível salvar os contatos no banco de dados. Salvando localmente.",
+            variant: "destructive",
+          });
+        } else {
+          console.log("✅ Contacts saved to database");
+          toast({
+            title: "Contatos salvos",
+            description: "Contatos salvos com sucesso no banco de dados.",
+          });
+        }
+
+        // Always save to localStorage as backup
+        localStorage.setItem("safeContacts", JSON.stringify(contacts));
+        console.log("✅ Contacts also saved to localStorage as backup");
+        
+      } catch (error) {
+        console.error("❌ Database save error:", error);
+        localStorage.setItem("safeContacts", JSON.stringify(contacts));
+        console.log("✅ Contacts saved to localStorage as fallback");
+        
+        toast({
+          title: "Salvando localmente",
+          description: "Contatos salvos localmente devido a erro na conexão.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    // Only save if we have contacts (avoid saving empty array on initial load)
+    if (contacts.length > 0) {
+      saveContactsToDatabase();
+    }
+  }, [contacts, toast]);
 
   return { toast };
 };
