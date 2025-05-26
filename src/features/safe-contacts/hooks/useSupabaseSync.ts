@@ -49,7 +49,6 @@ export const useSupabaseSync = (contacts: SafeContact[], setContacts: (contacts:
           const formattedContacts = data.map(contact => ({
             id: contact.id,
             name: contact.name,
-            phone: contact.phone,
             telegramId: contact.telegram_id || '',
             relationship: 'Contato' // Default relationship since it's not in the database schema
           }));
@@ -112,7 +111,6 @@ export const useSupabaseSync = (contacts: SafeContact[], setContacts: (contacts:
         const contactsToInsert = contacts.map(contact => ({
           id: contact.id,
           name: contact.name,
-          phone: contact.phone,
           telegram_id: contact.telegramId,
           user_id: session.user.id // Use the actual authenticated user's ID
         }));

@@ -1,5 +1,5 @@
 
-import { User, Phone, MessageSquare, Trash2, Pencil } from "lucide-react";
+import { User, MessageSquare, Trash2, Pencil } from "lucide-react";
 import { SafeContact } from "@/features/support-network/types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useState } from "react";
@@ -49,10 +49,6 @@ const ContactList = ({ contacts, onRemoveContact, onEditContact }: ContactListPr
               <User className="h-4 w-4 mr-2 text-safelady" />
               {contact.name}
             </h3>
-            <p className="text-sm text-gray-600 flex items-center mt-1">
-              <Phone className="h-3 w-3 mr-2 text-gray-400" />
-              {contact.phone}
-            </p>
             <p className="text-sm text-gray-600 flex items-center mt-1">
               <MessageSquare className="h-3 w-3 mr-2 text-gray-400" />
               Telegram: @{contact.telegramId}

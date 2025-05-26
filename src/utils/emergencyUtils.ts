@@ -45,7 +45,6 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
           contacts = data.map(contact => ({
             id: contact.id,
             name: contact.name,
-            phone: contact.phone,
             telegramId: contact.telegram_id || '',
             relationship: 'Contato'
           }));

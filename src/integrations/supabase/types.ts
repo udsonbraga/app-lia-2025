@@ -78,7 +78,6 @@ export type Database = {
           id: string
           is_primary: boolean | null
           name: string
-          phone: string
           telegram_id: string | null
           updated_at: string
           user_id: string
@@ -88,7 +87,6 @@ export type Database = {
           id?: string
           is_primary?: boolean | null
           name: string
-          phone: string
           telegram_id?: string | null
           updated_at?: string
           user_id: string
@@ -98,7 +96,6 @@ export type Database = {
           id?: string
           is_primary?: boolean | null
           name?: string
-          phone?: string
           telegram_id?: string | null
           updated_at?: string
           user_id?: string

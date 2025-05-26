@@ -1,29 +1,34 @@
 
-import { useState } from "react";
-import { SafeContact, UserPremiumStatus } from "@/features/support-network/types";
+import { useState, useEffect } from "react";
+import { SafeContact } from "@/features/support-network/types";
 
 export const useContactState = () => {
-  const [contacts, setContacts] = useState<SafeContact[]>(() => {
-    const savedContacts = localStorage.getItem("safeContacts");
-    return savedContacts ? JSON.parse(savedContacts) : [];
+  const [contacts, setContacts] = useState<SafeContact[]>([]);
+  const [premiumStatus, setPremiumStatus] = useState({
+    isPremium: false,
+    maxContacts: 1,
   });
-
-  const [premiumStatus, setPremiumStatus] = useState<UserPremiumStatus>(() => {
-    const savedStatus = localStorage.getItem("premiumStatus");
-    return savedStatus ? JSON.parse(savedStatus) : { isPremium: false, maxContacts: 1 };
-  });
-
   const [newContact, setNewContact] = useState<Omit<SafeContact, "id">>({
     name: "",
-    phone: "",
     telegramId: "",
     relationship: "",
   });
-
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
   const [showPremiumDialog, setShowPremiumDialog] = useState(false);
+
+  useEffect(() => {
+    const savedContacts = localStorage.getItem("safeContacts");
+    if (savedContacts) {
+      setContacts(JSON.parse(savedContacts));
+    }
+
+    const savedPremiumStatus = localStorage.getItem("premiumStatus");
+    if (savedPremiumStatus) {
+      setPremiumStatus(JSON.parse(savedPremiumStatus));
+    }
+  }, []);
 
   return {
     contacts,

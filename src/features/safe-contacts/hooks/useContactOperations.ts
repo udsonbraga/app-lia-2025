@@ -37,11 +37,11 @@ export const useContactOperations = ({
     console.log("Is editing:", isEditing);
     console.log("Editing contact ID:", editingContactId);
     
-    if (!newContact.name || !newContact.phone || !newContact.relationship) {
+    if (!newContact.name || !newContact.relationship) {
       console.log("❌ Validation failed - missing fields");
       toast({
         title: "Campos obrigatórios",
-        description: "Preencha pelo menos o nome, telefone e parentesco para adicionar um contato.",
+        description: "Preencha pelo menos o nome e parentesco para adicionar um contato.",
         variant: "destructive",
       });
       return;
@@ -60,8 +60,8 @@ export const useContactOperations = ({
       setEditingContactId(null);
       
       toast({
-        title: "Contato atualizado",
-        description: "Contato de segurança atualizado com sucesso.",
+        title: "Contato atualizado com sucesso!",
+        description: "As informações do contato foram atualizadas.",
       });
     } else {
       console.log("✅ Adding new contact");
@@ -88,14 +88,13 @@ export const useContactOperations = ({
       
       toast({
         title: "Contato adicionado com sucesso!",
-        description: "Contato foi salvo localmente.",
+        description: "O contato de segurança foi cadastrado e está pronto para receber alertas de emergência.",
       });
     }
 
     // Reset form
     setNewContact({ 
       name: "", 
-      phone: "", 
       telegramId: "", 
       relationship: "",
     });
@@ -110,7 +109,6 @@ export const useContactOperations = ({
     
     setNewContact({
       name: contact.name,
-      phone: contact.phone,
       telegramId: contact.telegramId,
       relationship: contact.relationship,
     });
