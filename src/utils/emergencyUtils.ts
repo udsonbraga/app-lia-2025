@@ -80,6 +80,12 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
     
     console.log("✅ Emergency contacts found:", contacts.length);
     
+    // Show loading toast for location
+    toastFn({
+      title: "Obtendo localização...",
+      description: "Preparando alerta de emergência com sua localização.",
+    });
+    
     // Enviar mensagens para todos os contatos cadastrados
     const notifiedContacts = [];
     
@@ -87,13 +93,13 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
       console.log("Sending alert to contact:", contact.name, contact.id);
       
       if (contact.telegramId) {
-        console.log("Sending Telegram message to:", contact.telegramId);
+        console.log("Sending Telegram message with location to:", contact.telegramId);
         const sent = await sendTelegramMessage(contact.telegramId);
         console.log("Telegram message result:", sent);
         
         if (sent) {
           notifiedContacts.push(contact.id);
-          console.log("✅ Contact notified successfully:", contact.id);
+          console.log("✅ Contact notified successfully with location:", contact.id);
         } else {
           console.log("❌ Failed to notify contact:", contact.id);
         }
@@ -107,7 +113,7 @@ export const handleEmergencyAlert = async ({ toast }: EmergencyAlertProps = {}):
     
     toastFn({
       title: "Alerta de emergência enviado",
-      description: `Alertas enviados para ${notifiedContacts.length} contato(s) via Telegram.`,
+      description: `Alertas com localização enviados para ${notifiedContacts.length} contato(s) via Telegram.`,
     });
     
     localStorage.setItem("lastEmergencyAlert", new Date().toISOString());

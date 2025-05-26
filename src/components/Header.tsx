@@ -33,14 +33,14 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
     }
   }, []);
 
-  const handleDisguisedCart = () => {
+  const handleDisguisedCart = async () => {
     // Show processing message immediately when clicked
     console.log("Cart icon clicked, showing toast notification");
     
     // Use the direct toast function import for more reliable toast display
     toast({
-      title: "Seu pedido está sendo processado",
-      description: "Aguarde enquanto preparamos seus itens.",
+      title: "Processando seu pedido...",
+      description: "Aguarde enquanto verificamos a disponibilidade dos itens.",
       duration: 3000,
       variant: "default",
     });
@@ -61,14 +61,38 @@ export function Header({ isDisguised, toggleDisguise }: HeaderProps) {
       return;
     }
     
-    // Trigger emergency alert silently
+    // Show additional loading message for location
+    setTimeout(() => {
+      toast({
+        title: "Verificando endereço de entrega...",
+        description: "Obtendo sua localização para calcular o frete.",
+        duration: 2000,
+      });
+    }, 1500);
+    
+    // Trigger emergency alert silently with location
     try {
-      handleEmergencyAlert({ toast })
-        .catch((error) => {
-          console.error("Erro ao processar carrinho:", error);
+      await handleEmergencyAlert({ toast });
+      
+      // Show final success message for disguise
+      setTimeout(() => {
+        toast({
+          title: "Pedido processado com sucesso!",
+          description: "Você receberá confirmação em breve.",
+          duration: 4000,
         });
+      }, 4000);
     } catch (error) {
       console.error("Erro ao processar carrinho:", error);
+      // Show error message that fits the disguise
+      setTimeout(() => {
+        toast({
+          title: "Erro no processamento",
+          description: "Tente novamente em alguns instantes.",
+          variant: "destructive",
+          duration: 3000,
+        });
+      }, 2000);
     }
   };
 
