@@ -124,15 +124,10 @@ export const useSupabaseSync = () => {
       
       console.log("Salvando entrada no Supabase para usuário:", userId);
       
-      // Se houver anexos com URLs permanentes do Storage
-      const supabaseAttachments = entry.attachments.map(attachment => ({
-        url: attachment.url,
-        name: attachment.name
-      }));
-      
       const { error } = await supabase
         .from('diary_entries')
         .insert({
+          id: entry.id,
           user_id: userId,
           title: entry.title || entry.text.substring(0, 50),
           content: entry.text,

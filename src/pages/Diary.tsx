@@ -5,7 +5,7 @@ import DiaryHeader from "@/components/diary/DiaryHeader";
 import DiaryForm from "@/components/diary/DiaryForm";
 import DiaryEntryList from "@/components/diary/DiaryEntryList";
 import { generateDiaryEntryPDF } from "@/utils/pdfGenerator";
-import { useDiaryEntries } from "@/hooks/useDiaryEntries";
+import { useDiaryEntries } from "@/hooks/useDiaryEntries/index";
 import { DiaryEntry } from "@/types/diary";
 import { useAuth } from "@/hooks/useAuth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
