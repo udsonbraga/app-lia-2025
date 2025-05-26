@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function MainNavigation() {
   const navigate = useNavigate();
@@ -30,20 +31,23 @@ export function MainNavigation() {
     setFeedbackSubmitting(true);
     
     try {
-      // Save feedback to localStorage instead of database
-      const existingFeedback = localStorage.getItem('userFeedback');
-      const feedbackList = existingFeedback ? JSON.parse(existingFeedback) : [];
+      // Obter a sessão atual do usuário
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
       
-      const newFeedback = {
-        id: Date.now().toString(),
-        feedback_type: feedbackType,
-        content: feedbackContent,
-        created_at: new Date().toISOString(),
-        user_id: localStorage.getItem('userName') || 'anonymous'
-      };
-      
-      feedbackList.push(newFeedback);
-      localStorage.setItem('userFeedback', JSON.stringify(feedbackList));
+      // Inserir o feedback no banco de dados
+      const { error } = await supabase
+        .from('user_feedback')
+        .insert({
+          feedback_type: feedbackType,
+          content: feedbackContent,
+          user_id: userId || null // Permite feedback anônimo
+        });
+        
+      if (error) {
+        console.error("Erro ao salvar feedback:", error);
+        throw error;
+      }
       
       toast({
         title: "Feedback enviado",

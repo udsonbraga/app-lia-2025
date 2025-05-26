@@ -99,6 +99,52 @@ class ApiService {
     });
   }
 
+  // Diary endpoints
+  async getDiaryEntries() {
+    return this.request<{entries: any[]}>('/diary');
+  }
+
+  async createDiaryEntry(data: {title: string, content: string, location?: string, attachments?: any[]}) {
+    return this.request<{entry: any}>('/diary', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateDiaryEntry(id: string, data: {title: string, content: string, location?: string, attachments?: any[]}) {
+    return this.request<{entry: any}>(`/diary/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteDiaryEntry(id: string) {
+    return this.request(`/diary/${id}`, { method: 'DELETE' });
+  }
+
+  // Contacts endpoints
+  async getContacts() {
+    return this.request<{contacts: any[]}>('/contacts');
+  }
+
+  async createContact(data: {name: string, phone: string, email?: string, relationship: string}) {
+    return this.request<{contact: any}>('/contacts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateContact(id: string, data: {name: string, phone: string, email?: string, relationship: string}) {
+    return this.request<{contact: any}>(`/contacts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteContact(id: string) {
+    return this.request(`/contacts/${id}`, { method: 'DELETE' });
+  }
+
   // Emergency endpoints
   async sendEmergencyAlert(data: {location?: string, message?: string, contacts: string[]}) {
     return this.request<{message: string, alertId: string}>('/emergency/alert', {
