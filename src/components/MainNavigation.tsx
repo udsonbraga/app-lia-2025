@@ -1,13 +1,12 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, BookOpen, Phone, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 export function MainNavigation() {
   const navigate = useNavigate();
@@ -31,23 +30,17 @@ export function MainNavigation() {
     setFeedbackSubmitting(true);
     
     try {
-      // Obter a sessão atual do usuário
-      const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id;
+      // Salvar feedback apenas localmente já que a tabela foi removida
+      const feedbacks = JSON.parse(localStorage.getItem('feedbacks') || '[]');
+      const newFeedback = {
+        id: Date.now().toString(),
+        type: feedbackType,
+        content: feedbackContent,
+        timestamp: new Date().toISOString()
+      };
       
-      // Inserir o feedback no banco de dados
-      const { error } = await supabase
-        .from('user_feedback')
-        .insert({
-          feedback_type: feedbackType,
-          content: feedbackContent,
-          user_id: userId || null // Permite feedback anônimo
-        });
-        
-      if (error) {
-        console.error("Erro ao salvar feedback:", error);
-        throw error;
-      }
+      feedbacks.push(newFeedback);
+      localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
       
       toast({
         title: "Feedback enviado",
@@ -76,36 +69,6 @@ export function MainNavigation() {
 
   return (
     <div className="flex flex-col space-y-4">
-      <button
-        onClick={() => navigate("/support-network")}
-        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center"
-      >
-        <div className="flex items-center gap-3 mx-auto">
-          <Users className="h-6 w-6 text-[#FF84C6]" />
-          <span className="font-medium text-gray-800 text-center">Rede de Apoio</span>
-        </div>
-      </button>
-
-      <button
-        onClick={() => navigate("/diary")}
-        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center"
-      >
-        <div className="flex items-center gap-3 mx-auto">
-          <BookOpen className="h-6 w-6 text-[#FF84C6]" />
-          <span className="font-medium text-gray-800 text-center">Diário Seguro</span>
-        </div>
-      </button>
-
-      <button
-        onClick={() => navigate("/safe-contact")}
-        className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center"
-      >
-        <div className="flex items-center gap-3 mx-auto">
-          <Phone className="h-6 w-6 text-[#FF84C6]" />
-          <span className="font-medium text-gray-800 text-center">Contato Seguro</span>
-        </div>
-      </button>
-
       <button
         onClick={() => setFeedbackOpen(true)}
         className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex items-center"

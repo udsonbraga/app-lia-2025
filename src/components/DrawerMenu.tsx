@@ -1,5 +1,5 @@
 
-import { BookOpen, Shield, Users, MessageCircle, Settings, LogOut, Home } from "lucide-react";
+import { Settings, LogOut, Home } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -28,11 +28,6 @@ const DrawerMenu = ({ onClose }: DrawerMenuProps) => {
       icon: Home,
       label: "Início",
       href: "/home",
-    },
-    {
-      icon: MessageCircle,
-      label: "Feedback",
-      href: "/feedback",
     },
     {
       icon: Settings,
