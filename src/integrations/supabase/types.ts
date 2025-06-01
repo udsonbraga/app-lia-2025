@@ -11,63 +11,39 @@ export type Database = {
     Tables: {
       diary_entries: {
         Row: {
+          attachments: Json | null
           content: string
           created_at: string
           date: string
           id: string
+          location: string | null
           mood: string | null
-          title: string
+          title: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          attachments?: Json | null
           content: string
           created_at?: string
           date?: string
           id?: string
+          location?: string | null
           mood?: string | null
-          title: string
+          title?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          attachments?: Json | null
           content?: string
           created_at?: string
           date?: string
           id?: string
+          location?: string | null
           mood?: string | null
-          title?: string
+          title?: string | null
           updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      emergency_alerts: {
-        Row: {
-          alert_type: string
-          contacts_notified: string[] | null
-          created_at: string
-          id: string
-          location_data: Json | null
-          resolved: boolean | null
-          user_id: string
-        }
-        Insert: {
-          alert_type: string
-          contacts_notified?: string[] | null
-          created_at?: string
-          id?: string
-          location_data?: Json | null
-          resolved?: boolean | null
-          user_id: string
-        }
-        Update: {
-          alert_type?: string
-          contacts_notified?: string[] | null
-          created_at?: string
-          id?: string
-          location_data?: Json | null
-          resolved?: boolean | null
           user_id?: string
         }
         Relationships: []
@@ -76,8 +52,8 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          is_primary: boolean | null
           name: string
+          relationship: string | null
           telegram_id: string | null
           updated_at: string
           user_id: string
@@ -85,8 +61,8 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          is_primary?: boolean | null
           name: string
+          relationship?: string | null
           telegram_id?: string | null
           updated_at?: string
           user_id: string
@@ -94,44 +70,11 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          is_primary?: boolean | null
           name?: string
+          relationship?: string | null
           telegram_id?: string | null
           updated_at?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      fake_products: {
-        Row: {
-          category: string
-          created_at: string
-          description: string | null
-          id: string
-          image_url: string | null
-          is_active: boolean | null
-          name: string
-          price: number
-        }
-        Insert: {
-          category: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          image_url?: string | null
-          is_active?: boolean | null
-          name: string
-          price: number
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          image_url?: string | null
-          is_active?: boolean | null
-          name?: string
-          price?: number
         }
         Relationships: []
       }
@@ -159,48 +102,36 @@ export type Database = {
         }
         Relationships: []
       }
-      support_resources: {
+      safe_contacts: {
         Row: {
-          address: string | null
-          category: string
           created_at: string
-          description: string
+          email: string | null
           id: string
-          is_verified: boolean | null
-          latitude: number | null
-          longitude: number | null
           name: string
           phone: string | null
+          relationship: string | null
           updated_at: string
-          website: string | null
+          user_id: string
         }
         Insert: {
-          address?: string | null
-          category: string
           created_at?: string
-          description: string
+          email?: string | null
           id?: string
-          is_verified?: boolean | null
-          latitude?: number | null
-          longitude?: number | null
           name: string
           phone?: string | null
+          relationship?: string | null
           updated_at?: string
-          website?: string | null
+          user_id: string
         }
         Update: {
-          address?: string | null
-          category?: string
           created_at?: string
-          description?: string
+          email?: string | null
           id?: string
-          is_verified?: boolean | null
-          latitude?: number | null
-          longitude?: number | null
           name?: string
           phone?: string | null
+          relationship?: string | null
           updated_at?: string
-          website?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -240,15 +171,15 @@ export type Database = {
           created_at: string
           feedback_type: string
           id: string
-          is_resolved: boolean | null
+          updated_at: string
           user_id: string | null
         }
         Insert: {
           content: string
           created_at?: string
-          feedback_type: string
+          feedback_type?: string
           id?: string
-          is_resolved?: boolean | null
+          updated_at?: string
           user_id?: string | null
         }
         Update: {
@@ -256,7 +187,7 @@ export type Database = {
           created_at?: string
           feedback_type?: string
           id?: string
-          is_resolved?: boolean | null
+          updated_at?: string
           user_id?: string | null
         }
         Relationships: []
