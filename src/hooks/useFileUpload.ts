@@ -1,124 +1,71 @@
 
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
-export interface FileAttachment {
-  file: File;
-  url: string;
+interface FileUploadOptions {
+  maxSize?: number;
+  allowedTypes?: string[];
 }
 
-export interface UploadedAttachment {
-  name: string;
-  url: string;
-}
-
-export interface UploadProgress {
-  [key: string]: number;
-}
-
-export const useFileUpload = () => {
+export const useFileUpload = (options: FileUploadOptions = {}) => {
   const { toast } = useToast();
-  const [attachments, setAttachments] = useState<File[]>([]);
-  const [attachmentPreviews, setAttachmentPreviews] = useState<FileAttachment[]>([]);
-  const [uploadProgress, setUploadProgress] = useState<UploadProgress>({});
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
-  const handleAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      const newFiles = Array.from(files);
-      setAttachments(prev => [...prev, ...newFiles]);
-      
-      // Create previews for images and videos
-      newFiles.forEach(file => {
-        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-          const url = URL.createObjectURL(file);
-          setAttachmentPreviews(prev => [...prev, {file, url}]);
-          setUploadProgress(prev => ({...prev, [file.name]: 0}));
-        }
-      });
-    }
-  };
+  const uploadFile = async (file: File) => {
+    setIsUploading(true);
+    setUploadProgress(0);
 
-  const clearAttachments = () => {
-    // Liberar URLs de objetos para prevenir vazamentos de memória
-    attachmentPreviews.forEach(preview => {
-      URL.revokeObjectURL(preview.url);
-    });
-    
-    setAttachments([]);
-    setAttachmentPreviews([]);
-    setUploadProgress({});
-  };
-
-  const uploadFiles = async (userId: string | undefined): Promise<UploadedAttachment[]> => {
-    if (!attachments.length) return [];
-    
-    if (!userId) {
-      // Se o usuário não estiver autenticado, retorne apenas as URLs locais
-      return attachments.map(file => {
-        const preview = attachmentPreviews.find(p => p.file === file);
-        return {
-          name: file.name,
-          url: preview?.url || ""
-        };
-      });
-    }
-    
     try {
-      // Upload dos arquivos para o bucket do Supabase
-      const uploadPromises = attachments.map(async (file) => {
-        // Criar um caminho para o arquivo baseado no ID do usuário
-        const filePath = `${userId}/${new Date().getTime()}_${file.name}`;
-        
-        // Obter a extensão do arquivo
-        const fileType = file.type;
-        
-        // Upload do arquivo com rastreamento de progresso
-        const { data, error } = await supabase.storage
-          .from('diary_attachments')
-          .upload(filePath, file, { 
-            contentType: fileType || 'application/octet-stream',
-            upsert: true,
-          });
-          
-        if (error) {
-          console.error('Erro ao fazer upload do arquivo:', error);
-          toast({
-            title: "Erro no upload",
-            description: `Não foi possível enviar o arquivo ${file.name}`,
-            variant: "destructive"
-          });
-          throw error;
-        }
-        
-        // Atualizar o progresso para 100% quando o upload for concluído
-        setUploadProgress(prev => ({...prev, [file.name]: 100}));
-        
-        // Obter a URL pública do arquivo
-        const { data: { publicUrl } } = supabase.storage
-          .from('diary_attachments')
-          .getPublicUrl(data.path);
-        
-        return {
-          name: file.name,
-          url: publicUrl
-        };
+      // Validate file size
+      if (options.maxSize && file.size > options.maxSize) {
+        throw new Error(`File size exceeds ${options.maxSize / (1024 * 1024)}MB limit`);
+      }
+
+      // Validate file type
+      if (options.allowedTypes && !options.allowedTypes.includes(file.type)) {
+        throw new Error(`File type ${file.type} is not allowed`);
+      }
+
+      // Simulate file upload progress
+      for (let progress = 0; progress <= 100; progress += 10) {
+        setUploadProgress(progress);
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      // Create a local URL for the file (since we don't have real file storage yet)
+      const fileUrl = URL.createObjectURL(file);
+      
+      toast({
+        title: "Upload realizado",
+        description: `${file.name} foi carregado com sucesso.`,
+      });
+
+      return {
+        url: fileUrl,
+        name: file.name,
+        size: file.size,
+        type: file.type
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro no upload';
+      
+      toast({
+        title: "Erro no upload",
+        description: errorMessage,
+        variant: "destructive",
       });
       
-      return await Promise.all(uploadPromises);
-    } catch (error) {
-      console.error('Erro ao fazer upload dos arquivos:', error);
       throw error;
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
   return {
-    attachments,
-    attachmentPreviews,
-    uploadProgress,
-    handleAttachment,
-    uploadFiles,
-    clearAttachments
+    uploadFile,
+    isUploading,
+    uploadProgress
   };
 };

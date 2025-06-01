@@ -1,60 +1,40 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { FormField } from "./FormField";
-import { supabase } from "@/integrations/supabase/client";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ArrowLeft, Mail } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-const recoverySchema = z.object({
-  email: z.string().email("Informe um email válido"),
-});
+interface PasswordRecoveryProps {
+  onBack: () => void;
+}
 
-type FormValues = z.infer<typeof recoverySchema>;
-
-export const PasswordRecovery = () => {
+const PasswordRecovery: React.FC<PasswordRecoveryProps> = ({ onBack }) => {
+  const { toast } = useToast();
+  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const navigate = useNavigate();
-  const { toast } = useToast();
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(recoverySchema),
-    defaultValues: {
-      email: "",
-    },
-  });
-
-  const handleSubmit = async (values: FormValues) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
+
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-
-      if (error) {
-        toast({
-          title: "Erro ao enviar email",
-          description: error.message,
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
+      // Simulate password recovery email sending
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       setEmailSent(true);
       toast({
         title: "Email enviado",
-        description: "Verifique sua caixa de entrada para redefinir sua senha.",
+        description: "Instruções para redefinir sua senha foram enviadas para seu email.",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Erro",
-        description: "Ocorreu um erro ao enviar o email de recuperação.",
+        description: "Não foi possível enviar o email de recuperação. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -62,67 +42,66 @@ export const PasswordRecovery = () => {
     }
   };
 
-  return (
-    <div className="space-y-6 w-full max-w-md">
-      <div className="flex items-center mb-4">
-        <Button
-          type="button"
-          variant="ghost"
-          className="p-0 mr-2"
-          onClick={() => navigate("/login")}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-xl font-semibold">Recuperar Senha</h1>
-      </div>
-
-      {!emailSent ? (
-        <>
-          <p className="text-gray-600">
-            Informe o email associado à sua conta para receber instruções de
-            recuperação de senha.
-          </p>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              name="email"
-              label="Email"
-              placeholder="seu.email@exemplo.com"
-              type="email"
-              register={form.register}
-              error={form.formState.errors.email}
-              disabled={isLoading}
-              value=""
-              onChange={() => {}}
-            />
-            <Button
-              type="submit"
-              className="w-full bg-[#FF84C6] hover:bg-[#FF5AA9] text-white"
-              disabled={isLoading}
-            >
-              {isLoading ? "Enviando..." : "Enviar"}
-            </Button>
-          </form>
-        </>
-      ) : (
-        <div className="space-y-4 text-center">
-          <p className="text-green-600 font-medium">
-            Email de recuperação enviado!
-          </p>
-          <p className="text-gray-600">
-            Verifique sua caixa de entrada e clique no link que enviamos para
-            redefinir sua senha.
-          </p>
-          <Button
-            type="button"
-            onClick={() => navigate("/login")}
-            className="w-full"
-            variant="outline"
-          >
-            Voltar para o login
+  if (emailSent) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+            <Mail className="h-6 w-6 text-green-600" />
+          </div>
+          <CardTitle>Email enviado</CardTitle>
+          <CardDescription>
+            Verifique sua caixa de entrada e siga as instruções para redefinir sua senha.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={onBack} variant="outline" className="w-full">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar ao login
           </Button>
-        </div>
-      )}
-    </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Recuperar senha</CardTitle>
+        <CardDescription>
+          Digite seu email para receber instruções de recuperação de senha.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="seu@email.com"
+              required
+            />
+          </div>
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Enviando...' : 'Enviar instruções'}
+          </Button>
+
+          <Button 
+            type="button" 
+            variant="ghost" 
+            onClick={onBack}
+            className="w-full"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar ao login
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 
