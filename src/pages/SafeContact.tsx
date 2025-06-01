@@ -2,10 +2,10 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Shield } from 'lucide-react';
-import { Header } from '@/components/safe-contact/Header';
-import { ContactList } from '@/components/safe-contact/ContactList';
-import { AddContactForm } from '@/components/safe-contact/AddContactForm';
-import { PremiumDialog } from '@/components/safe-contact/PremiumDialog';
+import Header from '@/components/safe-contact/Header';
+import ContactList from '@/components/safe-contact/ContactList';
+import AddContactForm from '@/components/safe-contact/AddContactForm';
+import PremiumDialog from '@/components/safe-contact/PremiumDialog';
 import { useSafeContacts } from '@/hooks/useSafeContacts';
 
 const SafeContact = () => {

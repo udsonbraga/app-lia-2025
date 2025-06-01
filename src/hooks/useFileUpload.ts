@@ -2,6 +2,19 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
+export interface FileAttachment {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  size: number;
+}
+
+export interface UploadProgress {
+  progress: number;
+  isUploading: boolean;
+}
+
 interface FileUploadOptions {
   maxSize?: number;
   allowedTypes?: string[];

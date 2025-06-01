@@ -1,6 +1,6 @@
 
 import { EmergencyButton } from "@/components/EmergencyButton";
-import { MainNavigation } from "@/components/MainNavigation";
+import MainNavigation from "@/components/MainNavigation";
 
 interface NormalModeProps {
   showPasswordPrompt: boolean;
