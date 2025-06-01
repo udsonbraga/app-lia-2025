@@ -1,5 +1,5 @@
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8000/api';
 
 class ApiService {
   private baseURL: string;
@@ -16,7 +16,7 @@ class ApiService {
     };
 
     if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
+      headers.Authorization = `Token ${this.token}`;
     }
 
     return headers;
@@ -45,7 +45,7 @@ class ApiService {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(errorData.error || errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       return await response.json();
@@ -89,11 +89,11 @@ class ApiService {
 
   // User endpoints
   async getUserProfile() {
-    return this.request<{profile: any}>('/users/profile');
+    return this.request<{profile: any}>('/auth/profile/');
   }
 
   async updateUserProfile(data: {name?: string, avatar_url?: string}) {
-    return this.request<{profile: any}>('/users/profile', {
+    return this.request<{profile: any}>('/auth/profile/', {
       method: 'PUT',
       body: JSON.stringify(data),
     });
@@ -101,53 +101,61 @@ class ApiService {
 
   // Diary endpoints
   async getDiaryEntries() {
-    return this.request<{entries: any[]}>('/diary');
+    return this.request<{entries: any[]}>('/diary/');
   }
 
   async createDiaryEntry(data: {title: string, content: string, location?: string, attachments?: any[]}) {
-    return this.request<{entry: any}>('/diary', {
+    return this.request<{entry: any}>('/diary/', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   async updateDiaryEntry(id: string, data: {title: string, content: string, location?: string, attachments?: any[]}) {
-    return this.request<{entry: any}>(`/diary/${id}`, {
+    return this.request<{entry: any}>(`/diary/${id}/`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   }
 
   async deleteDiaryEntry(id: string) {
-    return this.request(`/diary/${id}`, { method: 'DELETE' });
+    return this.request(`/diary/${id}/`, { method: 'DELETE' });
   }
 
   // Contacts endpoints
   async getContacts() {
-    return this.request<{contacts: any[]}>('/contacts');
+    return this.request<{contacts: any[]}>('/contacts/');
   }
 
   async createContact(data: {name: string, phone: string, email?: string, relationship: string}) {
-    return this.request<{contact: any}>('/contacts', {
+    return this.request<{contact: any}>('/contacts/', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   async updateContact(id: string, data: {name: string, phone: string, email?: string, relationship: string}) {
-    return this.request<{contact: any}>(`/contacts/${id}`, {
+    return this.request<{contact: any}>(`/contacts/${id}/`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   }
 
   async deleteContact(id: string) {
-    return this.request(`/contacts/${id}`, { method: 'DELETE' });
+    return this.request(`/contacts/${id}/`, { method: 'DELETE' });
   }
 
   // Emergency endpoints
   async sendEmergencyAlert(data: {location?: string, message?: string, contacts: string[]}) {
     return this.request<{message: string, alertId: string}>('/emergency/alert', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Feedback endpoint
+  async submitFeedback(data: {feedback_type: string, content: string}) {
+    return this.request<{message: string}>('/auth/feedback/', {
       method: 'POST',
       body: JSON.stringify(data),
     });

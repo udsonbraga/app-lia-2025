@@ -10,12 +10,7 @@ export const useAuthService = () => {
       const result = await apiService.signIn(email, password);
       
       localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('userName', result.user?.user_metadata?.name || '');
-      
-      toast({
-        title: "Login realizado com sucesso",
-        description: `Bem-vinda de volta!`,
-      });
+      localStorage.setItem('userName', result.user?.name || result.user?.email || '');
       
       return {
         success: true,
@@ -23,12 +18,6 @@ export const useAuthService = () => {
         data: result
       };
     } catch (error: any) {
-      toast({
-        title: "Erro ao fazer login",
-        description: error.message || "Erro ao processar login",
-        variant: "destructive"
-      });
-      
       return {
         success: false,
         error: error.message,
@@ -44,23 +33,12 @@ export const useAuthService = () => {
       localStorage.setItem('isAuthenticated', 'true');
       localStorage.setItem('userName', name);
       
-      toast({
-        title: "Conta criada com sucesso!",
-        description: "Bem-vinda ao Lia.",
-      });
-      
       return {
         success: true,
         error: null,
         data: result
       };
     } catch (error: any) {
-      toast({
-        title: "Erro ao criar conta",
-        description: error.message || "Erro ao processar cadastro",
-        variant: "destructive"
-      });
-      
       return {
         success: false,
         error: error.message,

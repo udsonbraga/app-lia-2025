@@ -1,9 +1,7 @@
 
-import { Session, User } from "@supabase/supabase-js";
-
 export interface AuthState {
-  user: User | null;
-  session: Session | null;
+  user: any | null;
+  session: any | null;
   isLoading: boolean;
   error: string | null;
 }

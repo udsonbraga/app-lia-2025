@@ -1,12 +1,15 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import type { AuthState } from "@/features/auth/types/auth";
-import { useAuthService } from "@/features/auth/services/authService";
+import { apiService } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
-export type { AuthState };
+export interface AuthState {
+  user: any | null;
+  session: any | null;
+  isLoading: boolean;
+  error: string | null;
+}
 
 export function useAuth() {
   const [state, setState] = useState<AuthState>({
@@ -17,105 +20,73 @@ export function useAuth() {
   });
   
   const navigate = useNavigate();
-  const authService = useAuthService();
   const { toast } = useToast();
 
   useEffect(() => {
     console.log("=== USEAUTH INITIALIZATION ===");
     
-    // Configurar listener para mudanças na autenticação PRIMEIRO
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state changed:", { event, session: !!session, userId: session?.user?.id });
-        
-        setState(prev => ({
-          ...prev,
-          session,
-          user: session?.user || null,
-          isLoading: false,
-          error: null
-        }));
-
-        // Se o usuário fez login, salvar no localStorage para compatibilidade
-        if (session?.user) {
-          localStorage.setItem('isAuthenticated', 'true');
-          localStorage.setItem('userName', session.user.user_metadata?.name || session.user.email || '');
-          localStorage.setItem('authToken', session.access_token);
-          console.log("User authenticated, localStorage updated");
-        } else {
-          localStorage.removeItem('isAuthenticated');
-          localStorage.removeItem('userName');
-          localStorage.removeItem('authToken');
-          console.log("User signed out, localStorage cleared");
-        }
-      }
-    );
-
-    // DEPOIS obter sessão atual
-    const getInitialSession = async () => {
-      try {
-        console.log("Getting initial session...");
-        const { data, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Error getting session:", error);
-          setState(prev => ({ ...prev, error: error.message, isLoading: false }));
-          return;
-        }
-        
-        const session = data?.session;
-        console.log("Initial session:", { hasSession: !!session, userId: session?.user?.id });
-        
-        setState(prev => ({
-          ...prev,
-          session,
-          user: session?.user || null,
-          isLoading: false,
-          error: null
-        }));
-        
-      } catch (error: any) {
-        console.error("Error in getInitialSession:", error);
-        setState(prev => ({
-          ...prev,
-          error: error.message,
-          isLoading: false
-        }));
-      }
-    };
-
-    getInitialSession();
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    // Check if user is authenticated from localStorage
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    const authToken = localStorage.getItem('authToken');
+    const userName = localStorage.getItem('userName');
+    
+    if (isAuthenticated && authToken) {
+      console.log("User found in localStorage");
+      setState(prev => ({
+        ...prev,
+        user: { name: userName, id: 'local-user' },
+        session: { access_token: authToken },
+        isLoading: false,
+        error: null
+      }));
+    } else {
+      console.log("No authenticated user found");
+      setState(prev => ({ ...prev, isLoading: false }));
+    }
   }, []);
 
   const signIn = async (email: string, password: string) => {
     console.log("=== SIGNIN ATTEMPT ===");
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
-    const result = await authService.signIn(email, password);
-    
-    if (result.success && result.data) {
-      console.log("SignIn successful:", result.data.user?.id);
+    try {
+      const result = await apiService.signIn(email, password);
+      
+      console.log("SignIn successful:", result.user?.id);
+      
+      // Update localStorage
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userName', result.user?.name || result.user?.email || '');
+      
       setState(prev => ({
         ...prev,
-        user: result.data.user,
-        session: result.data.session,
+        user: result.user,
+        session: result.session,
         isLoading: false,
         error: null
       }));
       
+      toast({
+        title: "Login realizado com sucesso",
+        description: "Bem-vinda de volta!",
+      });
+      
       navigate('/home');
       return true;
-    } else {
-      console.error("SignIn failed:", result.error);
+    } catch (error: any) {
+      console.error("SignIn failed:", error);
       setState(prev => ({
         ...prev,
-        error: result.error || "Erro ao fazer login",
+        error: error.message || "Erro ao fazer login",
         isLoading: false
       }));
+      
+      toast({
+        title: "Erro ao fazer login",
+        description: error.message || "Erro ao processar login",
+        variant: "destructive"
+      });
+      
       return false;
     }
   };
@@ -124,25 +95,43 @@ export function useAuth() {
     console.log("=== SIGNUP ATTEMPT ===");
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
-    const result = await authService.signUp(email, password, name);
-    
-    if (result.success && result.data) {
-      console.log("SignUp successful:", result.data.user?.id);
+    try {
+      const result = await apiService.signUp(email, password, name);
+      
+      console.log("SignUp successful:", result.user?.id);
+      
+      // Update localStorage
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('userName', name);
+      
       setState(prev => ({
         ...prev,
-        user: result.data.user,
-        session: result.data.session,
+        user: result.user,
+        session: result.session,
         isLoading: false,
         error: null
       }));
+      
+      toast({
+        title: "Conta criada com sucesso!",
+        description: "Bem-vinda ao Lia.",
+      });
+      
       return true;
-    } else {
-      console.error("SignUp failed:", result.error);
+    } catch (error: any) {
+      console.error("SignUp failed:", error);
       setState(prev => ({
         ...prev,
-        error: result.error || "Erro ao criar conta",
+        error: error.message || "Erro ao criar conta",
         isLoading: false
       }));
+      
+      toast({
+        title: "Erro ao criar conta",
+        description: error.message || "Erro ao processar cadastro",
+        variant: "destructive"
+      });
+      
       return false;
     }
   };
@@ -151,9 +140,14 @@ export function useAuth() {
     console.log("=== SIGNOUT ATTEMPT ===");
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
-    const result = await authService.signOut();
-    
-    if (result.success) {
+    try {
+      await apiService.signOut();
+      
+      // Clear localStorage
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('authToken');
+      
       setState(prev => ({
         ...prev,
         user: null,
@@ -164,10 +158,10 @@ export function useAuth() {
       
       navigate('/login');
       return true;
-    } else {
+    } catch (error: any) {
       setState(prev => ({
         ...prev,
-        error: result.error || "Erro ao sair",
+        error: error.message || "Erro ao sair",
         isLoading: false
       }));
       return false;
