@@ -24,12 +24,12 @@ services:
 
   backend:
     build: 
-      context: ./django_backend
-      dockerfile: Dockerfile.django
+      context: .
+      dockerfile: Dockerfile.python
     ports:
       - "8000:8000"
     volumes:
-      - ./django_backend:/app
+      - .:/app
     environment:
       - DEBUG=True
       - DB_NAME=lia_db
@@ -37,7 +37,7 @@ services:
       - DB_PASSWORD=lia_password
       - DB_HOST=db
       - DB_PORT=5432
-      - CELERY_BROKER_URL=redis://redis:6379/0
+      - REDIS_URL=redis://redis:6379/0
       - CORS_ALLOWED_ORIGINS=http://localhost:8080,http://127.0.0.1:8080
     depends_on:
       - db
@@ -51,10 +51,10 @@ services:
 
   celery:
     build: 
-      context: ./django_backend
-      dockerfile: Dockerfile.django
+      context: .
+      dockerfile: Dockerfile.python
     volumes:
-      - ./django_backend:/app
+      - .:/app
     environment:
       - DEBUG=True
       - DB_NAME=lia_db
@@ -62,7 +62,7 @@ services:
       - DB_PASSWORD=lia_password
       - DB_HOST=db
       - DB_PORT=5432
-      - CELERY_BROKER_URL=redis://redis:6379/0
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
       - db
       - redis
