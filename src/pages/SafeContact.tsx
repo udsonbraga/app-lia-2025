@@ -49,13 +49,7 @@ const SafeContact = () => {
         <Card className="p-6">
           <AddContactForm
             newContact={newContact}
-            setNewContact={(contact) => {
-              if (typeof contact === 'function') {
-                setNewContact(prev => ({ ...prev, ...contact(prev) }));
-              } else {
-                setNewContact({ ...newContact, ...contact });
-              }
-            }}
+            setNewContact={setNewContact}
             isAdding={isAdding}
             isEditing={isEditing}
             onAdd={handleAddContact}
@@ -74,7 +68,7 @@ const SafeContact = () => {
 
       <PremiumDialog
         isOpen={showPremiumDialog}
-        onClose={() => setShowPremiumDialog(false)}
+        onClose={setShowPremiumDialog}
         onUpgrade={upgradeToPremium}
       />
     </div>

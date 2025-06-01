@@ -2,7 +2,19 @@
 import { useState } from "react";
 import { Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FileAttachment, UploadProgress } from "../../../hooks/useFileUpload";
+
+export interface FileAttachment {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  size: number;
+  file: File;
+}
+
+export interface UploadProgress {
+  [fileName: string]: number;
+}
 
 interface AttachmentsUploadProps {
   attachments: File[];

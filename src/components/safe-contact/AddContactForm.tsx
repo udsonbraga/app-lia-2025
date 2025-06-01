@@ -8,17 +8,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface AddContactFormProps {
   newContact: Omit<SafeContact, "id">;
-  onNewContactChange: (contact: Omit<SafeContact, "id">) => void;
-  onAddContact: () => void;
+  setNewContact: (contact: any) => void;
+  onAdd: () => void;
   onCancel: () => void;
+  isAdding: boolean;
   isEditing?: boolean;
 }
 
 const AddContactForm = ({
   newContact,
-  onNewContactChange,
-  onAddContact,
+  setNewContact,
+  onAdd,
   onCancel,
+  isAdding,
   isEditing = false,
 }: AddContactFormProps) => {
   return (
@@ -36,7 +38,7 @@ const AddContactForm = ({
               placeholder="Nome do contato"
               value={newContact.name}
               onChange={(e) =>
-                onNewContactChange({ ...newContact, name: e.target.value })
+                setNewContact({ ...newContact, name: e.target.value })
               }
               className="pl-10"
             />
@@ -48,7 +50,7 @@ const AddContactForm = ({
               placeholder="ID do Telegram (sem @)"
               value={newContact.telegramId}
               onChange={(e) =>
-                onNewContactChange({
+                setNewContact({
                   ...newContact,
                   telegramId: e.target.value,
                 })
@@ -62,7 +64,7 @@ const AddContactForm = ({
             <Select
               value={newContact.relationship}
               onValueChange={(value) =>
-                onNewContactChange({
+                setNewContact({
                   ...newContact,
                   relationship: value,
                 })
@@ -92,7 +94,7 @@ const AddContactForm = ({
             Cancelar
           </Button>
           <Button 
-            onClick={onAddContact} 
+            onClick={onAdd} 
             className="flex-1 bg-[#FF84C6] hover:bg-[#FF5AA9] text-white flex items-center justify-center gap-2"
           >
             {isEditing ? "Salvar Contato" : "Adicionar Contato"}

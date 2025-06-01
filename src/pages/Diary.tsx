@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import DiaryHeader from "@/components/diary/DiaryHeader";
@@ -87,7 +86,10 @@ const Diary = () => {
             </div>
           )}
           
-          <DiaryForm onSave={handleSaveDiary} />
+          <DiaryForm 
+            onSubmit={handleSaveDiary}
+            onCancel={() => {}}
+          />
           <DiaryEntryList 
             entries={entries} 
             onDelete={deleteEntry} 

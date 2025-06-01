@@ -4,13 +4,20 @@ import { SafeContact } from "@/features/support-network/types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 
-interface ContactListProps {
-  contacts: SafeContact[];
-  onRemoveContact: (id: string) => void;
-  onEditContact?: (contact: SafeContact) => void;
+interface PremiumStatus {
+  isPremium: boolean;
+  maxContacts: number;
 }
 
-const ContactList = ({ contacts, onRemoveContact, onEditContact }: ContactListProps) => {
+interface ContactListProps {
+  contacts: SafeContact[];
+  onRemove: (id: string) => void;
+  onEdit?: (contact: SafeContact) => void;
+  onAddNew: () => void;
+  premiumStatus: PremiumStatus;
+}
+
+const ContactList = ({ contacts, onRemove, onEdit, onAddNew, premiumStatus }: ContactListProps) => {
   const [contactToDelete, setContactToDelete] = useState<string | null>(null);
 
   const handleDeleteClick = (id: string) => {
@@ -19,7 +26,7 @@ const ContactList = ({ contacts, onRemoveContact, onEditContact }: ContactListPr
 
   const confirmDelete = () => {
     if (contactToDelete) {
-      onRemoveContact(contactToDelete);
+      onRemove(contactToDelete);
       setContactToDelete(null);
     }
   };
@@ -58,9 +65,9 @@ const ContactList = ({ contacts, onRemoveContact, onEditContact }: ContactListPr
             </p>
           </div>
           <div className="flex gap-2">
-            {onEditContact && (
+            {onEdit && (
               <button
-                onClick={() => onEditContact(contact)}
+                onClick={() => onEdit(contact)}
                 className="p-1 hover:bg-blue-50 rounded-full"
                 aria-label="Editar contato"
               >

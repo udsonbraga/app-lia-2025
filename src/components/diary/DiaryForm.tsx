@@ -5,9 +5,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { DiaryEntry } from '@/types/diary';
 
 interface DiaryFormProps {
-  onSubmit: (entry: { title: string; content: string; location?: string }) => void;
+  onSubmit: (entry: DiaryEntry) => Promise<boolean>;
   onCancel: () => void;
   initialData?: {
     title: string;
@@ -22,7 +23,7 @@ const DiaryForm: React.FC<DiaryFormProps> = ({ onSubmit, onCancel, initialData }
   const [content, setContent] = useState(initialData?.content || '');
   const [location, setLocation] = useState(initialData?.location || '');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title.trim() || !content.trim()) {
@@ -34,11 +35,24 @@ const DiaryForm: React.FC<DiaryFormProps> = ({ onSubmit, onCancel, initialData }
       return;
     }
 
-    onSubmit({
+    const entry: DiaryEntry = {
+      id: Date.now().toString(),
       title: title.trim(),
-      content: content.trim(),
-      location: location.trim() || undefined,
-    });
+      text: content.trim(),
+      location: location.trim() || null,
+      date: new Date(),
+      createdAt: new Date(),
+      attachments: [],
+      tags: [],
+    };
+
+    const success = await onSubmit(entry);
+    
+    if (success) {
+      setTitle('');
+      setContent('');
+      setLocation('');
+    }
   };
 
   return (

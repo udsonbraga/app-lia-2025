@@ -11,14 +11,14 @@ import {
 import { Button } from "@/components/ui/button";
 
 interface PremiumDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onUpgradeToPremium: () => void;
+  isOpen: boolean;
+  onClose: (open: boolean) => void;
+  onUpgrade: () => void;
 }
 
-const PremiumDialog = ({ open, onOpenChange, onUpgradeToPremium }: PremiumDialogProps) => {
+const PremiumDialog = ({ isOpen, onClose, onUpgrade }: PremiumDialogProps) => {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center">Plano Premium Necessário</DialogTitle>
@@ -34,10 +34,10 @@ const PremiumDialog = ({ open, onOpenChange, onUpgradeToPremium }: PremiumDialog
           </p>
         </div>
         <DialogFooter className="flex flex-col sm:flex-row sm:justify-center gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onClose(false)}>
             Cancelar
           </Button>
-          <Button onClick={onUpgradeToPremium} className="bg-amber-500 hover:bg-amber-600">
+          <Button onClick={onUpgrade} className="bg-amber-500 hover:bg-amber-600">
             Adquirir Premium (R$9,90/mês)
           </Button>
         </DialogFooter>
