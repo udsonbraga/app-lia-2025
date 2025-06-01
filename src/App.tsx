@@ -10,8 +10,6 @@ import SafeContact from "@/pages/SafeContact";
 import SupportNetwork from "@/pages/SupportNetwork";
 import { LoadingScreen } from "./components/LoadingScreen";
 import Help from "@/pages/Help";
-import Accessories from "@/pages/Accessories";
-import Clothing from "@/pages/Clothing";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import "./App.css";
 
@@ -66,22 +64,6 @@ function App() {
             element={
               <PrivateRoute>
                 <Help />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/accessories"
-            element={
-              <PrivateRoute>
-                <Accessories />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/clothing"
-            element={
-              <PrivateRoute>
-                <Clothing />
               </PrivateRoute>
             }
           />
