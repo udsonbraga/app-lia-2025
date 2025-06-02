@@ -42,6 +42,7 @@ class ApiService {
     };
   }
 
+  // Authentication methods
   async signIn(email: string, password: string): Promise<SignInResponse> {
     console.log('API: Attempting signin with:', { email });
     
@@ -58,7 +59,6 @@ class ApiService {
 
     const data = await response.json();
     
-    // Store token in localStorage
     if (data.session?.access_token) {
       localStorage.setItem('authToken', data.session.access_token);
     }
@@ -83,7 +83,6 @@ class ApiService {
 
     const data = await response.json();
     
-    // Store token in localStorage
     if (data.session?.access_token) {
       localStorage.setItem('authToken', data.session.access_token);
     }
@@ -104,9 +103,50 @@ class ApiService {
       console.error('API: Signout error:', error);
     }
     
-    // Always clear local storage
     localStorage.removeItem('authToken');
     console.log('API: Signout completed');
+  }
+
+  // User profile methods
+  async getUserProfile() {
+    const response = await fetch(`${API_BASE_URL}/auth/profile/`, {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao carregar perfil do usuário');
+    }
+
+    return response.json();
+  }
+
+  async updateUserProfile(profile: any) {
+    const response = await fetch(`${API_BASE_URL}/auth/profile/`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(profile),
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao atualizar perfil do usuário');
+    }
+
+    return response.json();
+  }
+
+  // User feedback methods
+  async submitFeedback(feedback: any) {
+    const response = await fetch(`${API_BASE_URL}/auth/feedback/`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(feedback),
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao enviar feedback');
+    }
+
+    return response.json();
   }
 
   // Diary methods
@@ -161,7 +201,7 @@ class ApiService {
     }
   }
 
-  // Contacts methods
+  // Safe contacts methods
   async getSafeContacts() {
     const response = await fetch(`${API_BASE_URL}/contacts/`, {
       headers: this.getAuthHeaders(),
