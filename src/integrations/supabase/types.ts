@@ -9,6 +9,326 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      accounts_user: {
+        Row: {
+          created_at: string
+          date_joined: string
+          email: string
+          first_name: string | null
+          id: string
+          is_active: boolean
+          is_staff: boolean
+          is_superuser: boolean
+          last_login: string | null
+          last_name: string | null
+          name: string
+          password: string
+          phone: string | null
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          date_joined?: string
+          email: string
+          first_name?: string | null
+          id?: string
+          is_active?: boolean
+          is_staff?: boolean
+          is_superuser?: boolean
+          last_login?: string | null
+          last_name?: string | null
+          name: string
+          password: string
+          phone?: string | null
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          date_joined?: string
+          email?: string
+          first_name?: string | null
+          id?: string
+          is_active?: boolean
+          is_staff?: boolean
+          is_superuser?: boolean
+          last_login?: string | null
+          last_name?: string | null
+          name?: string
+          password?: string
+          phone?: string | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      accounts_userdisguisesettings: {
+        Row: {
+          created_at: string
+          disguise_password: string | null
+          fake_app_name: string | null
+          id: string
+          is_active: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          disguise_password?: string | null
+          fake_app_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          disguise_password?: string | null
+          fake_app_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_userdisguisesettings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accounts_userfeedback: {
+        Row: {
+          content: string
+          created_at: string
+          feedback_type: string | null
+          id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          feedback_type?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          feedback_type?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_userfeedback_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accounts_userprofile: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_userprofile_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts_emergencycontact: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          relationship: string | null
+          telegram_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          relationship?: string | null
+          telegram_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          relationship?: string | null
+          telegram_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_emergencycontact_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts_safecontact: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          relationship: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          relationship?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          relationship?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_safecontact_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diary_diaryattachment: {
+        Row: {
+          created_at: string
+          entry_id: string
+          file: string
+          file_type: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          entry_id: string
+          file: string
+          file_type?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          entry_id?: string
+          file?: string
+          file_type?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diary_diaryattachment_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "diary_diaryentry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diary_diaryentry: {
+        Row: {
+          attachments: Json | null
+          content: string
+          created_at: string
+          date: string
+          id: string
+          location: string | null
+          mood: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attachments?: Json | null
+          content: string
+          created_at?: string
+          date?: string
+          id?: string
+          location?: string | null
+          mood?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attachments?: Json | null
+          content?: string
+          created_at?: string
+          date?: string
+          id?: string
+          location?: string | null
+          mood?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diary_diaryentry_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_user"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       diary_entries: {
         Row: {
           attachments: Json | null
@@ -77,6 +397,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      emergency_emergencyalert: {
+        Row: {
+          contacts_notified: Json | null
+          created_at: string
+          id: string
+          location: string | null
+          message: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contacts_notified?: Json | null
+          created_at?: string
+          id?: string
+          location?: string | null
+          message?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contacts_notified?: Json | null
+          created_at?: string
+          id?: string
+          location?: string | null
+          message?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emergency_emergencyalert_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_user"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
