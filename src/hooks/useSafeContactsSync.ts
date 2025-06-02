@@ -25,7 +25,7 @@ export const useSafeContactsSync = (contacts: SafeContact[], setContacts: (conta
           return;
         }
         
-        const response = await apiService.getContacts();
+        const response = await apiService.getSafeContacts();
 
         if (response.contacts && response.contacts.length > 0) {
           // Convert Django format to app format
@@ -86,7 +86,7 @@ export const useSafeContactsSync = (contacts: SafeContact[], setContacts: (conta
         // Save each contact to Django API
         for (const contact of contacts) {
           try {
-            await apiService.createContact({
+            await apiService.createSafeContact({
               name: contact.name,
               phone: contact.telegramId,
               relationship: contact.relationship
